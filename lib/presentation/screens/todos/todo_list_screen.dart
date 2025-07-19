@@ -1,0 +1,14 @@
+import 'package:flutter/material.dart';
+
+/// Todo list screen
+class TodoListScreen extends StatelessWidget {
+  const TodoListScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Todos')),
+      body: const Center(child: Text('Todo List Screen - TODO: Implement')),
+    );
+  }
+}
