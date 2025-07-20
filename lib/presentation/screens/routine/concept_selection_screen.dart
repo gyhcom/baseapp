@@ -3,7 +3,6 @@ import 'package:auto_route/auto_route.dart';
 import '../../../core/config/app_router.dart';
 import '../../theme/app_theme.dart';
 import '../../../domain/entities/routine_concept.dart';
-import '../../../domain/entities/ai_routine_request.dart';
 
 /// 루틴 컨셉 선택 화면
 class ConceptSelectionScreen extends StatefulWidget {

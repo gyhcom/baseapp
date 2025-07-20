@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum RoutineConcept {
   // 🔥 자기계발형
   godlife('🔥 갓생살기', '새벽 기상, 독서, 운동, 목표 달성 중심'),
@@ -111,6 +113,36 @@ enum RoutineConcept {
         return '24:00';
       case RoutineConcept.challenge:
         return '22:00';
+    }
+  }
+  
+  // 컨셉별 대표 색상
+  Color get color {
+    switch (this) {
+      case RoutineConcept.godlife:
+        return const Color(0xFFFF6B35); // 활기찬 주황색
+      case RoutineConcept.diligent:
+        return const Color(0xFF4CAF50); // 성실한 초록색
+      case RoutineConcept.relaxed:
+        return const Color(0xFF81C784); // 여유로운 연한 초록색
+      case RoutineConcept.restful:
+        return const Color(0xFF90CAF9); // 휴식의 연한 파란색
+      case RoutineConcept.creative:
+        return const Color(0xFF9C27B0); // 창의적인 보라색
+      case RoutineConcept.minimal:
+        return const Color(0xFF607D8B); // 집중의 회색빛
+      case RoutineConcept.workLifeBalance:
+        return const Color(0xFF2196F3); // 균형의 파란색
+      case RoutineConcept.lazyButRegular:
+        return const Color(0xFFFFC107); // 느긋한 노란색
+      case RoutineConcept.mindfulness:
+        return const Color(0xFF8BC34A); // 마음챙김의 연두색
+      case RoutineConcept.physicalHealth:
+        return const Color(0xFFE91E63); // 건강한 분홍색
+      case RoutineConcept.mentalRecovery:
+        return const Color(0xFF00BCD4); // 회복의 청록색
+      case RoutineConcept.challenge:
+        return const Color(0xFFFF5722); // 도전의 빨간색
     }
   }
 }

@@ -4,10 +4,10 @@ import 'package:baseapp/domain/entities/routine_concept.dart';
 import 'package:baseapp/domain/usecases/routine_recommendation_usecase.dart';
 
 void main() {
-  late RoutineRecommendationUsecase usecase;
+  late RoutineRecommendationUseCase usecase;
 
   setUp(() {
-    usecase = RoutineRecommendationUsecase();
+    usecase = RoutineRecommendationUseCase();
   });
 
   group('RoutineRecommendationUsecase Tests', () {
@@ -18,24 +18,22 @@ void main() {
         age: 28,
         job: '소프트웨어 개발자',
         hobbies: ['독서', '운동', '코딩'],
-        concept: RoutineConcept.productive,
+        concept: RoutineConcept.godlife,
         createdAt: DateTime.now(),
       );
 
       // When
-      final routine = await usecase.generateRecommendedRoutine(userProfile);
+      final routineItems = usecase.generateBaseRoutine(userProfile);
 
       // Then
-      expect(routine.concept, RoutineConcept.productive);
-      expect(routine.title, contains('김갓생님의 갓생 루틴'));
-      expect(routine.items.length, greaterThan(5));
+      expect(routineItems.length, greaterThan(5));
       
-      // 아침 일찍 기상하는지 확인
-      final morningItems = routine.morningItems;
+      // 아침 일찍 기상하는지 확인 
+      final morningItems = routineItems.where((item) => item.startTime.hour < 12);
       expect(morningItems.isNotEmpty, true);
       
       // 생산성 관련 활동이 포함되는지 확인
-      final hasProductiveActivity = routine.items.any(
+      final hasProductiveActivity = routineItems.any(
         (item) => item.title.contains('집중 업무') || item.title.contains('목표 설정')
       );
       expect(hasProductiveActivity, true);
@@ -53,20 +51,19 @@ void main() {
       );
 
       // When
-      final routine = await usecase.generateRecommendedRoutine(userProfile);
+      final routineItems = usecase.generateBaseRoutine(userProfile);
 
       // Then
-      expect(routine.concept, RoutineConcept.relaxed);
-      expect(routine.title, contains('박여유님의 여유롭게 루틴'));
+      expect(routineItems.length, greaterThan(0));
       
       // 여유로운 활동이 포함되는지 확인
-      final hasRelaxedActivity = routine.items.any(
+      final hasRelaxedActivity = routineItems.any(
         (item) => item.title.contains('산책') || item.title.contains('명상')
       );
       expect(hasRelaxedActivity, true);
       
       // 유연한 시간대 활동이 있는지 확인
-      final hasFlexibleActivity = routine.items.any(
+      final hasFlexibleActivity = routineItems.any(
         (item) => item.isFlexible == true
       );
       expect(hasFlexibleActivity, true);
@@ -84,20 +81,19 @@ void main() {
       );
 
       // When
-      final routine = await usecase.generateRecommendedRoutine(userProfile);
+      final routineItems = usecase.generateBaseRoutine(userProfile);
 
       // Then
-      expect(routine.concept, RoutineConcept.creative);
-      expect(routine.title, contains('이창작님의 크리에이티브 루틴'));
+      expect(routineItems.length, greaterThan(0));
       
       // 창작 활동이 포함되는지 확인
-      final hasCreativeActivity = routine.items.any(
+      final hasCreativeActivity = routineItems.any(
         (item) => item.title.contains('창작') || item.title.contains('영감')
       );
       expect(hasCreativeActivity, true);
       
       // 취미 관련 활동이 포함되는지 확인
-      final hasHobbyActivity = routine.items.any(
+      final hasHobbyActivity = routineItems.any(
         (item) => item.tags.any((tag) => userProfile.hobbies.contains(tag))
       );
       expect(hasHobbyActivity, true);
@@ -110,25 +106,24 @@ void main() {
         age: 32,
         job: '헬스 트레이너',
         hobbies: ['헬스', '등산', '수영'],
-        concept: RoutineConcept.healthy,
+        concept: RoutineConcept.physicalHealth,
         createdAt: DateTime.now(),
       );
 
       // When
-      final routine = await usecase.generateRecommendedRoutine(userProfile);
+      final routineItems = usecase.generateBaseRoutine(userProfile);
 
       // Then
-      expect(routine.concept, RoutineConcept.healthy);
-      expect(routine.title, contains('최건강님의 건강한 루틴'));
+      expect(routineItems.length, greaterThan(0));
       
       // 운동 관련 활동이 포함되는지 확인
-      final hasExerciseActivity = routine.items.any(
-        (item) => item.category.displayName.contains('운동')
+      final hasExerciseActivity = routineItems.any(
+        (item) => item.category.contains('운동')
       );
       expect(hasExerciseActivity, true);
       
       // 아침 스트레칭이 포함되는지 확인
-      final hasMorningStretch = routine.items.any(
+      final hasMorningStretch = routineItems.any(
         (item) => item.title.contains('스트레칭')
       );
       expect(hasMorningStretch, true);
@@ -141,16 +136,15 @@ void main() {
         age: 25,
         job: '학생',
         hobbies: ['독서'],
-        concept: RoutineConcept.balanced,
+        concept: RoutineConcept.workLifeBalance,
         createdAt: DateTime.now(),
       );
 
       // When
-      final routine = await usecase.generateRecommendedRoutine(userProfile);
+      final routineItems = usecase.generateBaseRoutine(userProfile);
 
       // Then
-      expect(routine.totalDuration.inMinutes, greaterThan(0));
-      expect(routine.totalDurationDisplay.isNotEmpty, true);
+      expect(routineItems.isNotEmpty, true);
     });
 
     test('시간대별 루틴 분류 테스트', () async {
@@ -165,15 +159,17 @@ void main() {
       );
 
       // When
-      final routine = await usecase.generateRecommendedRoutine(userProfile);
+      final routineItems = usecase.generateBaseRoutine(userProfile);
 
       // Then
-      expect(routine.morningItems.isNotEmpty, true);
-      expect(routine.eveningItems.isNotEmpty, true);
+      final morningItems = routineItems.where((item) => item.startTime.hour < 12);
+      final eveningItems = routineItems.where((item) => item.startTime.hour >= 18);
+      expect(morningItems.isNotEmpty, true);
+      expect(eveningItems.isNotEmpty, true);
       
       // 카테고리별 분류 테스트
-      final categorized = routine.itemsByCategory;
-      expect(categorized.keys.isNotEmpty, true);
+      final categories = routineItems.map((item) => item.category).toSet();
+      expect(categories.isNotEmpty, true);
     });
   });
 
@@ -185,7 +181,7 @@ void main() {
         age: 25,
         job: '개발자',
         hobbies: ['독서'],
-        concept: RoutineConcept.productive,
+        concept: RoutineConcept.godlife,
       );
 
       // Then
@@ -201,7 +197,7 @@ void main() {
         age: 200,
         job: '',
         hobbies: [],
-        concept: RoutineConcept.productive,
+        concept: RoutineConcept.godlife,
       );
 
       // Then
@@ -210,10 +206,10 @@ void main() {
 
     test('연령대 분류 테스트', () {
       // Given & Then
-      expect(UserProfile(name: 'test', age: 15, job: 'student', hobbies: ['독서'], concept: RoutineConcept.productive).ageGroup, '10대');
-      expect(UserProfile(name: 'test', age: 25, job: 'worker', hobbies: ['독서'], concept: RoutineConcept.productive).ageGroup, '20대');
-      expect(UserProfile(name: 'test', age: 35, job: 'manager', hobbies: ['독서'], concept: RoutineConcept.productive).ageGroup, '30대');
-      expect(UserProfile(name: 'test', age: 65, job: 'retired', hobbies: ['독서'], concept: RoutineConcept.productive).ageGroup, '60대 이상');
+      expect(UserProfile(name: 'test', age: 15, job: 'student', hobbies: ['독서'], concept: RoutineConcept.godlife).ageGroup, '10대');
+      expect(UserProfile(name: 'test', age: 25, job: 'worker', hobbies: ['독서'], concept: RoutineConcept.godlife).ageGroup, '20대');
+      expect(UserProfile(name: 'test', age: 35, job: 'manager', hobbies: ['독서'], concept: RoutineConcept.godlife).ageGroup, '30대');
+      expect(UserProfile(name: 'test', age: 65, job: 'retired', hobbies: ['독서'], concept: RoutineConcept.godlife).ageGroup, '60대 이상');
     });
   });
 }

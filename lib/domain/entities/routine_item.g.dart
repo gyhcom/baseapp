@@ -11,19 +11,18 @@ _$RoutineItemImpl _$$RoutineItemImplFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
-      category: $enumDecode(_$RoutineCategoryEnumMap, json['category']),
-      estimatedDuration:
-          Duration(microseconds: (json['estimatedDuration'] as num).toInt()),
-      priority: (json['priority'] as num?)?.toInt() ?? 1,
-      requiredConditions: (json['requiredConditions'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
+      startTime: const TimeOfDayConverter()
+          .fromJson(json['startTime'] as Map<String, dynamic>),
+      duration: Duration(microseconds: (json['duration'] as num).toInt()),
+      category: json['category'] as String? ?? '일반',
+      priority:
+          $enumDecodeNullable(_$RoutinePriorityEnumMap, json['priority']) ??
+              RoutinePriority.medium,
+      isCompleted: json['isCompleted'] as bool? ?? false,
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
               const [],
-      timeOfDay: json['timeOfDay'] as String?,
-      isFlexible: json['isFlexible'] as bool?,
+      isFlexible: json['isFlexible'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$$RoutineItemImplToJson(_$RoutineItemImpl instance) =>
@@ -31,21 +30,17 @@ Map<String, dynamic> _$$RoutineItemImplToJson(_$RoutineItemImpl instance) =>
       'id': instance.id,
       'title': instance.title,
       'description': instance.description,
-      'category': _$RoutineCategoryEnumMap[instance.category]!,
-      'estimatedDuration': instance.estimatedDuration.inMicroseconds,
-      'priority': instance.priority,
-      'requiredConditions': instance.requiredConditions,
+      'startTime': const TimeOfDayConverter().toJson(instance.startTime),
+      'duration': instance.duration.inMicroseconds,
+      'category': instance.category,
+      'priority': _$RoutinePriorityEnumMap[instance.priority]!,
+      'isCompleted': instance.isCompleted,
       'tags': instance.tags,
-      'timeOfDay': instance.timeOfDay,
       'isFlexible': instance.isFlexible,
     };
 
-const _$RoutineCategoryEnumMap = {
-  RoutineCategory.morning: 'morning',
-  RoutineCategory.work: 'work',
-  RoutineCategory.exercise: 'exercise',
-  RoutineCategory.hobby: 'hobby',
-  RoutineCategory.social: 'social',
-  RoutineCategory.selfCare: 'selfCare',
-  RoutineCategory.evening: 'evening',
+const _$RoutinePriorityEnumMap = {
+  RoutinePriority.high: 'high',
+  RoutinePriority.medium: 'medium',
+  RoutinePriority.low: 'low',
 };

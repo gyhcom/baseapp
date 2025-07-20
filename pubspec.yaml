@@ -83,7 +83,7 @@ dependencies:
   connectivity_plus: ^5.0.2          # Network connectivity
   
   # ========== NOTIFICATIONS ==========
-  flutter_local_notifications: ^16.3.0  # Local notifications
+  flutter_local_notifications: ^17.2.3  # Local notifications
   # firebase_messaging: ^14.7.10          # Push notifications (optional)
   
   # ========== LOGGING & DEBUGGING ==========

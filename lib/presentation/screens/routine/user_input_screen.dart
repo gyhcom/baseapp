@@ -182,7 +182,7 @@ class _UserInputScreenState extends State<UserInputScreen>
                 _hobbies = value;
               });
             },
-            onNext: _hobbies.isNotEmpty ? _nextStep : null,
+            onNext: _nextStep, // 취미 선택 없이도 다음으로 진행 가능
           ),
           
           // 5단계: 추가 정보 (선택사항)

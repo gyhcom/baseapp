@@ -27,6 +27,7 @@ mixin _$DailyRoutine {
   UserProfile get generatedFor => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
   bool get isFavorite => throw _privateConstructorUsedError;
   int get usageCount => throw _privateConstructorUsedError;
 
@@ -54,6 +55,7 @@ abstract class $DailyRoutineCopyWith<$Res> {
       UserProfile generatedFor,
       String description,
       DateTime? createdAt,
+      DateTime? updatedAt,
       bool isFavorite,
       int usageCount});
 
@@ -82,6 +84,7 @@ class _$DailyRoutineCopyWithImpl<$Res, $Val extends DailyRoutine>
     Object? generatedFor = null,
     Object? description = null,
     Object? createdAt = freezed,
+    Object? updatedAt = freezed,
     Object? isFavorite = null,
     Object? usageCount = null,
   }) {
@@ -113,6 +116,10 @@ class _$DailyRoutineCopyWithImpl<$Res, $Val extends DailyRoutine>
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
       isFavorite: null == isFavorite
           ? _value.isFavorite
@@ -152,6 +159,7 @@ abstract class _$$DailyRoutineImplCopyWith<$Res>
       UserProfile generatedFor,
       String description,
       DateTime? createdAt,
+      DateTime? updatedAt,
       bool isFavorite,
       int usageCount});
 
@@ -179,6 +187,7 @@ class __$$DailyRoutineImplCopyWithImpl<$Res>
     Object? generatedFor = null,
     Object? description = null,
     Object? createdAt = freezed,
+    Object? updatedAt = freezed,
     Object? isFavorite = null,
     Object? usageCount = null,
   }) {
@@ -211,6 +220,10 @@ class __$$DailyRoutineImplCopyWithImpl<$Res>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       isFavorite: null == isFavorite
           ? _value.isFavorite
           : isFavorite // ignore: cast_nullable_to_non_nullable
@@ -234,6 +247,7 @@ class _$DailyRoutineImpl implements _DailyRoutine {
       required this.generatedFor,
       this.description = '',
       this.createdAt,
+      this.updatedAt,
       this.isFavorite = false,
       this.usageCount = 0})
       : _items = items;
@@ -263,6 +277,8 @@ class _$DailyRoutineImpl implements _DailyRoutine {
   @override
   final DateTime? createdAt;
   @override
+  final DateTime? updatedAt;
+  @override
   @JsonKey()
   final bool isFavorite;
   @override
@@ -271,7 +287,7 @@ class _$DailyRoutineImpl implements _DailyRoutine {
 
   @override
   String toString() {
-    return 'DailyRoutine(id: $id, title: $title, concept: $concept, items: $items, generatedFor: $generatedFor, description: $description, createdAt: $createdAt, isFavorite: $isFavorite, usageCount: $usageCount)';
+    return 'DailyRoutine(id: $id, title: $title, concept: $concept, items: $items, generatedFor: $generatedFor, description: $description, createdAt: $createdAt, updatedAt: $updatedAt, isFavorite: $isFavorite, usageCount: $usageCount)';
   }
 
   @override
@@ -289,6 +305,8 @@ class _$DailyRoutineImpl implements _DailyRoutine {
                 other.description == description) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
             (identical(other.isFavorite, isFavorite) ||
                 other.isFavorite == isFavorite) &&
             (identical(other.usageCount, usageCount) ||
@@ -306,6 +324,7 @@ class _$DailyRoutineImpl implements _DailyRoutine {
       generatedFor,
       description,
       createdAt,
+      updatedAt,
       isFavorite,
       usageCount);
 
@@ -334,6 +353,7 @@ abstract class _DailyRoutine implements DailyRoutine {
       required final UserProfile generatedFor,
       final String description,
       final DateTime? createdAt,
+      final DateTime? updatedAt,
       final bool isFavorite,
       final int usageCount}) = _$DailyRoutineImpl;
 
@@ -354,6 +374,8 @@ abstract class _DailyRoutine implements DailyRoutine {
   String get description;
   @override
   DateTime? get createdAt;
+  @override
+  DateTime? get updatedAt;
   @override
   bool get isFavorite;
   @override

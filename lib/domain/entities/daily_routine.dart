@@ -16,6 +16,7 @@ class DailyRoutine with _$DailyRoutine {
     required UserProfile generatedFor,
     @Default('') String description,
     DateTime? createdAt,
+    DateTime? updatedAt,
     @Default(false) bool isFavorite,
     @Default(0) int usageCount,
   }) = _DailyRoutine;
@@ -28,32 +29,28 @@ extension DailyRoutineX on DailyRoutine {
   Duration get totalDuration {
     return items.fold(
       Duration.zero,
-      (total, item) => total + item.estimatedDuration,
+      (total, item) => total + item.duration,
     );
   }
 
   List<RoutineItem> get morningItems {
     return items.where((item) => 
-      item.category == RoutineCategory.morning ||
-      (item.timeOfDay != null && 
-       int.parse(item.timeOfDay!.split(':')[0]) < 12)
+      item.category.contains('아침') ||
+      item.startTime.hour < 12
     ).toList();
   }
 
   List<RoutineItem> get afternoonItems {
     return items.where((item) => 
-      item.category == RoutineCategory.work ||
-      (item.timeOfDay != null && 
-       int.parse(item.timeOfDay!.split(':')[0]) >= 12 &&
-       int.parse(item.timeOfDay!.split(':')[0]) < 18)
+      item.category.contains('업무') || item.category.contains('오후') ||
+      (item.startTime.hour >= 12 && item.startTime.hour < 18)
     ).toList();
   }
 
   List<RoutineItem> get eveningItems {
     return items.where((item) => 
-      item.category == RoutineCategory.evening ||
-      (item.timeOfDay != null && 
-       int.parse(item.timeOfDay!.split(':')[0]) >= 18)
+      item.category.contains('저녁') ||
+      item.startTime.hour >= 18
     ).toList();
   }
 
@@ -67,13 +64,15 @@ extension DailyRoutineX on DailyRoutine {
     return '${minutes}분';
   }
 
-  Map<RoutineCategory, List<RoutineItem>> get itemsByCategory {
-    final Map<RoutineCategory, List<RoutineItem>> categorized = {};
+  Map<String, List<RoutineItem>> get itemsByCategory {
+    final Map<String, List<RoutineItem>> categorized = {};
     
-    for (final category in RoutineCategory.values) {
-      categorized[category] = items
-          .where((item) => item.category == category)
-          .toList();
+    // 카테고리별로 루틴 아이템들을 그룹화
+    for (final item in items) {
+      if (categorized[item.category] == null) {
+        categorized[item.category] = [];
+      }
+      categorized[item.category]!.add(item);
     }
     
     return categorized;

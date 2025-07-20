@@ -23,14 +23,14 @@ mixin _$RoutineItem {
   String get id => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
-  RoutineCategory get category => throw _privateConstructorUsedError;
-  Duration get estimatedDuration => throw _privateConstructorUsedError;
-  int get priority => throw _privateConstructorUsedError; // 1-5 (1이 가장 높음)
-  List<String> get requiredConditions => throw _privateConstructorUsedError;
+  @TimeOfDayConverter()
+  TimeOfDay get startTime => throw _privateConstructorUsedError;
+  Duration get duration => throw _privateConstructorUsedError;
+  String get category => throw _privateConstructorUsedError;
+  RoutinePriority get priority => throw _privateConstructorUsedError;
+  bool get isCompleted => throw _privateConstructorUsedError;
   List<String> get tags => throw _privateConstructorUsedError;
-  String? get timeOfDay =>
-      throw _privateConstructorUsedError; // '06:00', '07:30' 등
-  bool? get isFlexible => throw _privateConstructorUsedError;
+  bool get isFlexible => throw _privateConstructorUsedError;
 
   /// Serializes this RoutineItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -52,13 +52,13 @@ abstract class $RoutineItemCopyWith<$Res> {
       {String id,
       String title,
       String description,
-      RoutineCategory category,
-      Duration estimatedDuration,
-      int priority,
-      List<String> requiredConditions,
+      @TimeOfDayConverter() TimeOfDay startTime,
+      Duration duration,
+      String category,
+      RoutinePriority priority,
+      bool isCompleted,
       List<String> tags,
-      String? timeOfDay,
-      bool? isFlexible});
+      bool isFlexible});
 }
 
 /// @nodoc
@@ -79,13 +79,13 @@ class _$RoutineItemCopyWithImpl<$Res, $Val extends RoutineItem>
     Object? id = null,
     Object? title = null,
     Object? description = null,
+    Object? startTime = null,
+    Object? duration = null,
     Object? category = null,
-    Object? estimatedDuration = null,
     Object? priority = null,
-    Object? requiredConditions = null,
+    Object? isCompleted = null,
     Object? tags = null,
-    Object? timeOfDay = freezed,
-    Object? isFlexible = freezed,
+    Object? isFlexible = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -100,34 +100,34 @@ class _$RoutineItemCopyWithImpl<$Res, $Val extends RoutineItem>
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String,
+      startTime: null == startTime
+          ? _value.startTime
+          : startTime // ignore: cast_nullable_to_non_nullable
+              as TimeOfDay,
+      duration: null == duration
+          ? _value.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as Duration,
       category: null == category
           ? _value.category
           : category // ignore: cast_nullable_to_non_nullable
-              as RoutineCategory,
-      estimatedDuration: null == estimatedDuration
-          ? _value.estimatedDuration
-          : estimatedDuration // ignore: cast_nullable_to_non_nullable
-              as Duration,
+              as String,
       priority: null == priority
           ? _value.priority
           : priority // ignore: cast_nullable_to_non_nullable
-              as int,
-      requiredConditions: null == requiredConditions
-          ? _value.requiredConditions
-          : requiredConditions // ignore: cast_nullable_to_non_nullable
-              as List<String>,
+              as RoutinePriority,
+      isCompleted: null == isCompleted
+          ? _value.isCompleted
+          : isCompleted // ignore: cast_nullable_to_non_nullable
+              as bool,
       tags: null == tags
           ? _value.tags
           : tags // ignore: cast_nullable_to_non_nullable
               as List<String>,
-      timeOfDay: freezed == timeOfDay
-          ? _value.timeOfDay
-          : timeOfDay // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isFlexible: freezed == isFlexible
+      isFlexible: null == isFlexible
           ? _value.isFlexible
           : isFlexible // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
     ) as $Val);
   }
 }
@@ -144,13 +144,13 @@ abstract class _$$RoutineItemImplCopyWith<$Res>
       {String id,
       String title,
       String description,
-      RoutineCategory category,
-      Duration estimatedDuration,
-      int priority,
-      List<String> requiredConditions,
+      @TimeOfDayConverter() TimeOfDay startTime,
+      Duration duration,
+      String category,
+      RoutinePriority priority,
+      bool isCompleted,
       List<String> tags,
-      String? timeOfDay,
-      bool? isFlexible});
+      bool isFlexible});
 }
 
 /// @nodoc
@@ -169,13 +169,13 @@ class __$$RoutineItemImplCopyWithImpl<$Res>
     Object? id = null,
     Object? title = null,
     Object? description = null,
+    Object? startTime = null,
+    Object? duration = null,
     Object? category = null,
-    Object? estimatedDuration = null,
     Object? priority = null,
-    Object? requiredConditions = null,
+    Object? isCompleted = null,
     Object? tags = null,
-    Object? timeOfDay = freezed,
-    Object? isFlexible = freezed,
+    Object? isFlexible = null,
   }) {
     return _then(_$RoutineItemImpl(
       id: null == id
@@ -190,34 +190,34 @@ class __$$RoutineItemImplCopyWithImpl<$Res>
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
               as String,
+      startTime: null == startTime
+          ? _value.startTime
+          : startTime // ignore: cast_nullable_to_non_nullable
+              as TimeOfDay,
+      duration: null == duration
+          ? _value.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as Duration,
       category: null == category
           ? _value.category
           : category // ignore: cast_nullable_to_non_nullable
-              as RoutineCategory,
-      estimatedDuration: null == estimatedDuration
-          ? _value.estimatedDuration
-          : estimatedDuration // ignore: cast_nullable_to_non_nullable
-              as Duration,
+              as String,
       priority: null == priority
           ? _value.priority
           : priority // ignore: cast_nullable_to_non_nullable
-              as int,
-      requiredConditions: null == requiredConditions
-          ? _value._requiredConditions
-          : requiredConditions // ignore: cast_nullable_to_non_nullable
-              as List<String>,
+              as RoutinePriority,
+      isCompleted: null == isCompleted
+          ? _value.isCompleted
+          : isCompleted // ignore: cast_nullable_to_non_nullable
+              as bool,
       tags: null == tags
           ? _value._tags
           : tags // ignore: cast_nullable_to_non_nullable
               as List<String>,
-      timeOfDay: freezed == timeOfDay
-          ? _value.timeOfDay
-          : timeOfDay // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isFlexible: freezed == isFlexible
+      isFlexible: null == isFlexible
           ? _value.isFlexible
           : isFlexible // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
     ));
   }
 }
@@ -229,15 +229,14 @@ class _$RoutineItemImpl implements _RoutineItem {
       {required this.id,
       required this.title,
       required this.description,
-      required this.category,
-      required this.estimatedDuration,
-      this.priority = 1,
-      final List<String> requiredConditions = const [],
+      @TimeOfDayConverter() required this.startTime,
+      required this.duration,
+      this.category = '일반',
+      this.priority = RoutinePriority.medium,
+      this.isCompleted = false,
       final List<String> tags = const [],
-      this.timeOfDay,
-      this.isFlexible})
-      : _requiredConditions = requiredConditions,
-        _tags = tags;
+      this.isFlexible = true})
+      : _tags = tags;
 
   factory _$RoutineItemImpl.fromJson(Map<String, dynamic> json) =>
       _$$RoutineItemImplFromJson(json);
@@ -249,24 +248,19 @@ class _$RoutineItemImpl implements _RoutineItem {
   @override
   final String description;
   @override
-  final RoutineCategory category;
+  @TimeOfDayConverter()
+  final TimeOfDay startTime;
   @override
-  final Duration estimatedDuration;
-  @override
-  @JsonKey()
-  final int priority;
-// 1-5 (1이 가장 높음)
-  final List<String> _requiredConditions;
-// 1-5 (1이 가장 높음)
+  final Duration duration;
   @override
   @JsonKey()
-  List<String> get requiredConditions {
-    if (_requiredConditions is EqualUnmodifiableListView)
-      return _requiredConditions;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_requiredConditions);
-  }
-
+  final String category;
+  @override
+  @JsonKey()
+  final RoutinePriority priority;
+  @override
+  @JsonKey()
+  final bool isCompleted;
   final List<String> _tags;
   @override
   @JsonKey()
@@ -277,14 +271,12 @@ class _$RoutineItemImpl implements _RoutineItem {
   }
 
   @override
-  final String? timeOfDay;
-// '06:00', '07:30' 등
-  @override
-  final bool? isFlexible;
+  @JsonKey()
+  final bool isFlexible;
 
   @override
   String toString() {
-    return 'RoutineItem(id: $id, title: $title, description: $description, category: $category, estimatedDuration: $estimatedDuration, priority: $priority, requiredConditions: $requiredConditions, tags: $tags, timeOfDay: $timeOfDay, isFlexible: $isFlexible)';
+    return 'RoutineItem(id: $id, title: $title, description: $description, startTime: $startTime, duration: $duration, category: $category, priority: $priority, isCompleted: $isCompleted, tags: $tags, isFlexible: $isFlexible)';
   }
 
   @override
@@ -296,17 +288,17 @@ class _$RoutineItemImpl implements _RoutineItem {
             (identical(other.title, title) || other.title == title) &&
             (identical(other.description, description) ||
                 other.description == description) &&
+            (identical(other.startTime, startTime) ||
+                other.startTime == startTime) &&
+            (identical(other.duration, duration) ||
+                other.duration == duration) &&
             (identical(other.category, category) ||
                 other.category == category) &&
-            (identical(other.estimatedDuration, estimatedDuration) ||
-                other.estimatedDuration == estimatedDuration) &&
             (identical(other.priority, priority) ||
                 other.priority == priority) &&
-            const DeepCollectionEquality()
-                .equals(other._requiredConditions, _requiredConditions) &&
+            (identical(other.isCompleted, isCompleted) ||
+                other.isCompleted == isCompleted) &&
             const DeepCollectionEquality().equals(other._tags, _tags) &&
-            (identical(other.timeOfDay, timeOfDay) ||
-                other.timeOfDay == timeOfDay) &&
             (identical(other.isFlexible, isFlexible) ||
                 other.isFlexible == isFlexible));
   }
@@ -318,12 +310,12 @@ class _$RoutineItemImpl implements _RoutineItem {
       id,
       title,
       description,
+      startTime,
+      duration,
       category,
-      estimatedDuration,
       priority,
-      const DeepCollectionEquality().hash(_requiredConditions),
+      isCompleted,
       const DeepCollectionEquality().hash(_tags),
-      timeOfDay,
       isFlexible);
 
   /// Create a copy of RoutineItem
@@ -347,13 +339,13 @@ abstract class _RoutineItem implements RoutineItem {
       {required final String id,
       required final String title,
       required final String description,
-      required final RoutineCategory category,
-      required final Duration estimatedDuration,
-      final int priority,
-      final List<String> requiredConditions,
+      @TimeOfDayConverter() required final TimeOfDay startTime,
+      required final Duration duration,
+      final String category,
+      final RoutinePriority priority,
+      final bool isCompleted,
       final List<String> tags,
-      final String? timeOfDay,
-      final bool? isFlexible}) = _$RoutineItemImpl;
+      final bool isFlexible}) = _$RoutineItemImpl;
 
   factory _RoutineItem.fromJson(Map<String, dynamic> json) =
       _$RoutineItemImpl.fromJson;
@@ -365,19 +357,20 @@ abstract class _RoutineItem implements RoutineItem {
   @override
   String get description;
   @override
-  RoutineCategory get category;
+  @TimeOfDayConverter()
+  TimeOfDay get startTime;
   @override
-  Duration get estimatedDuration;
+  Duration get duration;
   @override
-  int get priority; // 1-5 (1이 가장 높음)
+  String get category;
   @override
-  List<String> get requiredConditions;
+  RoutinePriority get priority;
+  @override
+  bool get isCompleted;
   @override
   List<String> get tags;
   @override
-  String? get timeOfDay; // '06:00', '07:30' 등
-  @override
-  bool? get isFlexible;
+  bool get isFlexible;
 
   /// Create a copy of RoutineItem
   /// with the given fields replaced by the non-null parameter values.

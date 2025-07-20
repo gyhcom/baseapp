@@ -6,11 +6,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants/app_constants.dart';
 import '../core/network/api_client.dart';
 import '../data/datasources/local/local_storage.dart';
+import '../data/datasources/local/routine_local_datasource.dart';
 import '../data/datasources/remote/api_service.dart';
 import '../data/repositories/auth_repository_impl.dart';
 import '../data/repositories/todo_repository_impl.dart';
+import '../data/repositories/routine_repository_impl.dart';
+import '../data/repositories/usage_repository_impl.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/todo_repository.dart';
+import '../domain/repositories/routine_repository.dart';
+import '../domain/repositories/usage_repository.dart';
 import '../domain/usecases/auth_usecases.dart';
 import '../domain/usecases/todo_usecases.dart';
 
@@ -84,6 +89,23 @@ Future<void> setupDependencies() async {
       apiService: getIt<ApiService>(),
       localStorage: getIt<LocalStorage>(),
     ),
+  );
+
+  // 루틴 로컬 데이터소스 초기화 및 등록
+  final routineLocalDataSource = RoutineLocalDataSourceImpl();
+  await routineLocalDataSource.init();
+  getIt.registerSingleton<RoutineLocalDataSource>(routineLocalDataSource);
+
+  // 루틴 저장소
+  getIt.registerLazySingleton<RoutineRepository>(
+    () => RoutineRepositoryImpl(
+      localDataSource: getIt<RoutineLocalDataSource>(),
+    ),
+  );
+
+  // 사용량 관리 저장소
+  getIt.registerLazySingleton<UsageRepository>(
+    () => UsageRepositoryImpl(),
   );
 
   // ========== DOMAIN LAYER ==========

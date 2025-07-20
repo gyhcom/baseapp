@@ -1,3 +1,4 @@
+import 'package:baseapp/domain/entities/routine_item.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,8 +6,16 @@ import 'package:dio/dio.dart';
 import '../../theme/app_theme.dart';
 import '../../../domain/entities/routine_concept.dart';
 import '../../../domain/entities/ai_routine_request.dart';
-import '../../../data/repositories/claude_ai_service_impl.dart';
-import '../../../core/constants/api_constants.dart';
+import '../../../domain/repositories/usage_repository.dart';
+import '../../../core/di/ai_service_provider.dart';
+import '../../../core/config/ai_config.dart';
+import '../../../domain/entities/daily_routine.dart';
+import '../../../domain/repositories/routine_repository.dart';
+import '../../../domain/services/routine_limit_service.dart';
+import '../../../core/constants/routine_limits.dart';
+import '../../../di/service_locator.dart';
+import 'routine_detail_screen.dart';
+import 'my_routines_screen.dart';
 
 /// AI 루틴 생성 화면
 class RoutineGenerationScreen extends ConsumerStatefulWidget {
@@ -41,7 +50,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
 
   String _currentStatus = 'AI가 당신의 정보를 분석하고 있어요...';
   bool _isGenerating = true;
-  Map<String, dynamic>? _generatedRoutine;
+  DailyRoutine? _generatedRoutine;
   String? _error;
 
   @override
@@ -90,6 +99,22 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
 
   Future<void> _generateRoutine() async {
     try {
+      // 0단계: 사용량 체크 (더미 모드가 아닐 때만)
+      if (!AIConfig.isDummyMode) {
+        setState(() {
+          _currentStatus = '사용량을 확인하고 있어요...';
+        });
+        
+        final usageRepository = getIt<UsageRepository>();
+        final canGenerate = await usageRepository.canGenerate();
+        
+        if (!canGenerate) {
+          throw Exception('오늘 AI 루틴 생성 횟수를 모두 사용했습니다. 내일 다시 시도해주세요.');
+        }
+        
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
       // 1단계: 사용자 정보 분석
       setState(() {
         _currentStatus = 'AI가 당신의 정보를 분석하고 있어요...';
@@ -102,9 +127,11 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
       });
       await Future.delayed(const Duration(seconds: 2));
 
-      // 3단계: 루틴 생성
+      // 3단계: 루틴 생성  
       setState(() {
-        _currentStatus = '개인화된 루틴을 생성하고 있어요...';
+        _currentStatus = AIConfig.isDummyMode 
+            ? '더미 데이터로 개인화된 루틴을 생성하고 있어요...'
+            : '${AIConfig.config.name}가 개인화된 루틴을 생성하고 있어요...';
       });
 
       final request = AIRoutineRequest(
@@ -116,22 +143,27 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
         additionalInfo: widget.additionalInfo,
       );
 
-      // Claude AI 서비스 생성
-      final dio = Dio();
-      final aiService = ClaudeAIServiceImpl(
-        apiKey: EnvironmentConfig.claudeApiKey,
-        dio: dio,
-      );
+      // AI 서비스 자동 선택 (설정에 따라 더미/실제 API 전환)
+      final aiService = AIServiceProvider.createService();
 
       // API 키 설정 확인
       final response = await aiService.generateRoutine(request);
 
+      // 실제 API 사용 시 사용량 차감
+      if (!AIConfig.isDummyMode && response.success) {
+        final usageRepository = getIt<UsageRepository>();
+        await usageRepository.consumeGeneration();
+      }
+
       if (response.success && response.routine != null) {
         setState(() {
           _currentStatus = '루틴 생성이 완료되었어요!';
-          _generatedRoutine = response.routine! as Map<String, dynamic>?;
+          _generatedRoutine = response.routine!;
           _isGenerating = false;
         });
+        
+        // 자동으로 루틴 저장
+        await _saveRoutineAutomatically(response.routine!);
         
         await Future.delayed(const Duration(seconds: 1));
         
@@ -177,16 +209,213 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.router.popUntilRoot();
+              Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
             },
             child: const Text('홈으로'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _navigateToMyRoutines();
+            },
+            child: const Text('내 루틴 보기'),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _generateRoutine(); // 다시 생성
+              _navigateToRoutineDetail();
             },
-            child: const Text('다시 생성'),
+            child: const Text('루틴 상세보기'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToRoutineDetail() {
+    if (_generatedRoutine == null) return;
+    
+    // 루틴 상세 화면으로 이동
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => RoutineDetailScreen(routine: _generatedRoutine!),
+      ),
+    );
+  }
+
+  void _navigateToMyRoutines() {
+    // 내 루틴 목록 화면으로 이동
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const MyRoutinesScreen(),
+      ),
+    );
+  }
+
+  /// 루틴 자동 저장 (제한 검사 포함)
+  Future<void> _saveRoutineAutomatically(DailyRoutine routine) async {
+    try {
+      // 저장 제한 검사
+      final saveResult = await RoutineLimitService.validateAndPrepareForSave();
+      
+      print('🔍 저장 제한 검사 결과:');
+      print('  - canSave: ${saveResult.canSave}');
+      print('  - status: ${saveResult.status}');
+      print('  - currentCount: ${saveResult.currentCount}');
+      print('  - remainingSlots: ${saveResult.remainingSlots}');
+      print('  - maxCount: ${saveResult.maxCount}');
+      
+      if (!saveResult.canSave) {
+        print('❌ 저장 제한으로 인해 저장 불가');
+        // 저장 불가능한 경우 사용자에게 알림
+        if (mounted) {
+          _showStorageLimitReached(saveResult);
+        }
+        return;
+      }
+      
+      final routineRepository = getIt<RoutineRepository>();
+      await routineRepository.saveRoutine(routine);
+      
+      print('✅ 루틴이 자동으로 저장되었습니다: ${routine.id}');
+      
+      // 사용자 프로필도 저장 (최신 정보 유지)
+      await routineRepository.saveUserProfile(routine.generatedFor);
+      
+      // 경고 상태인 경우 안내 메시지 표시
+      if (mounted && saveResult.status == LimitStatus.warning) {
+        _showStorageWarning(saveResult);
+      }
+      
+    } catch (e) {
+      print('❌ 루틴 저장 실패: $e');
+      // 저장 실패해도 사용자에게는 알리지 않음 (UX 방해 방지)
+    }
+  }
+
+  /// 저장 공간 한도 도달 알림
+  void _showStorageLimitReached(RoutineSaveResult result) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.folder_off, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('저장 공간 부족'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('생성된 루틴을 저장할 수 없습니다.'),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(result.warningMessage)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('해결 방법:'),
+              const SizedBox(height: 8),
+              const Text('• 기존 루틴을 삭제하여 공간 확보'),
+              const Text('• 프리미엄 구독으로 무제한 저장'),
+              const SizedBox(height: 16),
+              const Text('* 루틴은 임시로 생성되었으며, 상세보기에서 확인할 수 있습니다.'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('확인'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showPremiumUpgradeDialog();
+            },
+            child: const Text('프리미엄 구독'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 저장 공간 경고 (토스트 메시지)
+  void _showStorageWarning(RoutineSaveResult result) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.warning, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text(result.warningMessage)),
+          ],
+        ),
+        backgroundColor: Colors.orange,
+        action: SnackBarAction(
+          label: '프리미엄',
+          textColor: Colors.white,
+          onPressed: _showPremiumUpgradeDialog,
+        ),
+      ),
+    );
+  }
+
+  /// 프리미엄 업그레이드 다이얼로그
+  void _showPremiumUpgradeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.star, color: Colors.amber),
+            SizedBox(width: 8),
+            Text('프리미엄 구독'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('프리미엄 구독의 혜택:'),
+            SizedBox(height: 12),
+            Text('✅ 무제한 AI 루틴 생성'),
+            Text('✅ 무제한 루틴 저장'),
+            Text('✅ 고급 통계 및 분석'),
+            Text('✅ 클라우드 백업'),
+            Text('✅ 광고 없는 경험'),
+            Text('✅ 우선 고객 지원'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('나중에'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // TODO: 프리미엄 구독 페이지로 이동
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('프리미엄 구독 기능 준비 중입니다')),
+              );
+            },
+            child: const Text('구독하기'),
           ),
         ],
       ),
@@ -198,20 +427,24 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
     
     final List<Widget> items = [];
     
-    // 추천 기상/취침 시간
-    if (_generatedRoutine!['wakeUpTime'] != null) {
-      items.add(Text('• 추천 기상시간: ${_generatedRoutine!['wakeUpTime']}'));
-    }
-    if (_generatedRoutine!['bedTime'] != null) {
-      items.add(Text('• 추천 취침시간: ${_generatedRoutine!['bedTime']}'));
-    }
-    
-    // 주요 활동들
-    if (_generatedRoutine!['activities'] != null) {
-      final activities = _generatedRoutine!['activities'] as List;
-      for (var activity in activities.take(3)) {
-        items.add(Text('• ${activity['time']}: ${activity['activity']}'));
+    try {
+      // DailyRoutine 객체에서 정보 추출
+      items.add(Text('• 컨셉: ${_generatedRoutine!.concept.displayName}'));
+      
+      // 상위 5개 루틴 아이템만 표시
+      final routineItems = _generatedRoutine!.items.take(5);
+      for (var item in routineItems) {
+        final timeDisplay = item.timeDisplay; // RoutineItemX extension 사용
+        items.add(Text('• $timeDisplay: ${item.title}'));
       }
+      
+      if (_generatedRoutine!.description.isNotEmpty) {
+        items.add(const SizedBox(height: 8));
+        items.add(Text('설명: ${_generatedRoutine!.description}'));
+      }
+    } catch (e) {
+      print('루틴 아이템 빌드 오류: $e');
+      items.add(const Text('루틴 정보를 표시할 수 없습니다.'));
     }
     
     return items.map((item) => Padding(

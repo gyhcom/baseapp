@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import '../../domain/repositories/ai_service_repository.dart';
 import '../../domain/entities/ai_routine_request.dart';
 import '../../domain/entities/ai_routine_response.dart';
 import '../../domain/entities/daily_routine.dart';
 import '../../domain/entities/routine_item.dart';
-import '../../domain/entities/routine_concept.dart';
-import '../../domain/entities/user_profile.dart';
 
 /// Claude API 서비스 구현
 class ClaudeAIServiceImpl implements AIServiceRepository {
@@ -34,32 +33,6 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
     );
   }
 
-  @override
-  String get serviceName => 'Claude (Anthropic)';
-
-  @override
-  bool get isConfigured => _apiKey.isNotEmpty;
-
-  @override
-  List<String> get supportedLanguages => ['ko', 'en', 'ja'];
-
-  @override
-  Future<bool> checkServiceHealth() async {
-    try {
-      // 간단한 테스트 요청으로 서비스 상태 확인
-      final response = await _dio.post('/v1/messages', data: {
-        'model': 'claude-3-haiku-20240307',
-        'max_tokens': 10,
-        'messages': [
-          {'role': 'user', 'content': 'test'}
-        ]
-      });
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Claude AI Service Health Check Failed: $e');
-      return false;
-    }
-  }
 
   @override
   Future<AIRoutineResponse> generateRoutine(AIRoutineRequest request) async {
@@ -158,11 +131,11 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           title: item['title'] as String,
           description: item['description'] as String,
-          category: _parseCategory(item['category'] as String),
-          estimatedDuration: Duration(minutes: item['durationMinutes'] as int),
-          timeOfDay: item['timeOfDay'] as String?,
-          priority: item['priority'] as int? ?? 3,
-          isFlexible: item['isFlexible'] as bool?,
+          startTime: _parseTimeOfDay(item['timeOfDay'] as String? ?? '08:00'),
+          duration: Duration(minutes: item['durationMinutes'] as int? ?? 30),
+          category: item['category'] as String? ?? '일반',
+          priority: _parsePriority(item['priority'] as int? ?? 3),
+          isCompleted: false,
           tags: (item['tags'] as List?)?.cast<String>() ?? [],
         );
       }).toList();
@@ -183,25 +156,31 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
     }
   }
 
-  /// 카테고리 문자열을 enum으로 변환
-  RoutineCategory _parseCategory(String categoryStr) {
-    switch (categoryStr.toLowerCase()) {
-      case 'morning':
-        return RoutineCategory.morning;
-      case 'work':
-        return RoutineCategory.work;
-      case 'exercise':
-        return RoutineCategory.exercise;
-      case 'hobby':
-        return RoutineCategory.hobby;
-      case 'social':
-        return RoutineCategory.social;
-      case 'selfcare':
-        return RoutineCategory.selfCare;
-      case 'evening':
-        return RoutineCategory.evening;
+  /// 시간 문자열을 TimeOfDay로 변환
+  TimeOfDay _parseTimeOfDay(String timeStr) {
+    try {
+      final parts = timeStr.split(':');
+      final hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+      return TimeOfDay(hour: hour, minute: minute);
+    } catch (e) {
+      return const TimeOfDay(hour: 8, minute: 0); // 기본값
+    }
+  }
+
+  /// 우선순위 숫자를 enum으로 변환
+  RoutinePriority _parsePriority(int priority) {
+    switch (priority) {
+      case 1:
+      case 2:
+        return RoutinePriority.high;
+      case 3:
+        return RoutinePriority.medium;
+      case 4:
+      case 5:
+        return RoutinePriority.low;
       default:
-        return RoutineCategory.selfCare;
+        return RoutinePriority.medium;
     }
   }
 
@@ -212,28 +191,28 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
         id: 'fallback_1',
         title: '아침 시작',
         description: '하루를 시작하는 준비 시간',
-        category: RoutineCategory.morning,
-        estimatedDuration: const Duration(minutes: 30),
-        timeOfDay: '07:00',
-        priority: 1,
+        startTime: const TimeOfDay(hour: 7, minute: 0),
+        duration: const Duration(minutes: 30),
+        category: '아침',
+        priority: RoutinePriority.high,
       ),
       RoutineItem(
         id: 'fallback_2',
         title: '${request.concept.displayName} 활동',
         description: '선택하신 컨셉에 맞는 특별한 시간',
-        category: RoutineCategory.hobby,
-        estimatedDuration: const Duration(hours: 1),
-        priority: 2,
-        isFlexible: true,
+        startTime: const TimeOfDay(hour: 14, minute: 0),
+        duration: const Duration(hours: 1),
+        category: '취미',
+        priority: RoutinePriority.medium,
       ),
       RoutineItem(
         id: 'fallback_3',
         title: '하루 마무리',
         description: '편안한 휴식과 내일 준비',
-        category: RoutineCategory.evening,
-        estimatedDuration: const Duration(minutes: 30),
-        timeOfDay: '22:00',
-        priority: 1,
+        startTime: const TimeOfDay(hour: 22, minute: 0),
+        duration: const Duration(minutes: 30),
+        category: '저녁',
+        priority: RoutinePriority.high,
       ),
     ];
 
@@ -247,5 +226,42 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
       createdAt: DateTime.now(),
     );
   }
+
+  @override
+  Future<bool> checkServiceHealth() async {
+    try {
+      // 간단한 헬스체크 요청
+      final response = await _dio.post(
+        '/messages',
+        data: {
+          'model': 'claude-3-haiku-20240307',
+          'max_tokens': 10,
+          'messages': [
+            {'role': 'user', 'content': 'Hello'}
+          ],
+        },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': _apiKey,
+            'anthropic-version': '2023-06-01',
+          },
+        ),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Claude 서비스 헬스체크 실패: $e');
+      return false;
+    }
+  }
+
+  @override
+  List<String> get supportedLanguages => ['ko', 'en', 'ja', 'zh'];
+
+  @override
+  String get serviceName => 'Claude AI (Anthropic)';
+
+  @override
+  bool get isConfigured => _apiKey.isNotEmpty && !_apiKey.contains('dev-test-key');
 }
 

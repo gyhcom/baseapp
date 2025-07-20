@@ -81,12 +81,12 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(seconds: 2));
     print('✅ 루틴 앱 초기화 완료');
 
-    // 로그인 화면으로 이동
+    // 홈 화면으로 이동
     if (mounted) {
-      print('📱 로그인 화면으로 이동...');
+      print('📱 홈 화면으로 이동...');
       try {
-        context.router.navigate(const LoginRoute());
-        print('✅ 로그인 화면 이동 성공');
+        context.router.navigate(const HomeWrapperRoute());
+        print('✅ 홈 화면 이동 성공');
       } catch (e) {
         print('❌ 화면 이동 실패: $e');
       }

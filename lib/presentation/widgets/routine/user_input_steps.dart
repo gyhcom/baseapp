@@ -489,7 +489,7 @@ class _UserInputStep4State extends State<UserInputStep4>
     super.build(context);
     return StepLayout(
       title: '취미를 알려주세요 🎨',
-      subtitle: '관심사에 맞는 활동을 추천해드릴게요',
+      subtitle: '관심사에 맞는 활동을 추천해드릴게요 (선택사항)',
       stepIcon: Icons.favorite_outline,
       onNext: widget.onNext,
       child: Column(
@@ -533,10 +533,11 @@ class _UserInputStep4State extends State<UserInputStep4>
           
           // 일반적인 취미 선택
           Text(
-            '관심있는 활동을 선택해주세요 (최대 5개)',
+            '관심있는 활동을 선택해주세요 (최대 5개, 선택하지 않아도 괜찮아요)',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppTheme.textSecondaryColor,
             ),
+            textAlign: TextAlign.center,
           ),
           
           const SizedBox(height: AppTheme.spacingM),

@@ -86,6 +86,16 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const SplashPage(),
       );
     },
+    TodayRoutineRoute.name: (routeData) {
+      final args = routeData.argsAs<TodayRoutineRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: TodayRoutineScreen(
+          key: args.key,
+          routine: args.routine,
+        ),
+      );
+    },
     TodoDetailRoute.name: (routeData) {
       final pathParams = routeData.inheritedPathParams;
       final args = routeData.argsAs<TodoDetailRouteArgs>(
@@ -331,6 +341,44 @@ class SplashRoute extends PageRouteInfo<void> {
   static const String name = 'SplashRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [TodayRoutineScreen]
+class TodayRoutineRoute extends PageRouteInfo<TodayRoutineRouteArgs> {
+  TodayRoutineRoute({
+    Key? key,
+    required DailyRoutine routine,
+    List<PageRouteInfo>? children,
+  }) : super(
+          TodayRoutineRoute.name,
+          args: TodayRoutineRouteArgs(
+            key: key,
+            routine: routine,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'TodayRoutineRoute';
+
+  static const PageInfo<TodayRoutineRouteArgs> page =
+      PageInfo<TodayRoutineRouteArgs>(name);
+}
+
+class TodayRoutineRouteArgs {
+  const TodayRoutineRouteArgs({
+    this.key,
+    required this.routine,
+  });
+
+  final Key? key;
+
+  final DailyRoutine routine;
+
+  @override
+  String toString() {
+    return 'TodayRoutineRouteArgs{key: $key, routine: $routine}';
+  }
 }
 
 /// generated route for

@@ -1,7 +1,30 @@
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'routine_item.freezed.dart';
 part 'routine_item.g.dart';
+
+/// TimeOfDay JSON 변환기
+class TimeOfDayConverter implements JsonConverter<TimeOfDay, Map<String, dynamic>> {
+  const TimeOfDayConverter();
+
+  @override
+  TimeOfDay fromJson(Map<String, dynamic> json) {
+    return TimeOfDay(
+      hour: json['hour'] as int,
+      minute: json['minute'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson(TimeOfDay timeOfDay) {
+    return {
+      'hour': timeOfDay.hour,
+      'minute': timeOfDay.minute,
+    };
+  }
+}
 
 enum RoutineCategory {
   morning('아침', '기상 및 아침 활동'),
@@ -18,19 +41,33 @@ enum RoutineCategory {
   final String description;
 }
 
+enum RoutinePriority implements Comparable<RoutinePriority> {
+  high('높음'),
+  medium('보통'),
+  low('낮음');
+
+  const RoutinePriority(this.displayName);
+  final String displayName;
+
+  @override
+  int compareTo(RoutinePriority other) {
+    return index.compareTo(other.index);
+  }
+}
+
 @freezed
 class RoutineItem with _$RoutineItem {
   const factory RoutineItem({
     required String id,
     required String title,
     required String description,
-    required RoutineCategory category,
-    required Duration estimatedDuration,
-    @Default(1) int priority, // 1-5 (1이 가장 높음)
-    @Default([]) List<String> requiredConditions,
+    @TimeOfDayConverter() required TimeOfDay startTime,
+    required Duration duration,
+    @Default('일반') String category,
+    @Default(RoutinePriority.medium) RoutinePriority priority,
+    @Default(false) bool isCompleted,
     @Default([]) List<String> tags,
-    String? timeOfDay, // '06:00', '07:30' 등
-    bool? isFlexible, // 시간이 유동적인지
+    @Default(true) bool isFlexible, // 시간이 유동적인지
   }) = _RoutineItem;
 
   factory RoutineItem.fromJson(Map<String, dynamic> json) =>
@@ -39,8 +76,8 @@ class RoutineItem with _$RoutineItem {
 
 extension RoutineItemX on RoutineItem {
   String get durationDisplay {
-    final hours = estimatedDuration.inHours;
-    final minutes = estimatedDuration.inMinutes % 60;
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
     
     if (hours > 0) {
       return minutes > 0 ? '${hours}시간 ${minutes}분' : '${hours}시간';
@@ -48,6 +85,12 @@ extension RoutineItemX on RoutineItem {
     return '${minutes}분';
   }
 
-  bool get isShortActivity => estimatedDuration.inMinutes <= 30;
-  bool get isLongActivity => estimatedDuration.inHours >= 2;
+  bool get isShortActivity => duration.inMinutes <= 30;
+  bool get isLongActivity => duration.inHours >= 2;
+  
+  String get timeDisplay {
+    final hour = startTime.hour.toString().padLeft(2, '0');
+    final minute = startTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
 }
