@@ -12,12 +12,20 @@ import '../data/repositories/auth_repository_impl.dart';
 import '../data/repositories/todo_repository_impl.dart';
 import '../data/repositories/routine_repository_impl.dart';
 import '../data/repositories/usage_repository_impl.dart';
+import '../data/repositories/notification_repository_impl.dart';
+import '../domain/repositories/notification_repository.dart';
+import '../domain/services/notification_service.dart';
+import '../domain/usecases/notification_usecase.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/todo_repository.dart';
 import '../domain/repositories/routine_repository.dart';
 import '../domain/repositories/usage_repository.dart';
+import '../domain/entities/user_auth.dart';
 import '../domain/usecases/auth_usecases.dart';
+import '../domain/usecases/auth_usecase.dart';
 import '../domain/usecases/todo_usecases.dart';
+import '../domain/services/auth_service.dart';
+import '../data/services/firebase_auth_service.dart';
 
 /// Global service locator instance
 final GetIt getIt = GetIt.instance;
@@ -76,11 +84,22 @@ Future<void> setupDependencies() async {
     () => MockApiService(), // Using mock implementation for development
   );
 
+  // Auth Service
+  getIt.registerLazySingleton<AuthService>(
+    () => FirebaseAuthService(),
+  );
+
+  // Auth Box for Hive
+  final userAuthBox = await Hive.openBox<UserAuth>('userAuth');
+  getIt.registerSingleton<Box<UserAuth>>(userAuthBox, instanceName: 'userAuthBox');
+
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       apiService: getIt<ApiService>(),
       localStorage: getIt<LocalStorage>(),
+      authService: getIt<AuthService>(),
+      userAuthBox: getIt<Box<UserAuth>>(instanceName: 'userAuthBox'),
     ),
   );
 
@@ -108,6 +127,16 @@ Future<void> setupDependencies() async {
     () => UsageRepositoryImpl(),
   );
 
+  // 알림 저장소
+  getIt.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(),
+  );
+
+  // 알림 서비스
+  getIt.registerLazySingleton<NotificationService>(
+    () => LocalNotificationService(),
+  );
+
   // ========== DOMAIN LAYER ==========
 
   // Auth Use Cases
@@ -127,6 +156,11 @@ Future<void> setupDependencies() async {
     () => GetCurrentUserUseCase(getIt<AuthRepository>()),
   );
 
+  // Social Auth Use Case
+  getIt.registerLazySingleton<AuthUseCase>(
+    () => AuthUseCase(authRepository: getIt<AuthRepository>()),
+  );
+
   // Todo Use Cases
   getIt.registerLazySingleton<GetTodosUseCase>(
     () => GetTodosUseCase(getIt<TodoRepository>()),
@@ -142,6 +176,14 @@ Future<void> setupDependencies() async {
 
   getIt.registerLazySingleton<DeleteTodoUseCase>(
     () => DeleteTodoUseCase(getIt<TodoRepository>()),
+  );
+
+  // 알림 유스케이스
+  getIt.registerLazySingleton<NotificationUseCase>(
+    () => NotificationUseCase(
+      getIt<NotificationRepository>(),
+      getIt<NotificationService>(),
+    ),
   );
 }
 

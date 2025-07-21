@@ -27,6 +27,9 @@ class AIServiceProvider {
       case AIServiceType.gemini:
         // TODO: Gemini 서비스 구현 시 추가
         throw UnimplementedError('Gemini 서비스는 아직 구현되지 않았습니다.');
+        
+      case AIServiceType.dummy:
+        return DummyAIServiceImpl();
     }
   }
   
@@ -49,6 +52,9 @@ class AIServiceProvider {
         
       case AIServiceType.gemini:
         return false; // 아직 미구현
+        
+      case AIServiceType.dummy:
+        return true; // 더미는 항상 가능
     }
   }
   

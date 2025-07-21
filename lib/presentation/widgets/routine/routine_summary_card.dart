@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../theme/app_theme.dart';
 import '../../../domain/entities/daily_routine.dart';
+import '../../../domain/entities/routine_item.dart';
 import '../../screens/routine/routine_edit_screen.dart';
 import '../../../domain/repositories/routine_repository.dart';
 import '../../../di/service_locator.dart';
@@ -12,6 +14,7 @@ class RoutineSummaryCard extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback? onFavoriteToggle;
   final VoidCallback? onDelete;
+  final VoidCallback? onCopy;
 
   const RoutineSummaryCard({
     super.key,
@@ -19,6 +22,7 @@ class RoutineSummaryCard extends StatefulWidget {
     required this.onTap,
     this.onFavoriteToggle,
     this.onDelete,
+    this.onCopy,
   });
 
   @override
@@ -409,16 +413,57 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
 
   Future<void> _copyRoutine() async {
     try {
+      // 로딩 스낵바 표시
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                ),
+                SizedBox(width: 12),
+                Text('루틴 복사 중...'),
+              ],
+            ),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+
       final routineRepository = getIt<RoutineRepository>();
       
+      // 저장 제한 체크
+      final currentCount = await routineRepository.getSavedRoutines();
+      if (currentCount.length >= 5) { // 무료 사용자 제한
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('저장 공간이 가득 찼습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+      
       // 새로운 ID와 제목으로 복사본 생성
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       final copiedRoutine = widget.routine.copyWith(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: timestamp,
         title: '${widget.routine.title} (복사본)',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         usageCount: 0,
         isFavorite: false,
+        // 루틴 아이템들도 새로운 ID로 복사
+        items: widget.routine.items.map((item) => item.copyWith(
+          id: '${timestamp}_${item.id}',
+          isCompleted: false, // 복사본은 완료되지 않은 상태로
+        )).toList(),
       );
 
       // 복사본 저장
@@ -427,17 +472,22 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('루틴이 복사되었습니다'),
+            content: Text('✅ 루틴이 성공적으로 복사되었습니다'),
             backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
           ),
         );
+        
+        // 부모 화면에 복사 완료 알림
+        widget.onCopy?.call();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('루틴 복사에 실패했어요: $e'),
+            content: Text('❌ 루틴 복사에 실패했어요: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -459,7 +509,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
     shareText.writeln('⏰ 하루 루틴:');
     
     // 시간대별로 그룹화
-    final timeGroups = <String, List<dynamic>>{
+    final timeGroups = <String, List<RoutineItem>>{
       '🌅 새벽 (05:00-07:59)': [],
       '🌞 오전 (08:00-11:59)': [],
       '☀️ 점심 (12:00-13:59)': [],
@@ -505,12 +555,10 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
     }
     
     shareText.writeln('');
-    shareText.writeln('📱 RoutineCraft로 만든 루틴입니다!');
+    shareText.writeln('📱 RoutineCraft로 만든 개인 맞춤 루틴입니다!');
+    shareText.writeln('🔗 앱에서 나만의 루틴을 만들어보세요');
 
-    // 클립보드에 복사
-    Clipboard.setData(ClipboardData(text: shareText.toString()));
-    
-    // 공유 옵션 다이얼로그 표시
+    // 공유 다이얼로그 표시
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -518,9 +566,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('루틴이 클립보드에 복사되었습니다!'),
-            const SizedBox(height: 16),
-            const Text('공유할 방법을 선택하세요:'),
+            const Text('어떤 방식으로 공유하시겠습니까?'),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -530,6 +576,27 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                     IconButton(
                       onPressed: () {
                         Navigator.of(context).pop();
+                        Share.share(
+                          shareText.toString(),
+                          subject: '${widget.routine.title} - 나의 하루 루틴',
+                        );
+                      },
+                      icon: const Icon(Icons.share),
+                      iconSize: 32,
+                      style: IconButton.styleFrom(
+                        backgroundColor: const Color(0xFF6366F1).withOpacity(0.1),
+                        foregroundColor: const Color(0xFF6366F1),
+                      ),
+                    ),
+                    const Text('텍스트 공유', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+                Column(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Clipboard.setData(ClipboardData(text: shareText.toString()));
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('텍스트가 클립보드에 복사되었습니다'),
@@ -539,8 +606,12 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                       },
                       icon: const Icon(Icons.content_copy),
                       iconSize: 32,
+                      style: IconButton.styleFrom(
+                        backgroundColor: const Color(0xFF059669).withOpacity(0.1),
+                        foregroundColor: const Color(0xFF059669),
+                      ),
                     ),
-                    const Text('복사완료', style: TextStyle(fontSize: 12)),
+                    const Text('클립보드 복사', style: TextStyle(fontSize: 12)),
                   ],
                 ),
                 Column(
@@ -552,6 +623,10 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                       },
                       icon: const Icon(Icons.image),
                       iconSize: 32,
+                      style: IconButton.styleFrom(
+                        backgroundColor: const Color(0xFFDC2626).withOpacity(0.1),
+                        foregroundColor: const Color(0xFFDC2626),
+                      ),
                     ),
                     const Text('이미지로', style: TextStyle(fontSize: 12)),
                   ],

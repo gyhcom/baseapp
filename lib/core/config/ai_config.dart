@@ -57,6 +57,15 @@ class AIConfig {
           maxTokens: 4000,
           averageResponseTime: Duration(seconds: 7),
         );
+        
+      case AIServiceType.dummy:
+        return const AppAIServiceConfig(
+          name: 'Dummy Service',
+          description: '테스트용 더미 서비스',
+          requiresApiKey: false,
+          maxTokens: 2000,
+          averageResponseTime: Duration(seconds: 2),
+        );
     }
   }
 }

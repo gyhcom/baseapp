@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../screens/routine/today_routines_screen.dart';
 
 /// 오늘의 루틴 대시보드 위젯
 class TodayDashboardWidget extends StatelessWidget {
@@ -60,84 +61,72 @@ class TodayDashboardWidget extends StatelessWidget {
   Widget _buildHeader() {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6), Color(0xFFEC4899)],
-              stops: [0.0, 0.6, 1.0],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6366F1).withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+        Stack(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                  stops: [0.0, 0.6, 1.0],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: const Icon(
-            Icons.insights,
-            color: Colors.white,
-            size: 26,
-          ),
+              child: const Icon(
+                Icons.insights,
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+            
+            // LIVE 텍스트를 통계 아이콘 상단 중앙에 배치
+            Positioned(
+              top: 1,
+              left: 2,
+              right: 0,
+              child: Center(
+                child: Text(
+                  'LIVE',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 0.3,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.3),
+                        offset: const Offset(0, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '오늘의 진행상황',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0F172A),
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF10B981).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 3,
-                              height: 3,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF10B981),
-                                borderRadius: BorderRadius.circular(1.5),
-                              ),
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              'LIVE',
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF10B981),
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              Text(
+                '오늘의 진행상황',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF0F172A),
+                  letterSpacing: -0.3,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
@@ -157,31 +146,37 @@ class TodayDashboardWidget extends StatelessWidget {
             color: const Color(0xFF6366F1).withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: TextButton(
-            onPressed: () {
-              // TODO: 오늘의 루틴으로 이동
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '전체보기',
-                  style: TextStyle(
-                    color: const Color(0xFF6366F1),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const TodayRoutinesScreen(),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: const Color(0xFF6366F1),
-                  size: 14,
-                ),
-              ],
+                );
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '전체보기',
+                    style: TextStyle(
+                      color: const Color(0xFF6366F1),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: const Color(0xFF6366F1),
+                    size: 14,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

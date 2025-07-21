@@ -1,8 +1,7 @@
-import 'package:baseapp/domain/entities/routine_item.dart';
+import '../../../domain/entities/routine_item.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dio/dio.dart';
 import '../../theme/app_theme.dart';
 import '../../../domain/entities/routine_concept.dart';
 import '../../../domain/entities/ai_routine_request.dart';

@@ -96,17 +96,53 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _handleGoogleLogin() async {
-    // TODO: Google 로그인 구현
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Google 로그인 준비 중입니다')),
-    );
+    setState(() => _isLoading = true);
+    try {
+      // TODO: Google 로그인 구현
+      await Future.delayed(const Duration(seconds: 1));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Google 로그인 준비 중입니다'),
+          backgroundColor: AppTheme.primaryColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google 로그인 실패: $e'),
+          backgroundColor: AppTheme.errorColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _handleAppleLogin() async {
-    // TODO: Apple 로그인 구현
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Apple 로그인 준비 중입니다')),
-    );
+    setState(() => _isLoading = true);
+    try {
+      // TODO: Apple 로그인 구현
+      await Future.delayed(const Duration(seconds: 1));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Apple 로그인 준비 중입니다'),
+          backgroundColor: AppTheme.primaryColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Apple 로그인 실패: $e'),
+          backgroundColor: AppTheme.errorColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _handleSkip() {

@@ -1,5 +1,9 @@
+import 'package:hive/hive.dart';
+
 import '../../domain/entities/user.dart';
+import '../../domain/entities/user_auth.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/services/auth_service.dart';
 import '../datasources/local/local_storage.dart';
 import '../datasources/remote/api_service.dart';
 
@@ -8,11 +12,17 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required ApiService apiService,
     required LocalStorage localStorage,
+    AuthService? authService,
+    Box<UserAuth>? userAuthBox,
   }) : _apiService = apiService,
-       _localStorage = localStorage;
+       _localStorage = localStorage,
+       _authService = authService,
+       _userAuthBox = userAuthBox;
 
   final ApiService _apiService;
   final LocalStorage _localStorage;
+  final AuthService? _authService;
+  final Box<UserAuth>? _userAuthBox;
 
   @override
   Future<User> login({required String email, required String password}) async {
@@ -142,6 +152,67 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> deleteAccount() async {
     await _apiService.deleteAccount();
     await _localStorage.logout();
+  }
+
+  // Social login methods
+  @override
+  Future<UserAuth?> signInWithGoogle() async {
+    if (_authService == null) throw Exception('Auth service not configured');
+    final userAuth = await _authService!.signInWithGoogle();
+    if (userAuth != null) {
+      await saveUserAuth(userAuth);
+    }
+    return userAuth;
+  }
+
+  @override
+  Future<UserAuth?> signInWithApple() async {
+    if (_authService == null) throw Exception('Auth service not configured');
+    final userAuth = await _authService!.signInWithApple();
+    if (userAuth != null) {
+      await saveUserAuth(userAuth);
+    }
+    return userAuth;
+  }
+
+  @override
+  Future<UserAuth?> signInAnonymously() async {
+    if (_authService == null) throw Exception('Auth service not configured');
+    final userAuth = await _authService!.signInAnonymously();
+    if (userAuth != null) {
+      await saveUserAuth(userAuth);
+    }
+    return userAuth;
+  }
+
+  @override
+  Future<void> signOut() async {
+    if (_authService != null) {
+      await _authService!.signOut();
+    }
+    await _userAuthBox?.clear();
+  }
+
+  @override
+  Future<void> saveUserAuth(UserAuth userAuth) async {
+    await _userAuthBox?.put('current_user', userAuth);
+  }
+
+  @override
+  Future<UserAuth?> getCurrentUserAuth() async {
+    return _userAuthBox?.get('current_user');
+  }
+
+  @override
+  Stream<UserAuth?> get authStateChanges {
+    if (_authService == null) return Stream.value(null);
+    return _authService!.authStateChanges;
+  }
+
+  @override
+  bool get isSignedIn {
+    if (_authService == null) return false;
+    return _authService!.isSignedIn;
   }
 
   /// Map API response to User entity

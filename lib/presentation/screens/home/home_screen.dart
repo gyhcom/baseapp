@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
-import '../routine/my_routines_screen.dart';
-import '../routine/user_input_screen.dart';
-import '../routine/today_routine_screen.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/usage/usage_indicator.dart';
 import '../../widgets/home/today_dashboard_widget.dart';
 import '../../widgets/home/quick_action_grid_widget.dart';
 import '../../widgets/home/insights_widget.dart';
 import '../../widgets/home/recent_activity_widget.dart';
 import '../../../domain/repositories/routine_repository.dart';
-import '../../../domain/repositories/usage_repository.dart';
-import '../../../domain/entities/daily_routine.dart';
-import '../../../domain/entities/user_usage.dart';
 import '../../../di/service_locator.dart';
 
 /// Home screen - main dashboard

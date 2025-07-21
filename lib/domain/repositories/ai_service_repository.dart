@@ -25,7 +25,8 @@ enum AIServiceType {
   claude('Claude', 'Anthropic Claude API'),
   openai('OpenAI', 'OpenAI GPT API'),
   gemini('Gemini', 'Google Gemini API'),
-  local('Local', '로컬 규칙 기반');
+  local('Local', '로컬 규칙 기반'),
+  dummy('Dummy', '더미 데이터 서비스');
 
   const AIServiceType(this.id, this.displayName);
   

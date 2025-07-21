@@ -1,8 +1,27 @@
 import '../entities/user.dart';
+import '../entities/user_auth.dart';
 
 /// Authentication repository interface
 abstract class AuthRepository {
-  /// Login with email and password
+  /// Social login methods
+  Future<UserAuth?> signInWithGoogle();
+  Future<UserAuth?> signInWithApple();
+  Future<UserAuth?> signInAnonymously();
+  
+  /// Sign out
+  Future<void> signOut();
+  
+  /// Local storage for auth data
+  Future<void> saveUserAuth(UserAuth userAuth);
+  Future<UserAuth?> getCurrentUserAuth();
+  
+  /// Auth state stream
+  Stream<UserAuth?> get authStateChanges;
+  
+  /// Auth status check
+  bool get isSignedIn;
+
+  /// Legacy email/password authentication
   Future<User> login({required String email, required String password});
 
   /// Register new user

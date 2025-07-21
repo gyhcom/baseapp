@@ -218,6 +218,10 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
         return Icons.smart_toy;
       case AIServiceType.openai:
         return Icons.psychology;
+      case AIServiceType.local:
+        return Icons.storage;
+      case AIServiceType.gemini:
+        return Icons.auto_awesome;
     }
   }
 
@@ -229,6 +233,10 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
         return 'Anthropic Claude API (API 키 필요)';
       case AIServiceType.openai:
         return 'OpenAI ChatGPT API (준비 중)';
+      case AIServiceType.local:
+        return '로컬 규칙 기반 서비스 (무료)';
+      case AIServiceType.gemini:
+        return 'Google Gemini API (준비 중)';
     }
   }
 

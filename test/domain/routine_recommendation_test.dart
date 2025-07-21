@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:baseapp/domain/entities/user_profile.dart';
-import 'package:baseapp/domain/entities/routine_concept.dart';
-import 'package:baseapp/domain/usecases/routine_recommendation_usecase.dart';
+import '../../lib/domain/entities/user_profile.dart';
+import '../../lib/domain/entities/routine_concept.dart';
+import '../../lib/domain/usecases/routine_recommendation_usecase.dart';
 
 void main() {
   late RoutineRecommendationUseCase usecase;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import '../../theme/app_theme.dart';
 import '../../../domain/entities/daily_routine.dart';
+import '../../../domain/entities/routine_concept.dart';
 import '../../../domain/repositories/routine_repository.dart';
 import '../../../domain/services/routine_limit_service.dart';
 import '../../../core/constants/routine_limits.dart';
@@ -22,10 +23,18 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   final RoutineRepository _routineRepository = getIt<RoutineRepository>();
-
+  final TextEditingController _searchController = TextEditingController();
+  
   List<DailyRoutine> _allRoutines = [];
   List<DailyRoutine> _favoriteRoutines = [];
+  List<DailyRoutine> _filteredAllRoutines = [];
+  List<DailyRoutine> _filteredFavoriteRoutines = [];
   bool _isLoading = true;
+  bool _isSearching = false;
+  
+  // 필터링 상태
+  String _searchQuery = '';
+  Set<RoutineConcept> _selectedConcepts = {};
   
   // 저장 공간 관련 상태
   int _currentCount = 0;
@@ -43,6 +52,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -62,12 +72,15 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
       setState(() {
         _allRoutines = allRoutines;
         _favoriteRoutines = favoriteRoutines;
+        _filteredAllRoutines = allRoutines;
+        _filteredFavoriteRoutines = favoriteRoutines;
         _currentCount = currentCount;
         _remainingSlots = remainingSlots;
         _storageStatus = storageStatus;
         _userTier = userTier;
         _isLoading = false;
       });
+      _applyFilters();
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -93,6 +106,10 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
         ),
         actions: [
           IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: _toggleSearch,
+          ),
+          IconButton(
             icon: const Icon(Icons.add),
             onPressed: _createNewRoutine,
           ),
@@ -101,15 +118,15 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             onPressed: _showMoreOptions,
           ),
         ],
-        bottom: TabBar(
+        bottom: _isSearching ? null : TabBar(
           controller: _tabController,
           tabs: [
             Tab(
-              text: '전체 (${_allRoutines.length})',
+              text: '전체 (${_filteredAllRoutines.length})',
               icon: const Icon(Icons.list),
             ),
             Tab(
-              text: '즐겨찾기 (${_favoriteRoutines.length})',
+              text: '즐겨찾기 (${_filteredFavoriteRoutines.length})',
               icon: const Icon(Icons.favorite),
             ),
           ],
@@ -119,17 +136,23 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
           ? _buildLoadingWidget()
           : Column(
               children: [
+                // 검색 바 (검색 모드일 때만)
+                if (_isSearching) _buildSearchBar(),
+                // 필터 칩들
+                _buildFilterChips(),
                 // 저장 공간 표시 위젯
                 _buildStorageIndicator(),
-                // 탭뷰
+                // 탭뷰 또는 검색 결과
                 Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildAllRoutinesTab(),
-                      _buildFavoriteRoutinesTab(),
-                    ],
-                  ),
+                  child: _isSearching
+                      ? _buildSearchResults()
+                      : TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildAllRoutinesTab(),
+                            _buildFavoriteRoutinesTab(),
+                          ],
+                        ),
                 ),
               ],
             ),
@@ -155,7 +178,16 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
   }
 
   Widget _buildAllRoutinesTab() {
-    if (_allRoutines.isEmpty) {
+    if (_filteredAllRoutines.isEmpty) {
+      if (_searchQuery.isNotEmpty || _selectedConcepts.isNotEmpty) {
+        return _buildEmptyState(
+          icon: Icons.search_off,
+          title: '검색 결과가 없어요',
+          subtitle: '다른 검색어나 필터를 시도해보세요',
+          buttonText: '필터 초기화',
+          onButtonPressed: _clearFilters,
+        );
+      }
       return _buildEmptyState(
         icon: Icons.event_note,
         title: '아직 생성된 루틴이 없어요',
@@ -169,14 +201,15 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
       onRefresh: _loadRoutines,
       child: ListView.builder(
         padding: const EdgeInsets.all(AppTheme.spacingL),
-        itemCount: _allRoutines.length,
+        itemCount: _filteredAllRoutines.length,
         itemBuilder: (context, index) {
-          final routine = _allRoutines[index];
+          final routine = _filteredAllRoutines[index];
           return RoutineSummaryCard(
             routine: routine,
             onTap: () => _openRoutineDetail(routine),
             onFavoriteToggle: () => _toggleFavorite(routine.id),
             onDelete: () => _deleteRoutine(routine.id),
+            onCopy: () => _loadRoutines(),
           );
         },
       ),
@@ -184,7 +217,16 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
   }
 
   Widget _buildFavoriteRoutinesTab() {
-    if (_favoriteRoutines.isEmpty) {
+    if (_filteredFavoriteRoutines.isEmpty) {
+      if (_searchQuery.isNotEmpty || _selectedConcepts.isNotEmpty) {
+        return _buildEmptyState(
+          icon: Icons.search_off,
+          title: '검색 결과가 없어요',
+          subtitle: '다른 검색어나 필터를 시도해보세요',
+          buttonText: '필터 초기화',
+          onButtonPressed: _clearFilters,
+        );
+      }
       return _buildEmptyState(
         icon: Icons.favorite_border,
         title: '즐겨찾기한 루틴이 없어요',
@@ -198,14 +240,15 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
       onRefresh: _loadRoutines,
       child: ListView.builder(
         padding: const EdgeInsets.all(AppTheme.spacingL),
-        itemCount: _favoriteRoutines.length,
+        itemCount: _filteredFavoriteRoutines.length,
         itemBuilder: (context, index) {
-          final routine = _favoriteRoutines[index];
+          final routine = _filteredFavoriteRoutines[index];
           return RoutineSummaryCard(
             routine: routine,
             onTap: () => _openRoutineDetail(routine),
             onFavoriteToggle: () => _toggleFavorite(routine.id),
             onDelete: () => _deleteRoutine(routine.id),
+            onCopy: () => _loadRoutines(),
           );
         },
       ),
@@ -793,5 +836,218 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
         ],
       ),
     );
+  }
+
+  /// 검색 바 위젯
+  Widget _buildSearchBar() {
+    return Container(
+      margin: const EdgeInsets.all(AppTheme.spacingM),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: AppTheme.mediumRadius,
+        boxShadow: [AppTheme.cardShadow],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        decoration: InputDecoration(
+          hintText: '루틴 제목이나 설명으로 검색...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: _clearSearch,
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.spacingM,
+            vertical: AppTheme.spacingM,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 필터 칩들 위젯
+  Widget _buildFilterChips() {
+    if (!_isSearching && _selectedConcepts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_isSearching || _selectedConcepts.isNotEmpty)
+            Row(
+              children: [
+                Text(
+                  '필터',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                if (_selectedConcepts.isNotEmpty)
+                  TextButton(
+                    onPressed: _clearConceptFilters,
+                    child: const Text('모두 해제'),
+                  ),
+              ],
+            ),
+          const SizedBox(height: AppTheme.spacingS),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(bottom: AppTheme.spacingS),
+            child: Row(
+              children: RoutineConcept.values.map((concept) {
+                final isSelected = _selectedConcepts.contains(concept);
+                return Padding(
+                  padding: const EdgeInsets.only(right: AppTheme.spacingS),
+                  child: FilterChip(
+                    label: Text(concept.displayName),
+                    selected: isSelected,
+                    onSelected: (selected) => _toggleConceptFilter(concept),
+                    selectedColor: concept.color.withOpacity(0.2),
+                    checkmarkColor: concept.color,
+                    side: BorderSide(
+                      color: isSelected ? concept.color : AppTheme.dividerColor,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 검색 결과 위젯
+  Widget _buildSearchResults() {
+    final allFilteredRoutines = [..._filteredAllRoutines, ..._filteredFavoriteRoutines]
+        .toSet() // 중복 제거
+        .toList();
+
+    if (allFilteredRoutines.isEmpty) {
+      return _buildEmptyState(
+        icon: Icons.search_off,
+        title: '검색 결과가 없어요',
+        subtitle: '다른 검색어나 필터를 시도해보세요',
+        buttonText: '필터 초기화',
+        onButtonPressed: _clearFilters,
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadRoutines,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(AppTheme.spacingL),
+        itemCount: allFilteredRoutines.length,
+        itemBuilder: (context, index) {
+          final routine = allFilteredRoutines[index];
+          return RoutineSummaryCard(
+            routine: routine,
+            onTap: () => _openRoutineDetail(routine),
+            onFavoriteToggle: () => _toggleFavorite(routine.id),
+            onDelete: () => _deleteRoutine(routine.id),
+            onCopy: () => _loadRoutines(),
+          );
+        },
+      ),
+    );
+  }
+
+  /// 검색 토글
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        _searchQuery = '';
+        _applyFilters();
+      }
+    });
+  }
+
+  /// 검색어 변경 처리
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+    _applyFilters();
+  }
+
+  /// 검색어 초기화
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+    });
+    _applyFilters();
+  }
+
+  /// 컨셉 필터 토글
+  void _toggleConceptFilter(RoutineConcept concept) {
+    setState(() {
+      if (_selectedConcepts.contains(concept)) {
+        _selectedConcepts.remove(concept);
+      } else {
+        _selectedConcepts.add(concept);
+      }
+    });
+    _applyFilters();
+  }
+
+  /// 컨셉 필터 모두 해제
+  void _clearConceptFilters() {
+    setState(() {
+      _selectedConcepts.clear();
+    });
+    _applyFilters();
+  }
+
+  /// 모든 필터 초기화
+  void _clearFilters() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+      _selectedConcepts.clear();
+    });
+    _applyFilters();
+  }
+
+  /// 필터 적용
+  void _applyFilters() {
+    setState(() {
+      _filteredAllRoutines = _filterRoutines(_allRoutines);
+      _filteredFavoriteRoutines = _filterRoutines(_favoriteRoutines);
+    });
+  }
+
+  /// 루틴 필터링 로직
+  List<DailyRoutine> _filterRoutines(List<DailyRoutine> routines) {
+    var filtered = routines;
+
+    // 검색어 필터링
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      filtered = filtered.where((routine) {
+        return routine.title.toLowerCase().contains(query) ||
+               routine.description.toLowerCase().contains(query) ||
+               routine.concept.displayName.toLowerCase().contains(query);
+      }).toList();
+    }
+
+    // 컨셉 필터링
+    if (_selectedConcepts.isNotEmpty) {
+      filtered = filtered.where((routine) {
+        return _selectedConcepts.contains(routine.concept);
+      }).toList();
+    }
+
+    return filtered;
   }
 }

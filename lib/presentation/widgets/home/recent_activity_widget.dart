@@ -127,7 +127,7 @@ class RecentActivityWidget extends StatelessWidget {
           // 이미지/이모지
           Container(
             width: double.infinity,
-            height: 40,
+            height: 30,
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),

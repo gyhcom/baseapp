@@ -2,6 +2,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/user_profile.dart';
 import '../../../domain/entities/user_usage.dart';
+import '../../../domain/entities/notification_settings.dart';
+import '../../../domain/entities/user_auth.dart';
 import '../../models/daily_routine_hive.dart';
 
 /// 로컬 저장소 데이터 소스 (Hive 기반)
@@ -64,6 +66,15 @@ class RoutineLocalDataSourceImpl implements RoutineLocalDataSource {
     }
     if (!Hive.isAdapterRegistered(6)) {
       Hive.registerAdapter(BonusTypeAdapter());
+    }
+    if (!Hive.isAdapterRegistered(7)) {
+      Hive.registerAdapter(NotificationSettingsAdapter());
+    }
+    if (!Hive.isAdapterRegistered(8)) {
+      Hive.registerAdapter(UserAuthAdapter());
+    }
+    if (!Hive.isAdapterRegistered(9)) {
+      Hive.registerAdapter(UserAuthProviderAdapter());
     }
     
     // 박스 열기

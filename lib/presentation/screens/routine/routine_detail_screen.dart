@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../theme/app_theme.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
+import '../../../domain/repositories/routine_repository.dart';
+import '../../../di/service_locator.dart';
 import '../../widgets/routine/routine_item_card.dart';
 
 /// 루틴 상세 화면
@@ -425,11 +428,57 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
   }
 
   void _shareRoutine() {
-    // TODO: 루틴 공유 기능 구현
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('루틴 공유 기능은 준비 중입니다'),
-      ),
+    final StringBuffer shareText = StringBuffer();
+    shareText.writeln('📅 ${widget.routine.title}');
+    shareText.writeln('');
+    shareText.writeln('🎯 컨셉: ${widget.routine.concept.displayName}');
+    
+    if (widget.routine.description.isNotEmpty) {
+      shareText.writeln('💭 설명: ${widget.routine.description}');
+    }
+    
+    shareText.writeln('');
+    shareText.writeln('⏰ 하루 루틴:');
+    
+    // 시간대별로 루틴 아이템 그룹화
+    final Map<String, List<RoutineItem>> groupedItems = {};
+    
+    for (final item in widget.routine.items) {
+      final hour = item.startTime.hour;
+      String timeCategory;
+      
+      if (hour < 6) {
+        timeCategory = '🌙 새벽 (00:00-05:59)';
+      } else if (hour < 12) {
+        timeCategory = '🌅 오전 (06:00-11:59)';
+      } else if (hour < 18) {
+        timeCategory = '☀️ 오후 (12:00-17:59)';
+      } else {
+        timeCategory = '🌆 저녁 (18:00-23:59)';
+      }
+      
+      groupedItems.putIfAbsent(timeCategory, () => []);
+      groupedItems[timeCategory]!.add(item);
+    }
+    
+    // 시간대별로 정렬된 루틴 아이템 출력
+    for (final entry in groupedItems.entries) {
+      shareText.writeln('');
+      shareText.writeln(entry.key);
+      
+      for (final item in entry.value) {
+        final startTime = item.timeDisplay;
+        shareText.writeln('  • $startTime ${item.title} (${item.durationDisplay})');
+      }
+    }
+    
+    shareText.writeln('');
+    shareText.writeln('📱 RoutineCraft로 만든 개인 맞춤 루틴입니다!');
+    shareText.writeln('🔗 앱에서 나만의 루틴을 만들어보세요');
+    
+    Share.share(
+      shareText.toString(),
+      subject: '${widget.routine.title} - 나의 하루 루틴',
     );
   }
 
@@ -489,13 +538,84 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
     );
   }
 
-  void _copyRoutine() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('루틴이 복사되었습니다'),
-        backgroundColor: AppTheme.primaryColor,
-      ),
-    );
+  Future<void> _copyRoutine() async {
+    try {
+      // 로딩 스낵바 표시
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                ),
+                SizedBox(width: 12),
+                Text('루틴 복사 중...'),
+              ],
+            ),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+
+      final routineRepository = getIt<RoutineRepository>();
+      
+      // 저장 제한 체크
+      final currentCount = await routineRepository.getSavedRoutines();
+      if (currentCount.length >= 5) { // 무료 사용자 제한
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('저장 공간이 가득 찼습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+      
+      // 새로운 ID와 제목으로 복사본 생성
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final copiedRoutine = widget.routine.copyWith(
+        id: timestamp,
+        title: '${widget.routine.title} (복사본)',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        usageCount: 0,
+        isFavorite: false,
+        // 루틴 아이템들도 새로운 ID로 복사
+        items: widget.routine.items.map((item) => item.copyWith(
+          id: '${timestamp}_${item.id}',
+          isCompleted: false, // 복사본은 완료되지 않은 상태로
+        )).toList(),
+      );
+
+      // 복사본 저장
+      await routineRepository.saveRoutine(copiedRoutine);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ 루틴이 성공적으로 복사되었습니다'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ 루틴 복사에 실패했어요: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   void _deleteRoutine() {
