@@ -36,130 +36,99 @@ class _QuickActionGridWidgetState extends ConsumerState<QuickActionGridWidget> {
     );
   }
 
-  /// 섹션 헤더
+  /// 섹션 헤더 - 심플한 디자인
   Widget _buildSectionHeader() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(
-            Icons.dashboard_customize,
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '빠른 실행',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0F172A),
-                  letterSpacing: -0.3,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '자주 사용하는 기능을 빠르게 이용하세요',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: const Color(0xFF64748B),
-                  fontWeight: FontWeight.w500,
-                  height: 1.3,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFF6366F1).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFF6366F1).withOpacity(0.2),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '빠른 실행',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF0F172A),
+              letterSpacing: -0.3,
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '모든 기능',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: const Color(0xFF6366F1),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.apps,
+          
+          GestureDetector(
+            onTap: () {
+              // TODO: 모든 기능 화면으로 이동
+            },
+            child: Text(
+              '더보기',
+              style: TextStyle(
+                fontSize: 14,
                 color: const Color(0xFF6366F1),
-                size: 16,
+                fontWeight: FontWeight.w600,
               ),
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  /// 액션 그리드
+  /// 액션 그리드 - 1줄 가로 스크롤 방식
   Widget _buildActionGrid() {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.4,
-      children: [
-        ActionCard(
-          icon: Icons.add_circle_outline,
-          title: '새 루틴 생성',
-          subtitle: 'AI 맞춤 루틴',
-          gradient: const [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-          onTap: () => _handleNewRoutine(),
-        ),
-        
-        ActionCard(
-          icon: Icons.folder_open_outlined,
-          title: '내 루틴',
-          subtitle: '${widget.totalRoutines}개 저장됨',
-          gradient: const [Color(0xFF059669), Color(0xFF10B981)],
-          onTap: () => _navigateToMyRoutines(),
-        ),
-        
-        ActionCard(
-          icon: Icons.trending_up_outlined,
-          title: '통계 분석',
-          subtitle: '루틴 성과 확인',
-          gradient: const [Color(0xFFDC2626), Color(0xFFEF4444)],
-          onTap: () {
-            // TODO: 통계 화면
-          },
-        ),
-        
-        ActionCard(
-          icon: Icons.settings_outlined,
-          title: '설정',
-          subtitle: '앱 설정 관리',
-          gradient: const [Color(0xFF7C3AED), Color(0xFF8B5CF6)],
-          onTap: () {
-            // TODO: 설정 화면
-          },
-        ),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        children: [
+          QuickActionIcon(
+            icon: Icons.add_circle_outline,
+            label: '새 루틴',
+            color: const Color(0xFF6366F1),
+            onTap: () => _handleNewRoutine(),
+          ),
+          
+          const SizedBox(width: 24),
+          
+          QuickActionIcon(
+            icon: Icons.folder_open_outlined,
+            label: '내 루틴',
+            color: const Color(0xFF059669),
+            badge: '${widget.totalRoutines}',
+            onTap: () => _navigateToMyRoutines(),
+          ),
+          
+          const SizedBox(width: 24),
+          
+          QuickActionIcon(
+            icon: Icons.trending_up_outlined,
+            label: '통계',
+            color: const Color(0xFFDC2626),
+            onTap: () {
+              // TODO: 통계 화면
+            },
+          ),
+          
+          const SizedBox(width: 24),
+          
+          QuickActionIcon(
+            icon: Icons.schedule,
+            label: '오늘루틴',
+            color: const Color(0xFF7C3AED),
+            onTap: () {
+              // TODO: 오늘의 루틴 화면
+            },
+          ),
+          
+          const SizedBox(width: 24),
+          
+          QuickActionIcon(
+            icon: Icons.settings_outlined,
+            label: '설정',
+            color: const Color(0xFF64748B),
+            onTap: () {
+              // TODO: 설정 화면
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -207,20 +176,20 @@ class _QuickActionGridWidgetState extends ConsumerState<QuickActionGridWidget> {
   }
 }
 
-/// 액션 카드 위젯
-class ActionCard extends StatelessWidget {
+/// 퀵 액션 아이콘 위젯 (참고 이미지 스타일)
+class QuickActionIcon extends StatelessWidget {
   final IconData icon;
-  final String title;
-  final String subtitle;
-  final List<Color> gradient;
+  final String label;
+  final Color color;
+  final String? badge;
   final VoidCallback onTap;
 
-  const ActionCard({
+  const QuickActionIcon({
     super.key,
     required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.gradient,
+    required this.label,
+    required this.color,
+    this.badge,
     required this.onTap,
   });
 
@@ -229,81 +198,68 @@ class ActionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              Colors.white.withOpacity(0.95),
-              gradient.first.withOpacity(0.02),
-            ],
-            stops: const [0.0, 0.7, 1.0],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: gradient.first.withOpacity(0.1),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: gradient.first.withOpacity(0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
+        width: 70,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // 상단: 아이콘
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: gradient,
+            // 아이콘 컨테이너
+            Stack(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: color.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 24,
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 18,
-              ),
+                
+                // 뱃지 (숫자)
+                if (badge != null)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        badge!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             
-            // 하단: 텍스트
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
-                    height: 1.1,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: const Color(0xFF64748B),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            const SizedBox(height: 8),
+            
+            // 라벨
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF64748B),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
