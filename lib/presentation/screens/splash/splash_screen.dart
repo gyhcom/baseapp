@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/app_router.dart';
 import '../../theme/app_theme.dart';
+import '../../providers/auth_provider.dart';
 
 /// 루틴 생성 앱의 감성적인 스플래시 화면
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _scaleController;
@@ -81,14 +83,35 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(seconds: 2));
     print('✅ 루틴 앱 초기화 완료');
 
-    // 홈 화면으로 이동
     if (mounted) {
-      print('📱 홈 화면으로 이동...');
       try {
-        context.router.navigate(const HomeWrapperRoute());
-        print('✅ 홈 화면 이동 성공');
+        // 인증 상태 확인
+        print('🔐 인증 상태 확인 중...');
+        final authController = ref.read(authControllerProvider.notifier);
+        await authController.getCurrentUser();
+        
+        final authState = ref.read(authControllerProvider);
+        print('🔍 현재 인증 상태: ${authState.runtimeType}');
+        
+        if (authState is AuthAuthenticated) {
+          // 로그인된 사용자 - 홈 화면으로 이동
+          print('✅ 로그인된 사용자 확인 - 홈 화면으로 이동');
+          print('👤 사용자 정보: ${authState.user.displayName} (${authState.user.email})');
+          context.router.navigate(const HomeWrapperRoute());
+        } else {
+          // 로그인되지 않은 사용자 - 로그인 화면으로 이동
+          print('❌ 로그인되지 않은 사용자 - 로그인 화면으로 이동');
+          context.router.navigate(const LoginRoute());
+        }
+        
+        print('✅ 화면 이동 성공');
       } catch (e) {
-        print('❌ 화면 이동 실패: $e');
+        print('❌ 인증 확인 또는 화면 이동 실패: $e');
+        // 에러 발생 시 로그인 화면으로 이동
+        if (mounted) {
+          print('🔄 에러로 인해 로그인 화면으로 이동');
+          context.router.navigate(const LoginRoute());
+        }
       }
     }
   }

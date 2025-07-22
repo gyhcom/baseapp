@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/app_router.dart';
 import '../../theme/app_theme.dart';
+import '../../providers/auth_provider.dart';
 
 /// 루틴 앱의 사용자 친화적인 로그인 화면
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
+class _LoginScreenState extends ConsumerState<LoginScreen>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -53,33 +55,44 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _handleLogin() async {
-    // 개발용: 검증 없이 바로 진행
+    if (!_formKey.currentState!.validate()) return;
+    
     setState(() => _isLoading = true);
 
     try {
-      // 개발용: 짧은 딜레이
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (mounted) {
-        // 사용자 입력 화면으로 이동
-        context.router.navigate(const UserInputRoute());
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('루틴 생성을 시작합니다! ✨'),
-            backgroundColor: AppTheme.primaryColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppTheme.mediumRadius,
+      print('📧 이메일 로그인 시도 중...');
+      // 개발용: 이메일/비밀번호 로그인은 익명 로그인으로 처리
+      final authController = ref.read(authControllerProvider.notifier);
+      await authController.signInAnonymously();
+      
+      final authState = ref.read(authControllerProvider);
+      
+      if (authState is AuthAuthenticated) {
+        print('✅ 로그인 성공');
+        if (mounted) {
+          context.router.navigate(const UserInputRoute());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('로그인 성공! 루틴 생성을 시작합니다! ✨'),
+              backgroundColor: AppTheme.primaryColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: AppTheme.mediumRadius,
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } else if (authState is AuthError) {
+        throw Exception(authState.message);
+      } else {
+        throw Exception('로그인에 실패했습니다');
       }
     } catch (e) {
+      print('❌ 로그인 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('오류가 발생했습니다: $e'),
+            content: Text('로그인 실패: $e'),
             backgroundColor: AppTheme.errorColor,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -98,23 +111,46 @@ class _LoginScreenState extends State<LoginScreen>
   Future<void> _handleGoogleLogin() async {
     setState(() => _isLoading = true);
     try {
-      // TODO: Google 로그인 구현
-      await Future.delayed(const Duration(seconds: 1));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Google 로그인 준비 중입니다'),
-          backgroundColor: AppTheme.primaryColor,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      print('🔐 Google 로그인 시도 중...');
+      final authController = ref.read(authControllerProvider.notifier);
+      await authController.signInWithGoogle();
+      
+      final authState = ref.read(authControllerProvider);
+      
+      if (authState is AuthAuthenticated) {
+        print('✅ Google 로그인 성공');
+        if (mounted) {
+          context.router.navigate(const HomeWrapperRoute());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Google 로그인 성공! 🎉'),
+              backgroundColor: AppTheme.primaryColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: AppTheme.mediumRadius,
+              ),
+            ),
+          );
+        }
+      } else if (authState is AuthError) {
+        throw Exception(authState.message);
+      } else {
+        throw Exception('로그인에 실패했습니다');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Google 로그인 실패: $e'),
-          backgroundColor: AppTheme.errorColor,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      print('❌ Google 로그인 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google 로그인 실패: $e'),
+            backgroundColor: AppTheme.errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.mediumRadius,
+            ),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -123,31 +159,97 @@ class _LoginScreenState extends State<LoginScreen>
   Future<void> _handleAppleLogin() async {
     setState(() => _isLoading = true);
     try {
-      // TODO: Apple 로그인 구현
-      await Future.delayed(const Duration(seconds: 1));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Apple 로그인 준비 중입니다'),
-          backgroundColor: AppTheme.primaryColor,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      print('🍎 Apple 로그인 시도 중...');
+      final authController = ref.read(authControllerProvider.notifier);
+      await authController.signInWithApple();
+      
+      final authState = ref.read(authControllerProvider);
+      
+      if (authState is AuthAuthenticated) {
+        print('✅ Apple 로그인 성공');
+        if (mounted) {
+          context.router.navigate(const HomeWrapperRoute());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Apple 로그인 성공! 🎉'),
+              backgroundColor: AppTheme.primaryColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: AppTheme.mediumRadius,
+              ),
+            ),
+          );
+        }
+      } else if (authState is AuthError) {
+        throw Exception(authState.message);
+      } else {
+        throw Exception('로그인에 실패했습니다');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Apple 로그인 실패: $e'),
-          backgroundColor: AppTheme.errorColor,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      print('❌ Apple 로그인 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Apple 로그인 실패: $e'),
+            backgroundColor: AppTheme.errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.mediumRadius,
+            ),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _handleSkip() {
-    // 건너뛰기 - 루틴 생성 시작
-    context.router.navigate(const UserInputRoute());
+  Future<void> _handleSkip() async {
+    setState(() => _isLoading = true);
+    try {
+      print('👤 익명 로그인 시도 중...');
+      final authController = ref.read(authControllerProvider.notifier);
+      await authController.signInAnonymously();
+      
+      final authState = ref.read(authControllerProvider);
+      
+      if (authState is AuthAuthenticated) {
+        print('✅ 익명 로그인 성공');
+        if (mounted) {
+          context.router.navigate(const UserInputRoute());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('익명으로 시작합니다! ✨'),
+              backgroundColor: AppTheme.primaryColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: AppTheme.mediumRadius,
+              ),
+            ),
+          );
+        }
+      } else if (authState is AuthError) {
+        throw Exception(authState.message);
+      } else {
+        throw Exception('익명 로그인에 실패했습니다');
+      }
+    } catch (e) {
+      print('❌ 익명 로그인 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('익명 로그인 실패: $e'),
+            backgroundColor: AppTheme.errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.mediumRadius,
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override

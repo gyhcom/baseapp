@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import '../../widgets/home/today_dashboard_widget.dart';
 import '../../widgets/home/quick_action_grid_widget.dart';
 import '../../widgets/home/insights_widget.dart';
 import '../../widgets/home/recent_activity_widget.dart';
 import '../../../domain/repositories/routine_repository.dart';
 import '../../../di/service_locator.dart';
+import '../../../core/config/app_router.dart';
 
 /// Home screen - main dashboard
 class HomeScreen extends StatefulWidget {
@@ -238,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
         IconButton(
           icon: const Icon(Icons.person_outline, color: Colors.white),
           onPressed: () {
-            // TODO: 프로필 화면으로 이동
+            context.router.navigate(const ProfileRoute());
           },
         ),
       ],

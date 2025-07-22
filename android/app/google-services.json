@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "519214372910",
+    "project_id": "routinecraft-9bb15",
+    "storage_bucket": "routinecraft-9bb15.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:519214372910:android:6533c99e29a2b69cd367bf",
+        "android_client_info": {
+          "package_name": "com.routinecraft.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "519214372910-4am179ffmbj8927ocftg5pq7qjes7rsv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5nC62FuhE6Si71zHHhA4rwL768WBHN1k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "519214372910-4am179ffmbj8927ocftg5pq7qjes7rsv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

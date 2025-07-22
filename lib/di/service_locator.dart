@@ -38,8 +38,34 @@ Future<void> setupDependencies() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(sharedPreferences);
 
-  // Hive
+  // Hive 초기화 및 데이터 호환성 문제 해결
+  print('🔧 Hive 초기화 중...');
   await Hive.initFlutter();
+  
+  try {
+    // 기존 Hive 데이터베이스 삭제 (호환성 문제 해결)
+    await Hive.deleteFromDisk();
+    print('🗑️ 기존 Hive 데이터 초기화 완료');
+    
+    // Hive 재초기화
+    await Hive.initFlutter();
+    
+    // Hive Adapters 등록
+    if (!Hive.isAdapterRegistered(8)) {
+      Hive.registerAdapter(UserAuthAdapter());
+      print('✅ UserAuth Adapter 등록');
+    }
+    if (!Hive.isAdapterRegistered(9)) {
+      Hive.registerAdapter(UserAuthProviderAdapter());
+      print('✅ UserAuthProvider Adapter 등록');
+    }
+    
+    print('✅ Hive 초기화 성공');
+  } catch (e) {
+    print('❌ Hive 초기화 실패: $e');
+    throw e;
+  }
+  
   final hiveBox = await Hive.openBox(AppConstants.hiveBoxName);
   getIt.registerSingleton<Box>(hiveBox);
 
@@ -89,9 +115,15 @@ Future<void> setupDependencies() async {
     () => FirebaseAuthService(),
   );
 
-  // Auth Box for Hive
-  final userAuthBox = await Hive.openBox<UserAuth>('userAuth');
-  getIt.registerSingleton<Box<UserAuth>>(userAuthBox, instanceName: 'userAuthBox');
+  // Auth Box for Hive (어댑터 등록 후 생성)
+  try {
+    final userAuthBox = await Hive.openBox<UserAuth>('userAuth');
+    getIt.registerSingleton<Box<UserAuth>>(userAuthBox, instanceName: 'userAuthBox');
+    print('✅ UserAuth Box 생성 성공');
+  } catch (e) {
+    print('❌ UserAuth Box 생성 실패: $e');
+    throw e;
+  }
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(

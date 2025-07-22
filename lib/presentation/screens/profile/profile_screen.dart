@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:auto_route/auto_route.dart';
 import '../../theme/app_theme.dart';
 import '../../../domain/entities/user_profile.dart';
 import '../../../domain/entities/user_usage.dart';
@@ -8,16 +10,18 @@ import '../../../domain/repositories/routine_repository.dart';
 import '../../../domain/repositories/usage_repository.dart';
 import '../../../di/service_locator.dart';
 import '../../widgets/usage/usage_indicator.dart';
+import '../../providers/auth_provider.dart';
+import '../../../core/config/app_router.dart';
 
 /// 프로필 화면 - 사용자 정보 표시 및 수정
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final RoutineRepository _routineRepository = getIt<RoutineRepository>();
   final UsageRepository _usageRepository = getIt<UsageRepository>();
   
@@ -140,6 +144,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _handleLogout() async {
+    try {
+      // 로그아웃 확인 대화상자
+      final shouldLogout = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('로그아웃'),
+          content: const Text('정말로 로그아웃하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('취소'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('로그아웃'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldLogout == true) {
+        print('👋 로그아웃 시도 중...');
+        final authController = ref.read(authControllerProvider.notifier);
+        await authController.signOut();
+        
+        if (mounted) {
+          print('✅ 로그아웃 성공 - 로그인 화면으로 이동');
+          context.router.navigate(const LoginRoute());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('로그아웃되었습니다'),
+              backgroundColor: AppTheme.primaryColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: AppTheme.mediumRadius,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ 로그아웃 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('로그아웃 실패: $e'),
+            backgroundColor: AppTheme.errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.mediumRadius,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,6 +222,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
               icon: Icon(_isEditing ? Icons.save : Icons.edit),
             ),
+          IconButton(
+            onPressed: _handleLogout,
+            icon: const Icon(Icons.logout, color: Colors.red),
+            tooltip: '로그아웃',
+          ),
         ],
       ),
       body: _isLoading
@@ -253,6 +320,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 textAlign: TextAlign.center,
               ),
             ],
+            
+            // 프로필 헤더에 로그아웃 버튼 추가
+            const SizedBox(height: AppTheme.spacingM),
+            Container(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _handleLogout,
+                icon: const Icon(Icons.logout, color: Colors.white, size: 18),
+                label: const Text(
+                  '로그아웃',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.white, width: 1.5),
+                  backgroundColor: Colors.white.withOpacity(0.1),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppTheme.spacingS,
+                    horizontal: AppTheme.spacingM,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppTheme.mediumRadius,
+                  ),
+                ),
+              ),
+            ),
           ],
         ],
       ),
@@ -610,6 +702,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildInfoRow('앱 버전', '2.1.0'),
           _buildInfoRow('개발자', 'RoutineCraft Team'),
           _buildInfoRow('문의', 'support@routinecraft.app'),
+          
+          const SizedBox(height: AppTheme.spacingL),
+          
+          // 로그아웃 버튼
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _handleLogout,
+              icon: const Icon(Icons.logout, color: Colors.red),
+              label: const Text(
+                '로그아웃',
+                style: TextStyle(color: Colors.red),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red),
+                padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingM),
+              ),
+            ),
+          ),
         ],
       ),
     );

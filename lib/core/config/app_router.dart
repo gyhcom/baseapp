@@ -24,6 +24,7 @@ class AppRouter extends _$AppRouter {
   @override
   RouteType get defaultRouteType => const RouteType.adaptive();
 
+
   @override
   List<AutoRoute> get routes => [
     // ========== SPLASH ==========

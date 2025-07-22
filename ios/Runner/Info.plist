@@ -45,5 +45,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.example.baseapp</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.example.baseapp</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>GOOGLE_SIGN_IN</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.519214372910-4am179ffmbj8927ocftg5pq7qjes7rsv</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

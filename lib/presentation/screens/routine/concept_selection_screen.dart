@@ -3,6 +3,8 @@ import 'package:auto_route/auto_route.dart';
 import '../../../core/config/app_router.dart';
 import '../../theme/app_theme.dart';
 import '../../../domain/entities/routine_concept.dart';
+import '../../../domain/repositories/usage_repository.dart';
+import '../../../di/service_locator.dart';
 
 /// 루틴 컨셉 선택 화면
 class ConceptSelectionScreen extends StatefulWidget {
@@ -65,8 +67,17 @@ class _ConceptSelectionScreenState extends State<ConceptSelectionScreen>
     });
   }
 
-  void _generateRoutine() {
+  Future<void> _generateRoutine() async {
     if (_selectedConcept == null) return;
+
+    // 사용량 체크
+    final usageRepository = getIt<UsageRepository>();
+    final canGenerate = await usageRepository.canGenerate();
+
+    if (!canGenerate && mounted) {
+      _showUsageLimitDialog();
+      return;
+    }
 
     // 루틴 생성 화면으로 이동
     context.router.navigate(RoutineGenerationRoute(
@@ -77,6 +88,22 @@ class _ConceptSelectionScreenState extends State<ConceptSelectionScreen>
       additionalInfo: widget.additionalInfo,
       conceptName: _selectedConcept!.name,
     ));
+  }
+
+  void _showUsageLimitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('일일 생성 횟수 초과'),
+        content: const Text('오늘 AI 루틴 생성 횟수를 모두 사용했습니다.\n내일 다시 시도해주세요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

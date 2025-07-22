@@ -3,6 +3,9 @@ import 'package:auto_route/auto_route.dart';
 import '../../../core/config/app_router.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/routine/user_input_steps.dart';
+import '../../../domain/repositories/usage_repository.dart';
+import '../../../domain/entities/user_usage.dart';
+import '../../../di/service_locator.dart';
 
 /// 단계별 사용자 정보 입력 화면
 class UserInputScreen extends StatefulWidget {
@@ -86,7 +89,16 @@ class _UserInputScreenState extends State<UserInputScreen>
     _progressController.animateTo(progress);
   }
 
-  void _completeInput() {
+  Future<void> _completeInput() async {
+    // 사용량 체크
+    final usageRepository = getIt<UsageRepository>();
+    final canGenerate = await usageRepository.canGenerate();
+
+    if (!canGenerate && mounted) {
+      _showUsageLimitDialog();
+      return;
+    }
+
     // 컨셉 선택 화면으로 이동
     print('사용자 입력 완료:');
     print('이름: $_name, 나이: $_age, 직업: $_job');
@@ -100,6 +112,22 @@ class _UserInputScreenState extends State<UserInputScreen>
       hobbies: _hobbies,
       additionalInfo: _additionalInfo,
     ));
+  }
+
+  void _showUsageLimitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('일일 생성 횟수 초과'),
+        content: const Text('오늘 AI 루틴 생성 횟수를 모두 사용했습니다.\n내일 다시 시도해주세요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
