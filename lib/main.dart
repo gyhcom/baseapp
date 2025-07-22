@@ -15,7 +15,7 @@ void main() async {
     if (Platform.isIOS) {
       await Firebase.initializeApp(
         options: const FirebaseOptions(
-          apiKey: 'AIzaSyB5nC62FuhE6Si71zHHhA4rwL768WBHN1k',
+          apiKey: 'AIza',
           appId: '1:519214372910:ios:6533c99e29a2b69cd367bf',
           messagingSenderId: '519214372910',
           projectId: 'routinecraft-9bb15',
