@@ -6,6 +6,7 @@ import '../../domain/entities/ai_routine_response.dart';
 import '../../domain/entities/daily_routine.dart';
 import '../../domain/entities/routine_item.dart';
 import '../../domain/entities/routine_concept.dart';
+import '../../domain/services/routine_limit_service.dart';
 
 /// 더미 데이터를 사용하는 AI 서비스 구현
 /// 실제 API 비용 없이 전체 플로우 테스트 가능
@@ -19,7 +20,7 @@ class DummyAIServiceImpl implements AIServiceRepository {
 
     try {
       // 컨셉별 맞춤형 더미 루틴 생성
-      final routine = _generateDummyRoutine(request);
+      final routine = await _generateDummyRoutine(request);
       
       return AIRoutineResponse(
         success: true,
@@ -41,13 +42,17 @@ class DummyAIServiceImpl implements AIServiceRepository {
 
 
   /// 컨셉별 맞춤형 더미 루틴 생성
-  DailyRoutine _generateDummyRoutine(AIRoutineRequest request) {
+  Future<DailyRoutine> _generateDummyRoutine(AIRoutineRequest request) async {
     final concept = request.concept;
     final age = request.age;
     final hobbies = request.hobbies;
     
     // 컨셉별 기본 루틴 템플릿 선택
-    final items = _getRoutineItemsForConcept(concept, age, hobbies);
+    final allItems = _getRoutineItemsForConcept(concept, age, hobbies);
+    
+    // 사용자 등급에 따른 항목 개수 제한 적용
+    final maxItems = await RoutineLimitService.getMaxRoutineItems();
+    final items = allItems.take(maxItems).toList();
     
     return DailyRoutine(
       id: 'routine_${DateTime.now().millisecondsSinceEpoch}',

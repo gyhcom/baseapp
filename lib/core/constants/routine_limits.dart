@@ -1,18 +1,22 @@
 /// 루틴 저장 및 생성 제한 상수
 class RoutineLimits {
   // 루틴 저장 개수 제한
-  static const int freeMaxRoutines = 5;      // 무료: 5개
-  static const int premiumMaxRoutines = -1;  // 프리미엄: 무제한 (-1)
+  static const int freeMaxRoutines = 1;      // 무료: 1개만
+  static const int premiumMaxRoutines = -1;  // 프리미엄: 무제한
   
-  // AI 생성 제한 (기존)
-  static const int freeDailyGenerations = 3;
-  static const int premiumDailyGenerations = -1;
+  // 루틴 상세 항목 개수 제한
+  static const int freeMaxRoutineItems = 5;      // 무료: 루틴당 5개 항목
+  static const int premiumMaxRoutineItems = 10;  // 프리미엄: 루틴당 10개 항목
+  
+  // AI 생성 제한
+  static const int freeDailyGenerations = 1;     // 무료: 일 1회
+  static const int premiumDailyGenerations = -1; // 프리미엄: 무제한
   
   // 보너스 관련 제한
-  static const int maxBonusGenerations = 10;
+  static const int maxBonusGenerations = 5; // 보너스 줄임
   
   // 경고 임계점
-  static const int storageWarningThreshold = 4; // 4개부터 경고
+  static const int storageWarningThreshold = 1; // 1개에서 경고
 }
 
 /// 사용자 등급

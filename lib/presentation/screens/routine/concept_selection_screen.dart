@@ -116,6 +116,15 @@ class _ConceptSelectionScreenState extends State<ConceptSelectionScreen>
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => context.router.maybePop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home_outlined),
+            tooltip: '홈으로',
+            onPressed: () {
+              context.router.navigate(const HomeWrapperRoute());
+            },
+          ),
+        ],
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/config/app_router.dart';
 import '../../../domain/entities/routine_concept.dart';
 import '../../../domain/entities/ai_routine_request.dart';
 import '../../../domain/repositories/usage_repository.dart';
@@ -277,6 +278,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
       await routineRepository.saveRoutine(routine);
       
       print('✅ 루틴이 자동으로 저장되었습니다: ${routine.id}');
+      print('📊 루틴 항목 개수: ${routine.items.length}');
       
       // 사용자 프로필도 저장 (최신 정보 유지)
       await routineRepository.saveUserProfile(routine.generatedFor);
@@ -394,7 +396,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
             Text('프리미엄 구독의 혜택:'),
             SizedBox(height: 12),
             Text('✅ 무제한 AI 루틴 생성'),
-            Text('✅ 무제한 루틴 저장'),
+            Text('✅ 루틴당 10개 항목 (무료: 5개)'),
             Text('✅ 고급 통계 및 분석'),
             Text('✅ 클라우드 백업'),
             Text('✅ 광고 없는 경험'),
@@ -463,13 +465,22 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
             padding: const EdgeInsets.all(AppTheme.spacingL),
             child: Column(
               children: [
-                // 닫기 버튼
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    onPressed: () => context.router.maybePop(),
-                    icon: const Icon(Icons.close),
-                  ),
+                // 상단 버튼들
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.home_outlined),
+                      tooltip: '홈으로',
+                      onPressed: () {
+                        context.router.navigate(const HomeWrapperRoute());
+                      },
+                    ),
+                    IconButton(
+                      onPressed: () => context.router.maybePop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
                 ),
                 
                 const Spacer(),

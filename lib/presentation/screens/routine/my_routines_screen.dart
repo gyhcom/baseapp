@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/config/app_router.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_concept.dart';
 import '../../../domain/repositories/routine_repository.dart';
@@ -105,6 +106,13 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
           onPressed: () => context.router.maybePop(),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home_outlined),
+            tooltip: '홈으로',
+            onPressed: () {
+              context.router.navigate(const HomeWrapperRoute());
+            },
+          ),
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: _toggleSearch,

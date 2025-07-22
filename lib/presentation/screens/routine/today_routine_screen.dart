@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:auto_route/auto_route.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/config/app_router.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
 import '../../../domain/repositories/routine_repository.dart';
@@ -118,6 +119,15 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
             floating: false,
             pinned: true,
             backgroundColor: _routine.concept.color,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.home_outlined, color: Colors.white),
+                tooltip: '홈으로',
+                onPressed: () {
+                  context.router.navigate(const HomeWrapperRoute());
+                },
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: BoxDecoration(

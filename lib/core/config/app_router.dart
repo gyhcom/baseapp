@@ -40,14 +40,14 @@ class AppRouter extends _$AppRouter {
       path: '/home',
       children: [
         AutoRoute(page: HomeRoute.page, path: '', initial: true),
-        AutoRoute(page: TodoListRoute.page, path: 'todos'),
         AutoRoute(page: ProfileRoute.page, path: 'profile'),
-        AutoRoute(page: SettingsRoute.page, path: 'settings'),
       ],
     ),
 
     // ========== DETAIL ROUTES ==========
     AutoRoute(page: TodoDetailRoute.page, path: '/todo/:todoId'),
+    AutoRoute(page: TodoListRoute.page, path: '/todos'),
+    AutoRoute(page: SettingsRoute.page, path: '/settings'),
     
     // ========== ROUTINE ROUTES ==========
     AutoRoute(page: UserInputRoute.page, path: '/routine/input'),
@@ -91,7 +91,39 @@ class HomeWrapperPage extends StatelessWidget {
   const HomeWrapperPage({super.key});
 
   @override
-  Widget build(BuildContext context) => const AutoRouter();
+  Widget build(BuildContext context) {
+    return AutoTabsRouter(
+      routes: const [
+        HomeRoute(),
+        ProfileRoute(),
+      ],
+      builder: (context, child) {
+        final tabsRouter = AutoTabsRouter.of(context);
+        return Scaffold(
+          body: child,
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: tabsRouter.activeIndex,
+            onTap: tabsRouter.setActiveIndex,
+            selectedItemColor: const Color(0xFF4F86F7), // AppTheme.primaryColor
+            unselectedItemColor: Colors.grey,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: '홈',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person),
+                label: '프로필',
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 @RoutePage()

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/config/app_router.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
 import '../../../domain/repositories/routine_repository.dart';
@@ -31,21 +32,19 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
   void initState() {
     super.initState();
     _currentRoutine = widget.routine;
-    _setupAnimations();
+    _initializeFadeAnimation();
   }
 
-  void _setupAnimations() {
+  void _initializeFadeAnimation() {
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 600),
       vsync: this,
+      duration: const Duration(milliseconds: 600),
     );
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
+
+    _fadeAnimation = CurvedAnimation(
       parent: _fadeController,
       curve: Curves.easeInOut,
-    ));
+    );
 
     _fadeController.forward();
   }
@@ -80,6 +79,13 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
           onPressed: () => context.router.maybePop(),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home_outlined),
+            tooltip: '홈으로',
+            onPressed: () {
+              context.router.navigate(const HomeWrapperRoute());
+            },
+          ),
           IconButton(
             icon: Icon(
               _currentRoutine.isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -564,11 +570,11 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
       
       // 저장 제한 체크
       final currentCount = await routineRepository.getSavedRoutines();
-      if (currentCount.length >= 5) { // 무료 사용자 제한
+      if (currentCount.length >= 1) { // 무료 사용자 제한
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('저장 공간이 가득 찼습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요'),
+              content: Text('무료 사용자는 1개의 루틴만 저장할 수 있습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요'),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 3),
             ),

@@ -235,6 +235,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       }
     } catch (e) {
       print('❌ 익명 로그인 실패: $e');
+      
+      // 익명 로그인 실패 시 테스트를 위한 임시 건너뛰기
+      if (e.toString().contains('operation-not-allowed') || 
+          e.toString().contains('익명 로그인이 비활성화') ||
+          e.toString().contains('administrators only')) {
+        print('🔄 Firebase 익명 인증이 비활성화됨 - 테스트 모드로 진행');
+        if (mounted) {
+          context.router.navigate(const UserInputRoute());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('테스트 모드로 시작합니다 (익명 인증 비활성화됨)'),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: AppTheme.mediumRadius,
+              ),
+            ),
+          );
+          return;
+        }
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

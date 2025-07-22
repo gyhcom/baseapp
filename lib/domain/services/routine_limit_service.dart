@@ -17,7 +17,7 @@ class RoutineLimitService {
       return true;
     }
     
-    // 무료 사용자는 5개 제한
+    // 무료 사용자는 1개 제한
     final currentRoutines = await _routineRepo.getSavedRoutines();
     return currentRoutines.length < RoutineLimits.freeMaxRoutines;
   }
@@ -82,18 +82,50 @@ class RoutineLimitService {
 
   /// 루틴 삭제 후 슬롯 확보 안내 메시지
   static Future<String> getDeletionSuggestionMessage() async {
-    final currentCount = await getCurrentRoutineCount();
     final usage = await _usageRepo.getCurrentUsage();
     
     if (await _isPremiumUser(usage)) {
       return '프리미엄 사용자는 무제한으로 루틴을 저장할 수 있습니다.';
     }
     
-    if (currentCount >= RoutineLimits.freeMaxRoutines) {
-      return '새 루틴을 저장하려면 기존 루틴 중 ${currentCount - RoutineLimits.freeMaxRoutines + 1}개를 삭제해주세요.';
+    return '무료 사용자는 1개의 루틴만 저장 가능합니다. 새 루틴을 만들려면 기존 루틴을 삭제해주세요.';
+  }
+
+  // ========== 새로운 루틴 항목 개수 제한 기능 ==========
+  
+  /// 루틴 항목 최대 개수 확인
+  static Future<int> getMaxRoutineItems() async {
+    final usage = await _usageRepo.getCurrentUsage();
+    
+    if (await _isPremiumUser(usage)) {
+      return RoutineLimits.premiumMaxRoutineItems; // 프리미엄: 10개
     }
     
-    return '${RoutineLimits.freeMaxRoutines - currentCount}개의 루틴을 더 저장할 수 있습니다.';
+    return RoutineLimits.freeMaxRoutineItems; // 무료: 5개
+  }
+  
+  /// 루틴 항목 추가 가능 여부 확인
+  static Future<bool> canAddRoutineItem(int currentItemCount) async {
+    final maxItems = await getMaxRoutineItems();
+    return currentItemCount < maxItems;
+  }
+  
+  /// 루틴 항목 제한 상태 확인
+  static Future<LimitStatus> getRoutineItemLimitStatus(int currentItemCount) async {
+    final maxItems = await getMaxRoutineItems();
+    final usage = await _usageRepo.getCurrentUsage();
+    
+    if (await _isPremiumUser(usage)) {
+      return LimitStatus.unlimited;
+    }
+    
+    if (currentItemCount >= maxItems) {
+      return LimitStatus.exceeded;
+    } else if (currentItemCount >= maxItems - 1) {
+      return LimitStatus.warning;
+    } else {
+      return LimitStatus.available;
+    }
   }
 
   /// 프리미엄 사용자 여부 확인 (내부 헬퍼 메서드)
@@ -108,13 +140,17 @@ class RoutineLimitService {
     final status = await getStorageStatus();
     final remainingSlots = await getRemainingSlots();
     final currentCount = await getCurrentRoutineCount();
+    final usage = await _usageRepo.getCurrentUsage();
+    final maxCount = await _isPremiumUser(usage) 
+        ? RoutineLimits.premiumMaxRoutines 
+        : RoutineLimits.freeMaxRoutines;
     
     return RoutineSaveResult(
       canSave: canSave,
       status: status,
       remainingSlots: remainingSlots,
       currentCount: currentCount,
-      maxCount: RoutineLimits.freeMaxRoutines,
+      maxCount: maxCount,
     );
   }
 }
@@ -143,6 +179,9 @@ class RoutineSaveResult {
       case LimitStatus.warning:
         return '저장 공간이 거의 찼습니다. ($currentCount/$maxCount)';
       case LimitStatus.available:
+        if (remainingSlots == -1) {
+          return '프리미엄: 무제한 저장 가능';
+        }
         return '$remainingSlots개의 루틴을 더 저장할 수 있습니다.';
       case LimitStatus.unlimited:
         return '프리미엄: 무제한 저장 가능';
@@ -151,7 +190,7 @@ class RoutineSaveResult {
 
   /// 사용률 (0.0 ~ 1.0)
   double get usageRatio {
-    if (status == LimitStatus.unlimited) return 0.0;
+    if (status == LimitStatus.unlimited || maxCount == -1) return 0.0;
     return currentCount / maxCount;
   }
 }
