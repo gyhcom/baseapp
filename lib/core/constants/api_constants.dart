@@ -1,7 +1,9 @@
 /// API 관련 상수들
 class ApiConstants {
   // Claude API 설정
-  static const String claudeApiKey = 'sk-ant-api03-your-api-key-here'; // TODO: 실제 API 키로 교체
+  // ⚠️ 프로덕션에서는 반드시 환경변수 사용! 
+  // 테스트용으로만 여기에 직접 입력하세요
+  static const String claudeApiKey = '***REMOVED***'; // 실제 API 키 적용
   static const String claudeApiUrl = 'https://api.anthropic.com';
   static const String claudeApiVersion = '2023-06-01';
   
@@ -35,9 +37,26 @@ class EnvironmentConfig {
     switch (current) {
       case Environment.dev:
         // 개발용 - 실제 Claude API 키를 여기에 설정하세요
-        // 현재는 더미 키로 API 연동 테스트를 위해 기본 동작만 확인 가능
-        return const String.fromEnvironment('CLAUDE_API_KEY', 
-            defaultValue: 'sk-ant-api03-dev-test-key-for-routine-app');
+        // 실제 API 키가 필요합니다: sk-ant-api03-xxx...
+        const envApiKey = String.fromEnvironment('CLAUDE_API_KEY', 
+            defaultValue: '');
+        
+        // 환경변수에 API 키가 있으면 우선 사용
+        if (envApiKey.isNotEmpty && envApiKey.startsWith('sk-ant-api03-')) {
+          return envApiKey;
+        }
+        
+        // 환경변수가 없으면 코드에서 설정된 키 사용
+        if (ApiConstants.claudeApiKey.startsWith('sk-ant-api03-') && 
+            !ApiConstants.claudeApiKey.contains('your-api-key')) {
+          return ApiConstants.claudeApiKey;
+        }
+        
+        // API 키가 없으면 안내 메시지와 함께 빈 문자열 반환
+        print('⚠️  Claude API 키가 필요합니다!');
+        print('1. api_constants.dart에서 claudeApiKey 값을 실제 키로 변경');
+        print('2. 또는 환경변수 설정: export CLAUDE_API_KEY="your-key"');
+        return '';
       case Environment.prod:
         return ApiConstants.claudeApiKey;
     }

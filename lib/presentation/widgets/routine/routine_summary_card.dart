@@ -6,6 +6,8 @@ import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
 import '../../screens/routine/routine_edit_screen.dart';
 import '../../../domain/repositories/routine_repository.dart';
+import '../../../domain/services/routine_limit_service.dart';
+import '../../../core/constants/routine_limits.dart';
 import '../../../di/service_locator.dart';
 
 /// 루틴 요약 카드 위젯
@@ -15,6 +17,7 @@ class RoutineSummaryCard extends StatefulWidget {
   final VoidCallback? onFavoriteToggle;
   final VoidCallback? onDelete;
   final VoidCallback? onCopy;
+  final VoidCallback? onActiveToggle;
 
   const RoutineSummaryCard({
     super.key,
@@ -23,6 +26,7 @@ class RoutineSummaryCard extends StatefulWidget {
     this.onFavoriteToggle,
     this.onDelete,
     this.onCopy,
+    this.onActiveToggle,
   });
 
   @override
@@ -33,11 +37,22 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
+  late bool _isActive; // 내부 활성화 상태 관리
 
   @override
   void initState() {
     super.initState();
+    _isActive = widget.routine.isActive; // 초기 상태 설정
     _setupAnimations();
+  }
+
+  @override
+  void didUpdateWidget(RoutineSummaryCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 위젯이 업데이트되면 내부 상태도 동기화
+    if (oldWidget.routine.isActive != widget.routine.isActive) {
+      _isActive = widget.routine.isActive;
+    }
   }
 
   void _setupAnimations() {
@@ -109,16 +124,21 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                 
                 const SizedBox(height: AppTheme.spacingM),
                 
-                // 루틴 정보 (활동 개수, 소요시간 등)
-                _buildRoutineInfo(),
+                // 상태 및 기본 정보
+                _buildStatusRow(),
                 
                 const SizedBox(height: AppTheme.spacingM),
                 
+                // 루틴 통계 정보
+                _buildStatsGrid(),
+                
                 // 설명 (있을 경우)
                 if (widget.routine.description.isNotEmpty) ...[ 
-                  _buildDescription(),
                   const SizedBox(height: AppTheme.spacingM),
+                  _buildDescription(),
                 ],
+                
+                const SizedBox(height: AppTheme.spacingM),
                 
                 // 하단 메타 정보
                 _buildMetaInfo(),
@@ -219,7 +239,8 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
             ),
           ),
         
-        const SizedBox(width: AppTheme.spacingS),
+        if (widget.onFavoriteToggle != null)
+          const SizedBox(width: AppTheme.spacingS),
         
         // 더보기 버튼
         GestureDetector(
@@ -241,7 +262,96 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
     );
   }
 
-  Widget _buildRoutineInfo() {
+  /// 상태 및 기본 정보 행
+  Widget _buildStatusRow() {
+    return Row(
+      children: [
+        // 활성화 상태
+        _buildStatusBadge(),
+        
+        const SizedBox(width: AppTheme.spacingM),
+        
+        // 활동 개수
+        Icon(
+          Icons.list_alt,
+          size: 16,
+          color: AppTheme.textSecondaryColor,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '${widget.routine.items.length}개 활동',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppTheme.textSecondaryColor,
+          ),
+        ),
+        
+        const Spacer(),
+        
+        // 활성화 토글 스위치
+        Transform.scale(
+          scale: 0.8,
+          child: Switch(
+            key: ValueKey(_isActive), // 강제 리빌드
+            value: _isActive,
+            onChanged: (value) {
+              print('🎛️ 루틴 카드 스위치 클릭: $value (현재: $_isActive)');
+              _toggleActiveStatus();
+            },
+            activeColor: AppTheme.primaryColor,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 활성화 상태 배지
+  Widget _buildStatusBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: _isActive 
+            ? Colors.green.withOpacity(0.1)
+            : AppTheme.dividerColor.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _isActive 
+              ? Colors.green.withOpacity(0.3)
+              : AppTheme.dividerColor,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _isActive 
+                ? Icons.notifications_active
+                : Icons.notifications_off,
+            key: ValueKey('status_icon_$_isActive'),
+            size: 14,
+            color: _isActive 
+                ? Colors.green
+                : AppTheme.textSecondaryColor,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            _isActive ? '활성화' : '비활성화',
+            key: ValueKey('status_text_$_isActive'),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: _isActive 
+                  ? Colors.green
+                  : AppTheme.textSecondaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 통계 그리드 (2x2 레이아웃)
+  Widget _buildStatsGrid() {
     final totalMinutes = widget.routine.items.fold<int>(
       0,
       (sum, item) => sum + item.duration.inMinutes,
@@ -252,35 +362,81 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
         ? (completedCount / widget.routine.items.length * 100).round()
         : 0;
 
-    return Row(
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spacingM),
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.dividerColor),
+      ),
+      child: Row(
+        children: [
+          // 소요시간
+          Expanded(
+            child: _buildStatItem(
+              icon: Icons.schedule,
+              label: '소요시간',
+              value: _formatDuration(totalMinutes),
+              color: AppTheme.primaryColor,
+            ),
+          ),
+          
+          Container(
+            width: 1,
+            height: 40,
+            color: AppTheme.dividerColor,
+            margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+          ),
+          
+          // 진행률
+          Expanded(
+            child: _buildStatItem(
+              icon: Icons.check_circle,
+              label: '완료율',
+              value: '$progressPercent%',
+              color: progressPercent > 50 ? Colors.green : Colors.orange,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 통계 아이템
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Column(
       children: [
-        // 활동 개수
-        _buildInfoChip(
-          icon: Icons.list_alt,
-          label: '${widget.routine.items.length}개 활동',
-          color: AppTheme.accentColor,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
         ),
-        
-        const SizedBox(width: AppTheme.spacingS),
-        
-        // 총 소요시간
-        _buildInfoChip(
-          icon: Icons.schedule,
-          label: _formatDuration(totalMinutes),
-          color: AppTheme.primaryColor,
-        ),
-        
-        const SizedBox(width: AppTheme.spacingS),
-        
-        // 진행률
-        _buildInfoChip(
-          icon: Icons.check_circle,
-          label: '$progressPercent% 완료',
-          color: progressPercent > 50 ? Colors.green : Colors.orange,
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppTheme.textSecondaryColor,
+          ),
         ),
       ],
     );
   }
+
 
   Widget _buildInfoChip({
     required IconData icon,
@@ -655,6 +811,149 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
     );
   }
 
+
+  /// 루틴 활성화 상태 토글
+  Future<void> _toggleActiveStatus() async {
+    print('🔄 루틴 카드 활성화 토글 시작: ${widget.routine.title} (현재: $_isActive)');
+    
+    try {
+      final routineRepository = getIt<RoutineRepository>();
+      
+      // 활성화하려는 경우 제한 검사
+      if (!_isActive) {
+        print('📊 활성화 제한 검사 중...');
+        final canActivate = await RoutineLimitService.canActivateRoutine();
+        print('📊 활성화 가능 여부: $canActivate');
+        
+        if (!canActivate) {
+          print('❌ 활성화 제한으로 인해 실패');
+          // 제한 초과 시 업그레이드 안내
+          _showActivationLimitDialog();
+          return;
+        }
+        
+        // 무료 사용자는 기존 활성화된 루틴을 자동 비활성화 (현재 루틴 제외)
+        final userTier = await RoutineLimitService.getUserTier();
+        print('👤 사용자 등급: $userTier');
+        if (userTier == UserTier.free) {
+          print('🔧 기존 활성화된 루틴들 비활성화 중 (현재 루틴 제외: ${widget.routine.id})...');
+          await routineRepository.deactivateAllRoutines(exceptRoutineId: widget.routine.id);
+        }
+      }
+      
+      // UI 상태를 먼저 낙관적으로 업데이트
+      final expectedNewState = !_isActive;
+      print('🎨 UI 상태 낙관적 업데이트: $expectedNewState');
+      setState(() {
+        _isActive = expectedNewState;
+      });
+      
+      // 상태 토글
+      print('🔧 데이터베이스에서 루틴 상태 토글 실행...');
+      await routineRepository.toggleRoutineActive(widget.routine.id);
+      print('✅ 데이터베이스 토글 완료');
+      
+      // 부모 위젯에 변경 알림
+      widget.onActiveToggle?.call();
+      
+      // 성공 메시지
+      final message = _isActive 
+          ? '루틴이 활성화되었습니다. 알림과 추천을 받을 수 있습니다.' 
+          : '루틴이 비활성화되었습니다.';
+          
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: _isActive ? Colors.green : Colors.grey,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      
+      print('🏁 루틴 카드 활성화 토글 완료: $_isActive');
+      
+    } catch (e) {
+      print('❌ 루틴 카드 활성화 토글 실패: $e');
+      
+      // 실패 시 UI 상태를 원래대로 되돌림
+      setState(() {
+        _isActive = !_isActive;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('상태 변경에 실패했습니다: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// 활성화 제한 다이얼로그 표시
+  void _showActivationLimitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('🔒 활성화 제한'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '무료 사용자는 1개의 루틴만 활성화할 수 있습니다.',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 12),
+            Text(
+              '프리미엄으로 업그레이드하면:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('✨ 무제한 루틴 활성화'),
+            Text('✨ 무제한 루틴 저장'),
+            Text('✨ 루틴당 최대 10개 활동'),
+            Text('✨ 무제한 AI 루틴 생성'),
+            Text('✨ 통계 및 분석 기능'),
+            Text('✨ 백업 및 복원'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('나중에'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showPremiumUpgradeInfo();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+            ),
+            child: const Text('프리미엄 알아보기', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 프리미엄 업그레이드 정보 표시
+  void _showPremiumUpgradeInfo() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('🚧 프리미엄 기능은 준비 중입니다. 곧 출시될 예정입니다!'),
+          backgroundColor: AppTheme.primaryColor,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   void _showMoreOptions() {
     showModalBottomSheet(
       context: context,
@@ -663,6 +962,29 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            ListTile(
+              leading: Icon(
+                _isActive 
+                    ? Icons.notifications_off 
+                    : Icons.notifications_active,
+                color: _isActive 
+                    ? Colors.orange 
+                    : AppTheme.primaryColor,
+              ),
+              title: Text(
+                _isActive ? '루틴 비활성화' : '루틴 활성화',
+                style: TextStyle(
+                  color: _isActive 
+                      ? Colors.orange 
+                      : AppTheme.primaryColor,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _toggleActiveStatus();
+              },
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.edit),
               title: const Text('루틴 수정'),

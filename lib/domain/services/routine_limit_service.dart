@@ -88,10 +88,60 @@ class RoutineLimitService {
       return '프리미엄 사용자는 무제한으로 루틴을 저장할 수 있습니다.';
     }
     
-    return '무료 사용자는 1개의 루틴만 저장 가능합니다. 새 루틴을 만들려면 기존 루틴을 삭제해주세요.';
+    return '무료 사용자는 2개의 루틴만 저장 가능합니다. 새 루틴을 만들려면 기존 루틴을 삭제해주세요.';
   }
 
-  // ========== 새로운 루틴 항목 개수 제한 기능 ==========
+  // ========== 루틴 활성화 제한 기능 ==========
+  
+  /// 루틴 활성화 최대 개수 확인
+  static Future<int> getMaxActiveRoutines() async {
+    final usage = await _usageRepo.getCurrentUsage();
+    
+    if (await _isPremiumUser(usage)) {
+      return RoutineLimits.premiumMaxActiveRoutines; // 프리미엄: 무제한 (-1)
+    }
+    
+    return RoutineLimits.freeMaxActiveRoutines; // 무료: 1개
+  }
+  
+  /// 루틴 활성화 가능 여부 확인
+  static Future<bool> canActivateRoutine() async {
+    final maxActive = await getMaxActiveRoutines();
+    
+    // 프리미엄은 무제한
+    if (maxActive == -1) return true;
+    
+    // 현재 활성화된 루틴 개수 확인
+    final activeRoutines = await _routineRepo.getActiveRoutines();
+    return activeRoutines.length < maxActive;
+  }
+  
+  /// 현재 활성화된 루틴 개수
+  static Future<int> getCurrentActiveRoutineCount() async {
+    final activeRoutines = await _routineRepo.getActiveRoutines();
+    return activeRoutines.length;
+  }
+  
+  /// 루틴 활성화 제한 상태 확인
+  static Future<LimitStatus> getActiveRoutineLimitStatus() async {
+    final maxActive = await getMaxActiveRoutines();
+    final currentActive = await getCurrentActiveRoutineCount();
+    final usage = await _usageRepo.getCurrentUsage();
+    
+    if (await _isPremiumUser(usage)) {
+      return LimitStatus.unlimited;
+    }
+    
+    if (currentActive >= maxActive) {
+      return LimitStatus.exceeded;
+    } else if (currentActive >= maxActive - 1) {
+      return LimitStatus.warning;
+    } else {
+      return LimitStatus.available;
+    }
+  }
+
+  // ========== 루틴 항목 개수 제한 기능 ==========
   
   /// 루틴 항목 최대 개수 확인
   static Future<int> getMaxRoutineItems() async {

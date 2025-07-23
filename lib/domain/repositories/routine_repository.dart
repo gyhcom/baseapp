@@ -33,6 +33,15 @@ abstract class RoutineRepository {
   /// 루틴 사용 횟수 증가
   Future<void> incrementUsageCount(String id);
   
+  /// 루틴 활성화 상태 토글
+  Future<void> toggleRoutineActive(String id);
+  
+  /// 활성화된 루틴 목록 조회
+  Future<List<DailyRoutine>> getActiveRoutines();
+  
+  /// 모든 루틴 비활성화 (무료 사용자용)
+  Future<void> deactivateAllRoutines({String? exceptRoutineId});
+  
   /// 모든 데이터 초기화
   Future<void> clearAllData();
 }

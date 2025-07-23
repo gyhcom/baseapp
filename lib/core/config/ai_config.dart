@@ -4,7 +4,7 @@ import '../../domain/repositories/ai_service_repository.dart';
 class AIConfig {
   /// 현재 사용할 AI 서비스 타입
   /// 개발 중에는 local, 배포 시에는 claude 사용
-  static const AIServiceType currentService = AIServiceType.local;
+  static const AIServiceType currentService = AIServiceType.local; // 임시로 로컬 모드
   
   /// 지원하는 AI 서비스 타입들
   static const List<AIServiceType> supportedServices = [

@@ -7,12 +7,14 @@ class RoutineItemCard extends StatefulWidget {
   final RoutineItem item;
   final VoidCallback onToggleComplete;
   final VoidCallback? onEdit;
+  final bool isEnabled; // 루틴 활성화 상태
 
   const RoutineItemCard({
     super.key,
     required this.item,
     required this.onToggleComplete,
     this.onEdit,
+    this.isEnabled = true, // 기본값은 활성화
   });
 
   @override
@@ -78,42 +80,51 @@ class _RoutineItemCardState extends State<RoutineItemCard>
         child: InkWell(
           onTap: _handleTap,
           borderRadius: AppTheme.mediumRadius,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            padding: const EdgeInsets.all(AppTheme.spacingL),
-            decoration: BoxDecoration(
-              color: widget.item.isCompleted 
-                  ? AppTheme.primaryColor.withOpacity(0.1)
-                  : AppTheme.surfaceColor,
-              borderRadius: AppTheme.mediumRadius,
-              border: Border.all(
-                color: widget.item.isCompleted 
-                    ? AppTheme.primaryColor
-                    : AppTheme.dividerColor,
-                width: widget.item.isCompleted ? 2 : 1,
+          child: Opacity(
+            opacity: widget.isEnabled ? 1.0 : 0.5, // 비활성화 시 투명도 조정
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(AppTheme.spacingL),
+              decoration: BoxDecoration(
+                color: !widget.isEnabled
+                    ? Colors.grey.withOpacity(0.1) // 비활성화 시 회색
+                    : widget.item.isCompleted
+                    ? AppTheme.primaryColor.withOpacity(0.1)
+                    : AppTheme.surfaceColor,
+                borderRadius: AppTheme.mediumRadius,
+                border: Border.all(
+                  color: !widget.isEnabled
+                      ? Colors.grey.withOpacity(0.3) // 비활성화 시 회색 테두리
+                      : widget.item.isCompleted
+                      ? AppTheme.primaryColor
+                      : AppTheme.dividerColor,
+                  width: widget.item.isCompleted ? 2 : 1,
+                ),
+                boxShadow: !widget.isEnabled
+                    ? [] // 비활성화 시 그림자 제거
+                    : widget.item.isCompleted
+                    ? [AppTheme.buttonShadow]
+                    : [AppTheme.cardShadow],
               ),
-              boxShadow: widget.item.isCompleted 
-                  ? [AppTheme.buttonShadow]
-                  : [AppTheme.cardShadow],
-            ),
-            child: Row(
-              children: [
-                // 완료 체크박스
-                _buildCheckbox(),
-                
-                const SizedBox(width: AppTheme.spacingM),
-                
-                // 시간 표시
-                _buildTimeDisplay(),
-                
-                const SizedBox(width: AppTheme.spacingM),
-                
-                // 메인 콘텐츠
-                Expanded(child: _buildMainContent()),
-                
-                // 우선순위 및 액션
-                _buildTrailingActions(),
-              ],
+              child: Row(
+                children: [
+                  // 완료 체크박스
+                  _buildCheckbox(),
+
+                  const SizedBox(width: AppTheme.spacingM),
+
+                  // 시간 표시
+                  _buildTimeDisplay(),
+
+                  const SizedBox(width: AppTheme.spacingM),
+
+                  // 메인 콘텐츠
+                  Expanded(child: _buildMainContent()),
+
+                  // 우선순위 및 액션
+                  _buildTrailingActions(),
+                ],
+              ),
             ),
           ),
         ),

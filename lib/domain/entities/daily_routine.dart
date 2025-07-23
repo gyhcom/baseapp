@@ -18,6 +18,7 @@ class DailyRoutine with _$DailyRoutine {
     DateTime? createdAt,
     DateTime? updatedAt,
     @Default(false) bool isFavorite,
+    @Default(false) bool isActive, // 루틴 활성화 상태 (알림, 자동 실행 대상)
     @Default(0) int usageCount,
   }) = _DailyRoutine;
 

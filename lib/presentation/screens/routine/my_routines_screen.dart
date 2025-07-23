@@ -218,6 +218,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             onFavoriteToggle: () => _toggleFavorite(routine.id),
             onDelete: () => _deleteRoutine(routine.id),
             onCopy: () => _loadRoutines(),
+            onActiveToggle: () => _loadRoutines(),
           );
         },
       ),
@@ -257,6 +258,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             onFavoriteToggle: () => _toggleFavorite(routine.id),
             onDelete: () => _deleteRoutine(routine.id),
             onCopy: () => _loadRoutines(),
+            onActiveToggle: () => _loadRoutines(),
           );
         },
       ),
@@ -962,6 +964,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             onFavoriteToggle: () => _toggleFavorite(routine.id),
             onDelete: () => _deleteRoutine(routine.id),
             onCopy: () => _loadRoutines(),
+            onActiveToggle: () => _loadRoutines(),
           );
         },
       ),

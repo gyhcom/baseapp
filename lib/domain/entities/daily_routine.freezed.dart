@@ -29,6 +29,8 @@ mixin _$DailyRoutine {
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
   bool get isFavorite => throw _privateConstructorUsedError;
+  bool get isActive =>
+      throw _privateConstructorUsedError; // 루틴 활성화 상태 (알림, 자동 실행 대상)
   int get usageCount => throw _privateConstructorUsedError;
 
   /// Serializes this DailyRoutine to a JSON map.
@@ -57,6 +59,7 @@ abstract class $DailyRoutineCopyWith<$Res> {
       DateTime? createdAt,
       DateTime? updatedAt,
       bool isFavorite,
+      bool isActive,
       int usageCount});
 
   $UserProfileCopyWith<$Res> get generatedFor;
@@ -86,6 +89,7 @@ class _$DailyRoutineCopyWithImpl<$Res, $Val extends DailyRoutine>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? isFavorite = null,
+    Object? isActive = null,
     Object? usageCount = null,
   }) {
     return _then(_value.copyWith(
@@ -125,6 +129,10 @@ class _$DailyRoutineCopyWithImpl<$Res, $Val extends DailyRoutine>
           ? _value.isFavorite
           : isFavorite // ignore: cast_nullable_to_non_nullable
               as bool,
+      isActive: null == isActive
+          ? _value.isActive
+          : isActive // ignore: cast_nullable_to_non_nullable
+              as bool,
       usageCount: null == usageCount
           ? _value.usageCount
           : usageCount // ignore: cast_nullable_to_non_nullable
@@ -161,6 +169,7 @@ abstract class _$$DailyRoutineImplCopyWith<$Res>
       DateTime? createdAt,
       DateTime? updatedAt,
       bool isFavorite,
+      bool isActive,
       int usageCount});
 
   @override
@@ -189,6 +198,7 @@ class __$$DailyRoutineImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? isFavorite = null,
+    Object? isActive = null,
     Object? usageCount = null,
   }) {
     return _then(_$DailyRoutineImpl(
@@ -228,6 +238,10 @@ class __$$DailyRoutineImplCopyWithImpl<$Res>
           ? _value.isFavorite
           : isFavorite // ignore: cast_nullable_to_non_nullable
               as bool,
+      isActive: null == isActive
+          ? _value.isActive
+          : isActive // ignore: cast_nullable_to_non_nullable
+              as bool,
       usageCount: null == usageCount
           ? _value.usageCount
           : usageCount // ignore: cast_nullable_to_non_nullable
@@ -249,6 +263,7 @@ class _$DailyRoutineImpl implements _DailyRoutine {
       this.createdAt,
       this.updatedAt,
       this.isFavorite = false,
+      this.isActive = false,
       this.usageCount = 0})
       : _items = items;
 
@@ -283,11 +298,15 @@ class _$DailyRoutineImpl implements _DailyRoutine {
   final bool isFavorite;
   @override
   @JsonKey()
+  final bool isActive;
+// 루틴 활성화 상태 (알림, 자동 실행 대상)
+  @override
+  @JsonKey()
   final int usageCount;
 
   @override
   String toString() {
-    return 'DailyRoutine(id: $id, title: $title, concept: $concept, items: $items, generatedFor: $generatedFor, description: $description, createdAt: $createdAt, updatedAt: $updatedAt, isFavorite: $isFavorite, usageCount: $usageCount)';
+    return 'DailyRoutine(id: $id, title: $title, concept: $concept, items: $items, generatedFor: $generatedFor, description: $description, createdAt: $createdAt, updatedAt: $updatedAt, isFavorite: $isFavorite, isActive: $isActive, usageCount: $usageCount)';
   }
 
   @override
@@ -309,6 +328,8 @@ class _$DailyRoutineImpl implements _DailyRoutine {
                 other.updatedAt == updatedAt) &&
             (identical(other.isFavorite, isFavorite) ||
                 other.isFavorite == isFavorite) &&
+            (identical(other.isActive, isActive) ||
+                other.isActive == isActive) &&
             (identical(other.usageCount, usageCount) ||
                 other.usageCount == usageCount));
   }
@@ -326,6 +347,7 @@ class _$DailyRoutineImpl implements _DailyRoutine {
       createdAt,
       updatedAt,
       isFavorite,
+      isActive,
       usageCount);
 
   /// Create a copy of DailyRoutine
@@ -355,6 +377,7 @@ abstract class _DailyRoutine implements DailyRoutine {
       final DateTime? createdAt,
       final DateTime? updatedAt,
       final bool isFavorite,
+      final bool isActive,
       final int usageCount}) = _$DailyRoutineImpl;
 
   factory _DailyRoutine.fromJson(Map<String, dynamic> json) =
@@ -378,6 +401,8 @@ abstract class _DailyRoutine implements DailyRoutine {
   DateTime? get updatedAt;
   @override
   bool get isFavorite;
+  @override
+  bool get isActive; // 루틴 활성화 상태 (알림, 자동 실행 대상)
   @override
   int get usageCount;
 

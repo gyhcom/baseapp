@@ -15,11 +15,12 @@ void main() async {
     if (Platform.isIOS) {
       await Firebase.initializeApp(
         options: const FirebaseOptions(
-          apiKey: 'AIzaSyB5nC62FuhE6Si71zHHhA4rwL768WBHN1k',
-          appId: '1:519214372910:ios:6533c99e29a2b69cd367bf',
-          messagingSenderId: '519214372910',
-          projectId: 'routinecraft-9bb15',
-          storageBucket: 'routinecraft-9bb15.firebasestorage.app',
+          apiKey: 'AIzaSyDtxUeZDJksoOmiKYIUj5LkR-1TuZls1RE',
+          appId: '1:743929366941:ios:15884a7d38c846a6716eae',
+          messagingSenderId: '743929366941',
+          projectId: 'routinecraft-ios',
+          storageBucket: 'routinecraft-ios.appspot.com',
+          iosBundleId: 'com.routinecraft.app',
         ),
       );
     } else {
