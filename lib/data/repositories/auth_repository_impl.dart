@@ -200,7 +200,29 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserAuth?> getCurrentUserAuth() async {
-    return _userAuthBox?.get('current_user');
+    // Firebase 실시간 상태를 우선적으로 확인
+    if (_authService != null) {
+      final firebaseUser = _authService!.getCurrentUser();
+      
+      if (firebaseUser != null) {
+        // Firebase에서 사용자 정보를 가져온 경우, 로컬 저장소 업데이트
+        await saveUserAuth(firebaseUser);
+        print('🔄 Firebase에서 사용자 정보 동기화: ${firebaseUser.displayName} (${firebaseUser.email})');
+        return firebaseUser;
+      } else {
+        // Firebase에 사용자가 없으면 로컬 저장소도 클리어
+        await _userAuthBox?.clear();
+        print('🗑️ Firebase 로그아웃 상태로 로컬 데이터 클리어');
+        return null;
+      }
+    }
+    
+    // AuthService가 없는 경우에만 로컬 저장소에서 가져오기
+    final localUser = _userAuthBox?.get('current_user');
+    if (localUser != null) {
+      print('📦 로컬 저장소에서 사용자 정보 로드: ${localUser.displayName} (${localUser.email})');
+    }
+    return localUser;
   }
 
   @override

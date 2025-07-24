@@ -18,13 +18,13 @@ void main() async {
     // Initialize Firebase with options for iOS
     if (Platform.isIOS) {
       await Firebase.initializeApp(
-        options: const FirebaseOptions(
+        options: FirebaseOptions(
           apiKey: dotenv.env['FIREBASE_API_KEY'] ?? '',
-          appId: '1:743929366941:ios:15884a7d38c846a6716eae',
-          messagingSenderId: '743929366941',
-          projectId: 'routinecraft-ios',
-          storageBucket: 'routinecraft-ios.appspot.com',
-          iosBundleId: 'com.routinecraft.app',
+          appId: dotenv.env['FIREBASE_APP_ID'] ?? '',
+          messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+          projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+          storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
+          iosBundleId: dotenv.env['IOS_BUNDLE_ID'] ?? '',
         ),
       );
     } else {

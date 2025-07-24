@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../domain/entities/user_auth.dart';
 import '../../domain/services/auth_service.dart';
@@ -19,8 +20,8 @@ class FirebaseAuthService implements AuthService {
     GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn(
-          // Firebase 프로젝트의 클라이언트 ID 직접 설정
-          clientId: '519214372910-4am179ffmbj8927ocftg5pq7qjes7rsv.apps.googleusercontent.com',
+          // 환경변수에서 Firebase 프로젝트의 클라이언트 ID 가져오기
+          clientId: dotenv.env['GOOGLE_CLIENT_ID_IOS'],
           scopes: <String>[
             'email',
             'profile',
