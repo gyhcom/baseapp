@@ -209,7 +209,8 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+              context.router.popUntilRoot();
+              context.router.navigate(const HomeWrapperRoute());
             },
             child: const Text('홈으로'),
           ),
@@ -473,6 +474,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                       icon: const Icon(Icons.home_outlined),
                       tooltip: '홈으로',
                       onPressed: () {
+                        context.router.popUntilRoot();
                         context.router.navigate(const HomeWrapperRoute());
                       },
                     ),

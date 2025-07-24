@@ -180,6 +180,8 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
             icon: const Icon(Icons.home_outlined),
             tooltip: '홈으로',
             onPressed: () {
+              // 네비게이션 스택을 정리하고 홈으로 이동
+              context.router.popUntilRoot();
               context.router.navigate(const HomeWrapperRoute());
             },
           ),

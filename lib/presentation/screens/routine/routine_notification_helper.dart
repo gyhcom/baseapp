@@ -21,8 +21,8 @@ class RoutineNotificationHelper {
       // 루틴에 대한 알림 예약
       await _notificationUseCase.scheduleRoutineNotifications(routine);
       
-      // 알림 예약 로그 (향후 분석용)
-      await _logNotificationScheduled(routine);
+      // 알림 예약 로그 (향후 분석용) - 임시 비활성화
+      // await _logNotificationScheduled(routine);
       
       print('✅ 알림이 예약되었습니다: ${routine.title}');
     } catch (e) {

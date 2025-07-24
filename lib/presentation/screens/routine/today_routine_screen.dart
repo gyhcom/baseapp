@@ -124,6 +124,7 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
                 icon: const Icon(Icons.home_outlined, color: Colors.white),
                 tooltip: '홈으로',
                 onPressed: () {
+                  context.router.popUntilRoot();
                   context.router.navigate(const HomeWrapperRoute());
                 },
               ),

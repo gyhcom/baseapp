@@ -3,7 +3,7 @@ class ApiConstants {
   // Claude API 설정
   // ⚠️ 프로덕션에서는 반드시 환경변수 사용! 
   // 테스트용으로만 여기에 직접 입력하세요
-  static const String claudeApiKey = '***REMOVED***'; // 실제 API 키 적용
+  static const String claudeApiKey = ''; // 보안을 위해 환경변수 사용
   static const String claudeApiUrl = 'https://api.anthropic.com';
   static const String claudeApiVersion = '2023-06-01';
   

@@ -15,7 +15,7 @@ void main() async {
     if (Platform.isIOS) {
       await Firebase.initializeApp(
         options: const FirebaseOptions(
-          apiKey: 'AIzaSyDtxUeZDJksoOmiKYIUj5LkR-1TuZls1RE',
+          apiKey: const String.fromEnvironment('FIREBASE_API_KEY', defaultValue: ''),
           appId: '1:743929366941:ios:15884a7d38c846a6716eae',
           messagingSenderId: '743929366941',
           projectId: 'routinecraft-ios',

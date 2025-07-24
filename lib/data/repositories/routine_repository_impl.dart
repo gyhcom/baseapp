@@ -83,8 +83,13 @@ class RoutineRepositoryImpl implements RoutineRepository {
       if (afterAlarmRoutine?.isActive == false) {
         print('⚠️ 알림 예약 후 상태가 비활성화됨! 다시 복원 중...');
         final restoredRoutine = updatedRoutine.copyWith(isActive: true);
+        print('🔧 복원할 루틴 상태: ${restoredRoutine.isActive}');
         await _localDataSource.saveRoutine(restoredRoutine);
         print('✅ 루틴 상태 복원 완료');
+        
+        // 복원 후 다시 확인
+        final finalCheckRoutine = await getRoutineById(updatedRoutine.id);
+        print('🔍 복원 후 실제 상태: ${finalCheckRoutine?.isActive}');
       }
     } else {
       print('🔕 비활성화 상태이므로 알림 예약 건너뛰기');
@@ -181,5 +186,16 @@ class RoutineRepositoryImpl implements RoutineRepository {
   @override
   Future<void> clearAllData() async {
     await _localDataSource.clearAllData();
+  }
+
+  /// Hive 스키마 변경으로 인한 임시 데이터 초기화
+  Future<void> migrateHiveData() async {
+    try {
+      print('🔄 Hive 데이터 마이그레이션 시작...');
+      await _localDataSource.clearAllData();
+      print('✅ Hive 데이터 마이그레이션 완료');
+    } catch (e) {
+      print('❌ Hive 데이터 마이그레이션 실패: $e');
+    }
   }
 }

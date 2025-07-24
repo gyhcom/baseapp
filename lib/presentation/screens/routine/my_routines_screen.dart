@@ -110,6 +110,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             icon: const Icon(Icons.home_outlined),
             tooltip: '홈으로',
             onPressed: () {
+              context.router.popUntilRoot();
               context.router.navigate(const HomeWrapperRoute());
             },
           ),

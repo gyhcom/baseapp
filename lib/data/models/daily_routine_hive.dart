@@ -37,6 +37,9 @@ class DailyRoutineHive extends HiveObject {
   @HiveField(8)
   final int usageCount;
 
+  @HiveField(9)
+  final bool isActive;
+
   DailyRoutineHive({
     required this.id,
     required this.title,
@@ -47,6 +50,7 @@ class DailyRoutineHive extends HiveObject {
     this.createdAt,
     required this.isFavorite,
     required this.usageCount,
+    required this.isActive,
   });
 
   /// DailyRoutine 엔티티로 변환
@@ -61,6 +65,7 @@ class DailyRoutineHive extends HiveObject {
       createdAt: createdAt,
       isFavorite: isFavorite,
       usageCount: usageCount,
+      isActive: isActive,
     );
   }
 
@@ -76,6 +81,7 @@ class DailyRoutineHive extends HiveObject {
       createdAt: routine.createdAt,
       isFavorite: routine.isFavorite,
       usageCount: routine.usageCount,
+      isActive: routine.isActive,
     );
   }
 
