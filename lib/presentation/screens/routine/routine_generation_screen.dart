@@ -208,9 +208,12 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
         actions: [
           TextButton(
             onPressed: () {
+              // 다이얼로그 닫기
               Navigator.of(context).pop();
-              // 홈 화면으로 네비게이션 (기존 스택 대체)
-              context.router.navigate(const HomeWrapperRoute());
+              // 홈 화면이 있는 곳까지 pop하기
+              Navigator.of(context).popUntil((route) {
+                return route.settings.name?.contains('Home') == true || route.isFirst;
+              });
             },
             child: const Text('홈으로'),
           ),
