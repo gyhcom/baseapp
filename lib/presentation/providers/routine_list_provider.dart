@@ -42,7 +42,7 @@ class RoutineListProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _allRoutines = await _routineRepository.getAllRoutines();
+      _allRoutines = await _routineRepository.getSavedRoutines();
       _favoriteRoutines = _allRoutines.where((routine) => routine.isFavorite).toList();
       
       // 초기에는 필터링되지 않은 전체 목록을 표시
@@ -153,11 +153,10 @@ class RoutineListProvider with ChangeNotifier {
   /// 저장 공간 상태 업데이트
   Future<void> _updateStorageStatus() async {
     try {
-      final routineLimitService = getIt<RoutineLimitService>();
       _currentCount = _allRoutines.length;
-      _remainingSlots = await routineLimitService.getRemainingRoutineSlots();
-      _storageStatus = await routineLimitService.getRoutineStorageStatus();
-      _userTier = await routineLimitService.getCurrentUserTier();
+      _remainingSlots = await RoutineLimitService.getRemainingSlots();
+      _storageStatus = await RoutineLimitService.getStorageStatus();
+      _userTier = await RoutineLimitService.getUserTier();
     } catch (e) {
       debugPrint('저장 공간 상태 업데이트 실패: $e');
     }

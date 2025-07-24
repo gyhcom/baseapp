@@ -90,7 +90,7 @@ class RoutineStorageIndicator extends StatelessWidget {
   Widget _buildProgressBar(RoutineListProvider provider) {
     final maxRoutines = provider.userTier == UserTier.premium 
         ? double.infinity 
-        : RoutineLimits.maxRoutinesForFree;
+        : RoutineLimits.freeMaxRoutines;
     
     if (maxRoutines == double.infinity) {
       return Container(
@@ -140,7 +140,7 @@ class RoutineStorageIndicator extends StatelessWidget {
       );
     }
 
-    final maxRoutines = RoutineLimits.maxRoutinesForFree;
+    final maxRoutines = RoutineLimits.freeMaxRoutines;
     final statusText = _getStatusText(provider.storageStatus, provider.currentCount, maxRoutines);
     final statusColor = _getStatusColor(provider.storageStatus);
 
@@ -161,8 +161,10 @@ class RoutineStorageIndicator extends StatelessWidget {
         return Colors.blue;
       case LimitStatus.warning:
         return Colors.orange;
-      case LimitStatus.limit:
+      case LimitStatus.exceeded:
         return Colors.red;
+      case LimitStatus.unlimited:
+        return Colors.green;
     }
   }
 
@@ -173,8 +175,10 @@ class RoutineStorageIndicator extends StatelessWidget {
         return Colors.grey[600]!;
       case LimitStatus.warning:
         return Colors.orange[700]!;
-      case LimitStatus.limit:
+      case LimitStatus.exceeded:
         return Colors.red[700]!;
+      case LimitStatus.unlimited:
+        return Colors.green[700]!;
     }
   }
 
@@ -185,8 +189,10 @@ class RoutineStorageIndicator extends StatelessWidget {
         return '$current/$max개 사용 중 (${max - current}개 더 추가 가능)';
       case LimitStatus.warning:
         return '$current/$max개 사용 중 (${max - current}개만 더 추가 가능)';
-      case LimitStatus.limit:
-        return '$current/$max개 사용 중 (저장 공간이 가득참)';
+      case LimitStatus.exceeded:
+        return '$current/$max개 사용 중 (저장 공간이 가득함)';
+      case LimitStatus.unlimited:
+        return '무제한 루틴 저장 가능 (현재 $current개)';
     }
   }
 }

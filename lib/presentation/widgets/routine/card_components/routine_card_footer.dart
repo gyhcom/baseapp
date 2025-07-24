@@ -53,7 +53,7 @@ class RoutineCardFooter extends StatelessWidget {
         
         // 생성/수정 날짜
         Text(
-          _formatDate(routine.updatedAt ?? routine.createdAt),
+          _formatDate(routine.updatedAt ?? routine.createdAt!),
           style: TextStyle(
             fontSize: 11,
             color: Colors.grey[500],

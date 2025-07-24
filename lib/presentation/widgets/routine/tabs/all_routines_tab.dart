@@ -45,7 +45,7 @@ class AllRoutinesTab extends StatelessWidget {
                 child: RoutineSummaryCard(
                   routine: routine,
                   onTap: () => onRoutineDetail(routine),
-                  onToggleFavorite: () => routineProvider.toggleFavorite(routine.id),
+                  onFavoriteToggle: () => routineProvider.toggleFavorite(routine.id),
                   onDelete: () => _showDeleteDialog(context, routine, routineProvider),
                 ),
               );

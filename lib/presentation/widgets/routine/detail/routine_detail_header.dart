@@ -44,10 +44,9 @@ class RoutineDetailHeader extends StatelessWidget {
                   color: routine.concept.color.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  routine.concept.icon,
-                  color: routine.concept.color,
-                  size: 24,
+                child: Text(
+                  routine.concept.displayName.split(' ')[0], // 이모지 부분만 추출
+                  style: const TextStyle(fontSize: 24),
                 ),
               ),
               const Spacer(),

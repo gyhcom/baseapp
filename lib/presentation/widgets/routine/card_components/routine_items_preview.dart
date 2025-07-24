@@ -120,16 +120,15 @@ class RoutineItemsPreview extends StatelessWidget {
             ),
           ),
           
-          // 시간 표시 (있는 경우)
-          if (item.scheduledTime != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '${item.scheduledTime!.hour.toString().padLeft(2, '0')}:${item.scheduledTime!.minute.toString().padLeft(2, '0')}',
+          // 시간 표시
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '${item.startTime.hour.toString().padLeft(2, '0')}:${item.startTime.minute.toString().padLeft(2, '0')}',
                 style: TextStyle(
                   fontSize: 10,
                   color: Colors.blue[700],

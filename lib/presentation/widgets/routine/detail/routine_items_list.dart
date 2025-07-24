@@ -207,15 +207,14 @@ class RoutineItemsList extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             // 예정 시간 표시
-            if (item.scheduledTime != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${item.scheduledTime!.hour.toString().padLeft(2, '0')}:${item.scheduledTime!.minute.toString().padLeft(2, '0')}',
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '${item.startTime.hour.toString().padLeft(2, '0')}:${item.startTime.minute.toString().padLeft(2, '0')}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.blue[700],
@@ -251,19 +250,15 @@ class RoutineItemsList extends StatelessWidget {
     for (final item in items) {
       String timeLabel = '';
       
-      if (item.scheduledTime != null) {
-        final hour = item.scheduledTime!.hour;
-        if (hour >= 5 && hour < 12) {
-          timeLabel = '🌅 오전';
-        } else if (hour >= 12 && hour < 18) {
-          timeLabel = '☀️ 오후';
-        } else if (hour >= 18 && hour < 22) {
-          timeLabel = '🌆 저녁';
-        } else {
-          timeLabel = '🌙 밤';
-        }
+      final hour = item.startTime.hour;
+      if (hour >= 5 && hour < 12) {
+        timeLabel = '🌅 오전';
+      } else if (hour >= 12 && hour < 18) {
+        timeLabel = '☀️ 오후';
+      } else if (hour >= 18 && hour < 22) {
+        timeLabel = '🌆 저녁';
       } else {
-        timeLabel = '📝 언제든지';
+        timeLabel = '🌙 밤';
       }
       
       groups[timeLabel] = groups[timeLabel] ?? [];

@@ -209,7 +209,8 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+              // 홈 화면으로 직접 이동 (루틴 생성 관련 화면들 모두 제거)
+              Navigator.of(context).pushReplacementNamed('/home');
             },
             child: const Text('홈으로'),
           ),

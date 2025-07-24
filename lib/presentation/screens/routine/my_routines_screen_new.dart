@@ -12,6 +12,7 @@ import '../../widgets/routine/search/routine_search_bar.dart';
 import '../../widgets/routine/search/routine_filter_chips.dart';
 import '../../widgets/routine/storage/routine_storage_indicator.dart';
 import '../../widgets/common/common_app_bar.dart';
+import 'routine_detail_screen_new.dart';
 
 /// 리팩토링된 내 루틴 목록 화면
 @RoutePage()
@@ -306,6 +307,10 @@ class _MyRoutinesScreenNewState extends State<MyRoutinesScreenNew>
 
   /// 루틴 상세 화면 열기
   void _openRoutineDetail(DailyRoutine routine) {
-    context.router.push(RoutineDetailRoute(routine: routine));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => RoutineDetailScreenNew(routine: routine),
+      ),
+    );
   }
 }

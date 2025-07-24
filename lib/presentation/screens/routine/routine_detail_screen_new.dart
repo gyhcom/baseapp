@@ -360,7 +360,7 @@ class _ItemEditDialogState extends State<_ItemEditDialog> {
     super.initState();
     _titleController = TextEditingController(text: widget.item.title);
     _descriptionController = TextEditingController(text: widget.item.description);
-    _selectedTime = widget.item.scheduledTime;
+    _selectedTime = widget.item.startTime;
   }
 
   @override
@@ -446,7 +446,7 @@ class _ItemEditDialogState extends State<_ItemEditDialog> {
     final updatedItem = widget.item.copyWith(
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
-      scheduledTime: _selectedTime,
+      startTime: _selectedTime!,
     );
 
     widget.onSave(updatedItem);
