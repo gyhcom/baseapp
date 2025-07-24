@@ -95,6 +95,7 @@ dependencies:
   # ========== ICONS ==========
   cupertino_icons: ^1.0.8
   flutter_launcher_icons: ^0.13.1    # App icon generation
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -130,6 +131,7 @@ flutter:
     - assets/animations/
     - assets/lottie/
     - assets/translations/
+    - .env
   
   # ========== FONTS ==========
   # fonts:
