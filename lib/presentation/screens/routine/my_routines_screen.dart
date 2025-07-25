@@ -110,6 +110,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             icon: const Icon(Icons.home_outlined),
             tooltip: '홈으로',
             onPressed: () {
+              context.router.popUntilRoot();
               context.router.navigate(const HomeWrapperRoute());
             },
           ),
@@ -218,6 +219,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             onFavoriteToggle: () => _toggleFavorite(routine.id),
             onDelete: () => _deleteRoutine(routine.id),
             onCopy: () => _loadRoutines(),
+            onActiveToggle: () => _loadRoutines(),
           );
         },
       ),
@@ -257,6 +259,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             onFavoriteToggle: () => _toggleFavorite(routine.id),
             onDelete: () => _deleteRoutine(routine.id),
             onCopy: () => _loadRoutines(),
+            onActiveToggle: () => _loadRoutines(),
           );
         },
       ),
@@ -962,6 +965,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             onFavoriteToggle: () => _toggleFavorite(routine.id),
             onDelete: () => _deleteRoutine(routine.id),
             onCopy: () => _loadRoutines(),
+            onActiveToggle: () => _loadRoutines(),
           );
         },
       ),

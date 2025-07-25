@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../../core/config/app_router.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
 import '../../../domain/repositories/routine_repository.dart';
+import '../../../domain/services/routine_limit_service.dart';
+import '../../../core/constants/routine_limits.dart';
 import '../../../di/service_locator.dart';
 import '../../widgets/routine/routine_item_card.dart';
+import '../../providers/behavior_analytics_provider.dart';
+import '../../../domain/entities/user_behavior_log.dart';
 
 /// 루틴 상세 화면
-class RoutineDetailScreen extends StatefulWidget {
+class RoutineDetailScreen extends ConsumerStatefulWidget {
   final DailyRoutine routine;
 
   const RoutineDetailScreen({
@@ -19,10 +24,10 @@ class RoutineDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<RoutineDetailScreen> createState() => _RoutineDetailScreenState();
+  ConsumerState<RoutineDetailScreen> createState() => _RoutineDetailScreenState();
 }
 
-class _RoutineDetailScreenState extends State<RoutineDetailScreen>
+class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -55,17 +60,109 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
     super.dispose();
   }
 
-  void _toggleItemComplete(String itemId) {
+  void _toggleItemComplete(String itemId) async {
+    // 루틴이 활성화되지 않은 경우 체크 방지
+    if (!_currentRoutine.isActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('📢 루틴을 활성화해주세요! 활성화 후 루틴을 완료할 수 있습니다.'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: '활성화',
+            textColor: Colors.white,
+            onPressed: () {
+              _toggleActiveStatus();
+            },
+          ),
+        ),
+      );
+      return; // 체크 동작 중단
+    }
+    
+    final behaviorLogger = ref.read(behaviorLoggerProvider);
+    final userId = 'current_user'; // 실제로는 현재 로그인된 사용자 ID 사용
+    
     setState(() {
       final updatedItems = _currentRoutine.items.map((item) {
         if (item.id == itemId) {
-          return item.copyWith(isCompleted: !item.isCompleted);
+          final wasCompleted = item.isCompleted;
+          final newCompleted = !item.isCompleted;
+          
+          // 로그 수집 (비동기로 실행)
+          if (newCompleted && !wasCompleted) {
+            // 완료로 변경될 때
+            behaviorLogger.logRoutineCompleted(
+              userId: userId,
+              routineId: _currentRoutine.id,
+              routineItemId: itemId,
+            );
+            print('🎉 루틴 아이템 완료: ${item.title}');
+          } else if (!newCompleted && wasCompleted) {
+            // 완료 취소될 때
+            behaviorLogger.quickLog(
+              userId: userId,
+              routineId: _currentRoutine.id,
+              type: BehaviorType.routineStarted, // 다시 시작으로 간주
+            );
+            print('🔄 루틴 아이템 완료 취소: ${item.title}');
+          }
+          
+          return item.copyWith(isCompleted: newCompleted);
         }
         return item;
       }).toList();
       
       _currentRoutine = _currentRoutine.copyWith(items: updatedItems);
     });
+    
+    // 전체 루틴 완료 체크
+    final completedCount = _currentRoutine.items.where((item) => item.isCompleted).length;
+    final totalCount = _currentRoutine.items.length;
+    
+    if (completedCount == totalCount && totalCount > 0) {
+      // 모든 항목 완료 시 전체 루틴 완료 로그
+      await behaviorLogger.logRoutineCompleted(
+        userId: userId,
+        routineId: _currentRoutine.id,
+        routineItemId: 'full_routine',
+        duration: const Duration(minutes: 30), // 대략적인 소요 시간
+      );
+      
+      // 성공 메시지 표시
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('🎉 루틴을 모두 완료했어요! 멋져요!'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+      
+      print('🏆 전체 루틴 완료! 사용 횟수 증가');
+      
+      // 사용 횟수 증가 및 루틴 업데이트
+      try {
+        final routineRepository = getIt<RoutineRepository>();
+        await routineRepository.incrementUsageCount(_currentRoutine.id);
+        
+        // 변경된 루틴 상태를 데이터베이스에 저장
+        await routineRepository.updateRoutine(_currentRoutine);
+        print('✅ 루틴 상태 저장 완료');
+      } catch (e) {
+        print('❌ 루틴 업데이트 실패: $e');
+      }
+    } else {
+      // 전체 완료가 아니더라도 개별 항목 변경사항은 저장
+      try {
+        final routineRepository = getIt<RoutineRepository>();
+        await routineRepository.updateRoutine(_currentRoutine);
+        print('✅ 루틴 항목 변경사항 저장');
+      } catch (e) {
+        print('❌ 루틴 항목 업데이트 실패: $e');
+      }
+    }
   }
 
   @override
@@ -83,6 +180,8 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
             icon: const Icon(Icons.home_outlined),
             tooltip: '홈으로',
             onPressed: () {
+              // 네비게이션 스택을 정리하고 홈으로 이동
+              context.router.popUntilRoot();
               context.router.navigate(const HomeWrapperRoute());
             },
           ),
@@ -214,6 +313,41 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
                         ),
                       ],
                     ),
+                    
+                    const SizedBox(height: AppTheme.spacingS),
+                    
+                    // 활성화 상태 토글
+                    Row(
+                      children: [
+                        Icon(
+                          _currentRoutine.isActive ? Icons.notifications_active : Icons.notifications_off,
+                          key: ValueKey('icon_${_currentRoutine.isActive}'), // 강제 리빌드
+                          color: Colors.white.withOpacity(0.8),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _currentRoutine.isActive ? '활성화됨' : '비활성화됨',
+                          key: ValueKey('text_${_currentRoutine.isActive}'), // 강제 리빌드
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                        const Spacer(),
+                        Switch(
+                          key: ValueKey(_currentRoutine.isActive), // 강제 리빌드용 키
+                          value: _currentRoutine.isActive,
+                          onChanged: (value) {
+                            print('🎛️ 스위치 클릭: $value (현재: ${_currentRoutine.isActive})');
+                            _toggleActiveStatus();
+                          },
+                          activeColor: Colors.white,
+                          activeTrackColor: Colors.white.withOpacity(0.3),
+                          inactiveThumbColor: Colors.white.withOpacity(0.5),
+                          inactiveTrackColor: Colors.white.withOpacity(0.2),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -295,13 +429,64 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
     // 시간대별로 그룹화
     final groupedItems = _groupItemsByTimeOfDay();
     
-    return ListView.builder(
-      padding: const EdgeInsets.all(AppTheme.spacingL),
-      itemCount: groupedItems.length,
-      itemBuilder: (context, index) {
-        final group = groupedItems[index];
-        return _buildTimeGroup(group);
-      },
+    return Column(
+      children: [
+        // 비활성화 상태 안내 메시지
+        if (!_currentRoutine.isActive)
+          Container(
+            margin: const EdgeInsets.all(AppTheme.spacingL),
+            padding: const EdgeInsets.all(AppTheme.spacingL),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.1),
+              borderRadius: AppTheme.mediumRadius,
+              border: Border.all(color: Colors.orange.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Colors.orange,
+                  size: 24,
+                ),
+                const SizedBox(width: AppTheme.spacingM),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '루틴이 비활성화되어 있어요',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '활성화 후 루틴을 완료할 수 있습니다',
+                        style: TextStyle(
+                          color: Colors.orange.shade700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        
+        // 루틴 아이템 리스트
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(AppTheme.spacingL),
+            itemCount: groupedItems.length,
+            itemBuilder: (context, index) {
+              final group = groupedItems[index];
+              return _buildTimeGroup(group);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -341,6 +526,7 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
           item: item,
           onToggleComplete: () => _toggleItemComplete(item.id),
           onEdit: () => _editItem(item),
+          isEnabled: _currentRoutine.isActive, // 루틴 활성화 상태 전달
         )).toList(),
         
         const SizedBox(height: AppTheme.spacingL),
@@ -570,11 +756,11 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
       
       // 저장 제한 체크
       final currentCount = await routineRepository.getSavedRoutines();
-      if (currentCount.length >= 1) { // 무료 사용자 제한
+      if (currentCount.length >= 2) { // 무료 사용자 제한
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('무료 사용자는 1개의 루틴만 저장할 수 있습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요'),
+              content: Text('무료 사용자는 2개의 루틴만 저장할 수 있습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요'),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 3),
             ),
@@ -649,6 +835,170 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen>
             child: const Text('삭제', style: TextStyle(color: Colors.red)),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 루틴 활성화 상태 토글
+  Future<void> _toggleActiveStatus() async {
+    print('🔄 루틴 활성화 토글 시작: ${_currentRoutine.title} (현재: ${_currentRoutine.isActive})');
+    
+    try {
+      final routineRepository = getIt<RoutineRepository>();
+      
+      // 활성화하려는 경우 제한 검사
+      if (!_currentRoutine.isActive) {
+        print('📊 활성화 제한 검사 중...');
+        final canActivate = await RoutineLimitService.canActivateRoutine();
+        print('📊 활성화 가능 여부: $canActivate');
+        
+        if (!canActivate) {
+          print('❌ 활성화 제한으로 인해 실패');
+          // 제한 초과 시 업그레이드 안내
+          _showActivationLimitDialog();
+          return;
+        }
+        
+        // 무료 사용자는 기존 활성화된 루틴을 자동 비활성화
+        final userTier = await RoutineLimitService.getUserTier();
+        print('👤 사용자 등급: $userTier');
+        if (userTier == UserTier.free) {
+          print('🔧 기존 활성화된 루틴들 비활성화 중 (현재 루틴 제외: ${_currentRoutine.id})...');
+          await routineRepository.deactivateAllRoutines(exceptRoutineId: _currentRoutine.id);
+        }
+      } else {
+        print('📊 루틴 비활성화 진행');
+      }
+      
+      // UI 상태를 먼저 낙관적으로 업데이트
+      final expectedNewState = !_currentRoutine.isActive;
+      print('🎨 UI 상태 낙관적 업데이트: $expectedNewState');
+      setState(() {
+        _currentRoutine = _currentRoutine.copyWith(isActive: expectedNewState);
+      });
+      
+      // 상태 토글
+      print('🔧 데이터베이스에서 루틴 상태 토글 실행...');
+      await routineRepository.toggleRoutineActive(_currentRoutine.id);
+      print('✅ 데이터베이스 토글 완료');
+      
+      // 데이터베이스에서 실제 상태 확인하여 UI와 동기화
+      print('🔄 실제 상태 확인 중...');
+      final updatedRoutine = await routineRepository.getRoutineById(_currentRoutine.id);
+      if (updatedRoutine != null) {
+        print('📊 실제 DB 상태: ${updatedRoutine.isActive}');
+        print('📊 현재 UI 상태: ${_currentRoutine.isActive}');
+        
+        // DB 상태와 UI 상태가 다르면 UI를 다시 업데이트
+        if (updatedRoutine.isActive != _currentRoutine.isActive) {
+          print('⚠️ 상태 불일치 발견, UI 재동기화');
+          setState(() {
+            _currentRoutine = updatedRoutine;
+          });
+        }
+        print('✅ UI-DB 동기화 완료');
+      } else {
+        print('❌ 업데이트된 루틴 정보를 가져오지 못함');
+      }
+      
+      // 행동 로그 수집
+      final behaviorLogger = ref.read(behaviorLoggerProvider);
+      final userId = 'current_user';
+      
+      // 활성화/비활성화 로그 수집
+      if (_currentRoutine.isActive) {
+        await behaviorLogger.quickLog(
+          userId: userId,
+          routineId: _currentRoutine.id,
+          type: BehaviorType.routineStarted,
+        );
+        print('📊 루틴 활성화 로그: ${_currentRoutine.title}');
+      } else {
+        print('📊 루틴 비활성화: ${_currentRoutine.title}');
+      }
+      
+      // 성공 메시지
+      final message = _currentRoutine.isActive 
+          ? '루틴이 활성화되었습니다. 알림과 추천을 받을 수 있습니다.' 
+          : '루틴이 비활성화되었습니다.';
+          
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: _currentRoutine.isActive ? Colors.green : Colors.grey,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      
+    } catch (e) {
+      print('❌ 루틴 활성화 토글 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('상태 변경에 실패했습니다: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+    
+    print('🏁 루틴 활성화 토글 완료: ${_currentRoutine.isActive}');
+  }
+
+  /// 활성화 제한 다이얼로그 표시
+  void _showActivationLimitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('🔒 활성화 제한'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '무료 사용자는 1개의 루틴만 활성화할 수 있습니다.',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 12),
+            Text(
+              '프리미엄으로 업그레이드하면:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('✨ 무제한 루틴 활성화'),
+            Text('✨ 무제한 루틴 저장'),
+            Text('✨ 루틴당 최대 10개 활동'),
+            Text('✨ 무제한 AI 루틴 생성'),
+            Text('✨ 통계 및 분석 기능'),
+            Text('✨ 백업 및 복원'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('나중에'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showPremiumUpgradeInfo();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+            ),
+            child: const Text('프리미엄 알아보기', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 프리미엄 업그레이드 정보 표시
+  void _showPremiumUpgradeInfo() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('🚧 프리미엄 기능은 준비 중입니다. 곧 출시될 예정입니다!'),
+        backgroundColor: AppTheme.primaryColor,
+        duration: Duration(seconds: 3),
       ),
     );
   }

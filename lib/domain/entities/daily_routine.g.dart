@@ -24,6 +24,7 @@ _$DailyRoutineImpl _$$DailyRoutineImplFromJson(Map<String, dynamic> json) =>
           ? null
           : DateTime.parse(json['updatedAt'] as String),
       isFavorite: json['isFavorite'] as bool? ?? false,
+      isActive: json['isActive'] as bool? ?? false,
       usageCount: (json['usageCount'] as num?)?.toInt() ?? 0,
     );
 
@@ -38,6 +39,7 @@ Map<String, dynamic> _$$DailyRoutineImplToJson(_$DailyRoutineImpl instance) =>
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'isFavorite': instance.isFavorite,
+      'isActive': instance.isActive,
       'usageCount': instance.usageCount,
     };
 

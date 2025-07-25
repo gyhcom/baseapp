@@ -8,6 +8,8 @@ import '../../../domain/entities/user_usage.dart';
 import '../../../domain/entities/routine_concept.dart';
 import '../../../domain/repositories/routine_repository.dart';
 import '../../../domain/repositories/usage_repository.dart';
+import '../../../domain/services/routine_limit_service.dart';
+import '../../../core/constants/routine_limits.dart';
 import '../../../di/service_locator.dart';
 import '../../widgets/usage/usage_indicator.dart';
 import '../../providers/auth_provider.dart';
@@ -210,6 +212,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         title: const Text('프로필'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: false, // 기본 뒤로 가기 버튼 비활성화
+        leading: IconButton(
+          icon: const Icon(Icons.home_outlined),
+          tooltip: '홈으로',
+          onPressed: () {
+            // BottomNavigationBar를 사용하여 홈 탭으로 이동
+            final tabsRouter = context.router.parent<TabsRouter>();
+            if (tabsRouter != null) {
+              tabsRouter.setActiveIndex(0); // 홈 탭으로 이동
+            }
+          },
+        ),
         actions: [
           if (_userProfile != null)
             IconButton(
@@ -242,6 +256,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   
                   // 사용량 정보
                   _buildUsageSection(),
+                  
+                  const SizedBox(height: AppTheme.spacingXL),
+                  
+                  // 프리미엄 정보
+                  _buildPremiumSection(),
                   
                   const SizedBox(height: AppTheme.spacingXL),
                   
@@ -720,6 +739,249 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingM),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 프리미엄 섹션
+  Widget _buildPremiumSection() {
+    return FutureBuilder<UserTier>(
+      future: RoutineLimitService.getUserTier(),
+      builder: (context, snapshot) {
+        final userTier = snapshot.data ?? UserTier.free;
+        final isPremium = userTier == UserTier.premium;
+        
+        return Container(
+          padding: const EdgeInsets.all(AppTheme.spacingL),
+          decoration: BoxDecoration(
+            gradient: isPremium 
+                ? LinearGradient(
+                    colors: [Colors.amber.shade100, Colors.orange.shade100],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: isPremium ? null : AppTheme.surfaceColor,
+            borderRadius: AppTheme.mediumRadius,
+            boxShadow: [AppTheme.cardShadow],
+            border: isPremium 
+                ? Border.all(color: Colors.amber.shade300, width: 2)
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isPremium ? Icons.workspace_premium : Icons.upgrade,
+                    color: isPremium ? Colors.amber.shade700 : AppTheme.primaryColor,
+                    size: 24,
+                  ),
+                  const SizedBox(width: AppTheme.spacingS),
+                  Text(
+                    isPremium ? '프리미엄 사용자' : '무료 사용자',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isPremium ? Colors.amber.shade700 : null,
+                    ),
+                  ),
+                  if (isPremium) ...[
+                    const SizedBox(width: AppTheme.spacingS),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade700,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'PRO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              
+              const SizedBox(height: AppTheme.spacingM),
+              
+              if (isPremium) ...[
+                Text(
+                  '프리미엄 혜택을 모두 이용하고 계십니다!',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.amber.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spacingM),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    _buildFeatureChip('무제한 루틴 생성', Colors.green),
+                    _buildFeatureChip('무제한 루틴 활성화', Colors.blue),
+                    _buildFeatureChip('루틴당 10개 활동', Colors.purple),
+                    _buildFeatureChip('무제한 AI 생성', Colors.orange),
+                    _buildFeatureChip('고급 통계', Colors.teal),
+                    _buildFeatureChip('백업 & 복원', Colors.indigo),
+                  ],
+                ),
+              ] else ...[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '현재 제한사항:',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.textSecondaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildLimitationItem('루틴 저장', '2개'),
+                    _buildLimitationItem('루틴 활성화', '1개'),
+                    _buildLimitationItem('루틴당 활동', '5개'),
+                    _buildLimitationItem('AI 루틴 생성', '1일 1회'),
+                    
+                    const SizedBox(height: AppTheme.spacingL),
+                    
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _showPremiumUpgradeDialog,
+                        icon: const Icon(Icons.workspace_premium),
+                        label: const Text('프리미엄으로 업그레이드'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppTheme.mediumRadius,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildFeatureChip(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color.withOpacity(0.8),
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildLimitationItem(String title, String limit) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Icon(
+            Icons.radio_button_unchecked,
+            size: 16,
+            color: AppTheme.textSecondaryColor,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          Text(
+            limit,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: AppTheme.primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showPremiumUpgradeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.workspace_premium, color: Colors.amber),
+            SizedBox(width: 8),
+            Text('프리미엄 업그레이드'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '프리미엄 업그레이드 시 모든 제한이 해제됩니다:',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 16),
+            Text('✨ 무제한 루틴 생성 및 저장'),
+            Text('✨ 무제한 루틴 활성화'),
+            Text('✨ 루틴당 최대 10개 활동'),
+            Text('✨ 무제한 AI 루틴 생성'),
+            Text('✨ 고급 통계 및 분석 기능'),
+            Text('✨ 클라우드 백업 및 복원'),
+            Text('✨ 루틴 공유 및 템플릿'),
+            Text('✨ 프리미엄 테마'),
+            SizedBox(height: 16),
+            Text(
+              '💡 현재는 개발 단계로 무료로 모든 기능을 이용하실 수 있습니다!',
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('나중에'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('🚧 프리미엄 기능은 곧 출시될 예정입니다!'),
+                  backgroundColor: AppTheme.primaryColor,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+            ),
+            child: const Text('업그레이드 알림 받기', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

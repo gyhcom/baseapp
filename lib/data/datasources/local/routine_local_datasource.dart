@@ -48,6 +48,17 @@ class RoutineLocalDataSourceImpl implements RoutineLocalDataSource {
   Future<void> init() async {
     await Hive.initFlutter();
     
+    // 스키마 변경으로 인한 기존 박스 삭제 (임시)
+    try {
+      if (await Hive.boxExists(_routineBoxName)) {
+        print('🗑️ 기존 루틴 박스 삭제 중...');
+        await Hive.deleteBoxFromDisk(_routineBoxName);
+        print('✅ 기존 루틴 박스 삭제 완료');
+      }
+    } catch (e) {
+      print('⚠️ 기존 박스 삭제 실패 (계속 진행): $e');
+    }
+    
     // 어댑터 등록
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(DailyRoutineHiveAdapter());

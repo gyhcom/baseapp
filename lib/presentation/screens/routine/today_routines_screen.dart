@@ -27,14 +27,14 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
   Future<void> _loadRoutines() async {
     try {
       final routineRepository = getIt<RoutineRepository>();
-      final routines = await routineRepository.getSavedRoutines();
+      final activeRoutines = await routineRepository.getActiveRoutines();
       
       setState(() {
-        _routines = routines;
+        _routines = activeRoutines;
         _isLoading = false;
       });
     } catch (e) {
-      print('루틴 로드 실패: $e');
+      print('활성화된 루틴 로드 실패: $e');
       setState(() {
         _isLoading = false;
       });
@@ -47,7 +47,7 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          '오늘의 루틴',
+          '활성화된 루틴',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -89,7 +89,7 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
           ),
           const SizedBox(height: 24),
           const Text(
-            '생성된 루틴이 없습니다',
+            '활성화된 루틴이 없습니다',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -98,7 +98,7 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '첫 번째 루틴을 생성해보세요!',
+            '루틴을 활성화하여 하루를 시작해보세요!',
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
@@ -183,13 +183,46 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      routine.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            routine.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.green.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.notifications_active,
+                                size: 12,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '활성',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(

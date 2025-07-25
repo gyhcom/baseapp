@@ -26,7 +26,7 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': _apiKey,
-        'anthropic-version': '2023-06-01',
+        'anthropic-version': '2024-06-01', // 최신 버전으로 업데이트
       },
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 60),
@@ -37,13 +37,28 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
   @override
   Future<AIRoutineResponse> generateRoutine(AIRoutineRequest request) async {
     try {
+      // API 키 검증
+      if (!isConfigured) {
+        return AIRoutineResponse.failure(
+          error: 'Claude API 키가 설정되지 않았습니다. 설정 화면에서 API 키를 입력해주세요.',
+        );
+      }
+      
       final prompt = _buildPrompt(request);
       
       final response = await _dio.post('/v1/messages', data: {
-        'model': 'claude-3-sonnet-20240229', // 더 나은 품질을 위해 Sonnet 사용
+        'model': 'claude-3-haiku-20240307', // 더 빠르고 경제적인 모델
         'max_tokens': 2000,
         'messages': [
-          {'role': 'user', 'content': prompt}
+          {
+            'role': 'user', 
+            'content': [
+              {
+                'type': 'text',
+                'text': prompt
+              }
+            ]
+          }
         ]
       });
 
@@ -62,6 +77,21 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
       }
     } catch (e) {
       print('Claude AI Error: $e');
+      
+      // DioException에서 더 자세한 정보 추출
+      if (e is DioException) {
+        print('Response data: ${e.response?.data}');
+        print('Response headers: ${e.response?.headers}');
+        print('Request data: ${e.requestOptions.data}');
+        
+        final errorMessage = e.response?.data?['error']?['message'] ?? 
+                           'API 요청 실패 (${e.response?.statusCode})';
+        
+        return AIRoutineResponse.failure(
+          error: 'Claude AI 오류: $errorMessage',
+        );
+      }
+      
       return AIRoutineResponse.failure(
         error: 'AI 서비스 오류: ${e.toString()}',
       );
@@ -232,21 +262,22 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
     try {
       // 간단한 헬스체크 요청
       final response = await _dio.post(
-        '/messages',
+        '/v1/messages',
         data: {
           'model': 'claude-3-haiku-20240307',
           'max_tokens': 10,
           'messages': [
-            {'role': 'user', 'content': 'Hello'}
+            {
+              'role': 'user', 
+              'content': [
+                {
+                  'type': 'text',
+                  'text': 'Hello'
+                }
+              ]
+            }
           ],
         },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': _apiKey,
-            'anthropic-version': '2023-06-01',
-          },
-        ),
       );
       return response.statusCode == 200;
     } catch (e) {

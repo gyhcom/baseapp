@@ -1,9 +1,42 @@
 import 'package:flutter/material.dart';
 import '../../screens/routine/today_routines_screen.dart';
+import '../../../domain/entities/daily_routine.dart';
+import '../../../domain/repositories/routine_repository.dart';
+import '../../../di/service_locator.dart';
 
 /// 오늘의 루틴 대시보드 위젯
-class TodayDashboardWidget extends StatelessWidget {
+class TodayDashboardWidget extends StatefulWidget {
   const TodayDashboardWidget({super.key});
+
+  @override
+  State<TodayDashboardWidget> createState() => _TodayDashboardWidgetState();
+}
+
+class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
+  final RoutineRepository _routineRepository = getIt<RoutineRepository>();
+  List<DailyRoutine> _activeRoutines = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadActiveRoutines();
+  }
+
+  Future<void> _loadActiveRoutines() async {
+    try {
+      final activeRoutines = await _routineRepository.getActiveRoutines();
+      setState(() {
+        _activeRoutines = activeRoutines;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('활성화된 루틴 로드 실패: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +153,7 @@ class TodayDashboardWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '오늘의 진행상황',
+                _activeRoutines.isEmpty ? '루틴 현황' : '오늘의 진행상황',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -130,7 +163,9 @@ class TodayDashboardWidget extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                '실시간으로 업데이트되는 루틴 성과를 확인하세요',
+                _activeRoutines.isEmpty 
+                    ? '활성화된 루틴을 설정하여 하루를 계획해보세요'
+                    : '실시간으로 업데이트되는 루틴 성과를 확인하세요',
                 style: TextStyle(
                   fontSize: 14,
                   color: const Color(0xFF64748B),
@@ -186,11 +221,47 @@ class TodayDashboardWidget extends StatelessWidget {
 
   /// 메트릭스 카드들
   Widget _buildMetricsRow() {
+    if (_isLoading) {
+      return Row(
+        children: [
+          Expanded(child: _buildLoadingCard()),
+          const SizedBox(width: 12),
+          Expanded(child: _buildLoadingCard()),
+          const SizedBox(width: 12),
+          Expanded(child: _buildLoadingCard()),
+        ],
+      );
+    }
+
+    if (_activeRoutines.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    final totalItems = _activeRoutines.fold<int>(
+      0, (sum, routine) => sum + routine.items.length,
+    );
+    final completedItems = _activeRoutines.fold<int>(
+      0, (sum, routine) => sum + routine.items.where((item) => item.isCompleted).length,
+    );
+    final totalMinutes = _activeRoutines.fold<int>(
+      0, (sum, routine) => sum + routine.items.fold<int>(
+        0, (sum2, item) => sum2 + item.duration.inMinutes,
+      ),
+    );
+    final completedMinutes = _activeRoutines.fold<int>(
+      0, (sum, routine) => sum + routine.items
+          .where((item) => item.isCompleted)
+          .fold<int>(0, (sum2, item) => sum2 + item.duration.inMinutes),
+    );
+    
+    final progress = totalItems > 0 ? (completedItems / totalItems * 100).round() : 0;
+    final remainingMinutes = totalMinutes - completedMinutes;
+
     return Row(
       children: [
         Expanded(
           child: MetricCard(
-            value: '73%',
+            value: '$progress%',
             label: '완료율',
             icon: Icons.trending_up,
             gradient: const LinearGradient(
@@ -202,7 +273,7 @@ class TodayDashboardWidget extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: MetricCard(
-            value: '8/11',
+            value: '$completedItems/$totalItems',
             label: '완료 항목',
             icon: Icons.check_circle_outline,
             gradient: const LinearGradient(
@@ -214,7 +285,7 @@ class TodayDashboardWidget extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: MetricCard(
-            value: '45분',
+            value: '${remainingMinutes}분',
             label: '남은 시간',
             icon: Icons.schedule,
             gradient: const LinearGradient(
@@ -229,6 +300,20 @@ class TodayDashboardWidget extends StatelessWidget {
 
   /// 진행률 바
   Widget _buildProgressBar() {
+    if (_isLoading || _activeRoutines.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final totalItems = _activeRoutines.fold<int>(
+      0, (sum, routine) => sum + routine.items.length,
+    );
+    final completedItems = _activeRoutines.fold<int>(
+      0, (sum, routine) => sum + routine.items.where((item) => item.isCompleted).length,
+    );
+    
+    final progress = totalItems > 0 ? completedItems / totalItems : 0.0;
+    final progressPercent = (progress * 100).round();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -260,7 +345,7 @@ class TodayDashboardWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                '73% 완료',
+                '$progressPercent% 완료',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -278,7 +363,7 @@ class TodayDashboardWidget extends StatelessWidget {
             ),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
-              widthFactor: 0.73,
+              widthFactor: progress,
               child: Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -295,6 +380,93 @@ class TodayDashboardWidget extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 로딩 카드
+  Widget _buildLoadingCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE2E8F0),
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: 30,
+            height: 16,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE2E8F0),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            width: 50,
+            height: 12,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE2E8F0),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 빈 상태
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.schedule_outlined,
+            size: 48,
+            color: const Color(0xFF94A3B8),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '활성화된 루틴이 없습니다',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF475569),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '루틴을 활성화하여 오늘의 일정을 시작하세요',
+            style: TextStyle(
+              fontSize: 14,
+              color: const Color(0xFF64748B),
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

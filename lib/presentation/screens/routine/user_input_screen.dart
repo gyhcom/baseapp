@@ -150,6 +150,7 @@ class _UserInputScreenState extends State<UserInputScreen>
             icon: const Icon(Icons.home_outlined),
             tooltip: '홈으로',
             onPressed: () {
+              context.router.popUntilRoot();
               context.router.navigate(const HomeWrapperRoute());
             },
           ),

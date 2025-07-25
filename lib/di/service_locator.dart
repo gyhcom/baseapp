@@ -13,8 +13,12 @@ import '../data/repositories/todo_repository_impl.dart';
 import '../data/repositories/routine_repository_impl.dart';
 import '../data/repositories/usage_repository_impl.dart';
 import '../data/repositories/notification_repository_impl.dart';
+import '../data/repositories/behavior_log_repository_impl.dart';
+import '../data/datasources/local/behavior_log_local_datasource.dart';
 import '../domain/repositories/notification_repository.dart';
+import '../domain/repositories/behavior_log_repository.dart';
 import '../domain/services/notification_service.dart';
+import '../domain/services/behavior_analytics_service.dart';
 import '../domain/usecases/notification_usecase.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/todo_repository.dart';
@@ -167,6 +171,25 @@ Future<void> setupDependencies() async {
   // 알림 서비스
   getIt.registerLazySingleton<NotificationService>(
     () => LocalNotificationService(),
+  );
+
+  // 행동 로그 데이터소스
+  getIt.registerLazySingleton<BehaviorLogLocalDataSource>(
+    () => BehaviorLogLocalDataSource(),
+  );
+
+  // 행동 로그 저장소
+  getIt.registerLazySingleton<BehaviorLogRepository>(
+    () => BehaviorLogRepositoryImpl(
+      localDataSource: getIt<BehaviorLogLocalDataSource>(),
+    ),
+  );
+
+  // 행동 분석 서비스
+  getIt.registerLazySingleton<BehaviorAnalyticsService>(
+    () => BehaviorAnalyticsService(
+      logRepository: getIt<BehaviorLogRepository>(),
+    ),
   );
 
   // ========== DOMAIN LAYER ==========
