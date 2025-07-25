@@ -204,11 +204,8 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
         opacity: _fadeAnimation,
         child: Column(
           children: [
-            // 루틴 헤더 정보
+            // 루틴 헤더 정보 (진행률 포함)
             _buildRoutineHeader(),
-            
-            // 진행률 표시
-            _buildProgressSection(),
             
             // 루틴 아이템 목록
             Expanded(
@@ -294,7 +291,7 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
                 
                 const SizedBox(height: 4),
                 
-                // 컨셉과 기본 정보를 한 줄에
+                // 컨셉과 진행률 정보를 한 줄에
                 Row(
                   children: [
                     Text(
@@ -304,19 +301,33 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Icon(
-                      Icons.schedule,
-                      color: Colors.white.withOpacity(0.7),
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${_currentRoutine.items.length}개',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withOpacity(0.7),
+                    // 진행률 표시 추가
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white.withOpacity(0.9),
+                            size: 12,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${_currentRoutine.items.where((item) => item.isCompleted).length}/${_currentRoutine.items.length}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withOpacity(0.9),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const Spacer(),
                     Icon(
                       _currentRoutine.isActive ? Icons.notifications_active : Icons.notifications_off,
                       color: Colors.white.withOpacity(0.7),
@@ -339,57 +350,6 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
     );
   }
 
-  Widget _buildProgressSection() {
-    final completedCount = _currentRoutine.items.where((item) => item.isCompleted).length;
-    final totalCount = _currentRoutine.items.length;
-    final progress = totalCount > 0 ? completedCount / totalCount : 0.0;
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8), // 상하 마진 줄임
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // 패딩 줄임
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(12), // 반지름 줄임
-        boxShadow: [AppTheme.cardShadow],
-      ),
-      child: Row( // Column에서 Row로 변경하여 한 줄로
-        children: [
-          // 진행률 텍스트
-          Text(
-            '$completedCount/$totalCount',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryColor,
-            ),
-          ),
-          
-          const SizedBox(width: 12),
-          
-          // 진행률 바
-          Expanded(
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppTheme.dividerColor,
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
-              minHeight: 6, // 높이 줄임
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-          
-          const SizedBox(width: 12),
-          
-          // 퍼센트
-          Text(
-            '${(progress * 100).round()}%',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.textSecondaryColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildRoutineItemsList() {
     // 시간대별로 그룹화
