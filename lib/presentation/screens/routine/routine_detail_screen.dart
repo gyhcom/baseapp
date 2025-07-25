@@ -13,6 +13,7 @@ import '../../../di/service_locator.dart';
 import '../../widgets/routine/routine_item_card.dart';
 import '../../providers/behavior_analytics_provider.dart';
 import '../../../domain/entities/user_behavior_log.dart';
+import 'routine_notification_helper.dart';
 
 /// 루틴 상세 화면
 class RoutineDetailScreen extends ConsumerStatefulWidget {
@@ -809,6 +810,10 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
       final routineToUpdate = _currentRoutine.copyWith(isActive: targetState);
       await routineRepository.updateRoutine(routineToUpdate);
 
+      // 알림 관리 (DB 업데이트 후 별도 처리)
+      print('🔔 알림 관리 시작...');
+      await _manageNotifications(routineToUpdate);
+
       // 변경된 데이터를 다시 가져와서 확인
       final updatedRoutine = await routineRepository.getRoutineById(_currentRoutine.id);
       
@@ -875,6 +880,26 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
   /// 루틴 활성화 상태 토글 (기존 호환성을 위해 유지)
   Future<void> _toggleActiveStatus() async {
     await _setActiveStatus(!_currentRoutine.isActive);
+  }
+
+  /// 알림 관리 (활성화/비활성화에 따라 알림 예약/취소)
+  Future<void> _manageNotifications(DailyRoutine routine) async {
+    try {
+      // 기존 알림 모두 취소
+      await RoutineNotificationHelper.cancelNotificationsForRoutine(routine.id);
+      
+      // 활성화된 경우에만 새로 예약
+      if (routine.isActive) {
+        print('🔔 활성화 상태이므로 알림 예약');
+        await RoutineNotificationHelper.scheduleNotificationsForRoutine(routine);
+        print('✅ 알림 예약 완료');
+      } else {
+        print('🔕 비활성화 상태이므로 알림 취소만 진행');
+      }
+    } catch (e) {
+      print('❌ 알림 관리 실패: $e');
+      // 알림 실패가 루틴 상태 변경에는 영향을 주지 않음
+    }
   }
 
   /// 활성화 제한 다이얼로그 표시

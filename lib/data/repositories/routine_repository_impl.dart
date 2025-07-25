@@ -62,34 +62,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
     await _localDataSource.saveRoutine(updatedRoutine);
     print('✅ DB 저장 완료');
     
-    // 기존 알림 취소 후 활성화된 경우 새로 예약
-    print('🔔 알림 관리 시작...');
-    await RoutineNotificationHelper.cancelNotificationsForRoutine(updatedRoutine.id);
-    
-    if (updatedRoutine.isActive) {
-      print('🔔 활성화 상태이므로 알림 예약');
-      
-      // 저장 전 상태 확인
-      final beforeAlarmRoutine = await getRoutineById(updatedRoutine.id);
-      print('📊 알림 예약 전 DB 상태: ${beforeAlarmRoutine?.isActive}');
-      
-      await RoutineNotificationHelper.scheduleNotificationsForRoutine(updatedRoutine);
-      
-      // 저장 후 상태 확인
-      final afterAlarmRoutine = await getRoutineById(updatedRoutine.id);
-      print('📊 알림 예약 후 DB 상태: ${afterAlarmRoutine?.isActive}');
-      
-      // 만약 상태가 변경되었다면 다시 복원
-      if (afterAlarmRoutine?.isActive == false) {
-        print('⚠️ 알림 예약 후 상태가 비활성화됨! 다시 복원 중...');
-        final restoredRoutine = updatedRoutine.copyWith(isActive: true);
-        await _localDataSource.saveRoutine(restoredRoutine);
-        print('✅ 루틴 상태 복원 완료');
-      }
-    } else {
-      print('🔕 비활성화 상태이므로 알림 예약 건너뛰기');
-    }
-    
     print('✅ updateRoutine 완료');
     
     // 저장 후 실제 상태 확인
