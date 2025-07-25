@@ -228,141 +228,112 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
 
   Widget _buildRoutineHeader() {
     return Container(
-      margin: const EdgeInsets.all(AppTheme.spacingL),
-      padding: const EdgeInsets.all(AppTheme.spacingL),
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8), // 하단 마진 줄임
+      padding: const EdgeInsets.all(16), // 패딩 줄임
       decoration: BoxDecoration(
         gradient: AppTheme.primaryGradientDecoration,
-        borderRadius: AppTheme.mediumRadius,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [AppTheme.cardShadow],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              // 컨셉 이모지
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Center(
-                  child: Text(
-                    _currentRoutine.concept.displayName.split(' ')[0], // 이모지
-                    style: const TextStyle(fontSize: 30),
-                  ),
-                ),
+          // 컨셉 이모지 (크기 줄임)
+          Container(
+            width: 48, // 60에서 48로 줄임
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                _currentRoutine.concept.displayName.split(' ')[0],
+                style: const TextStyle(fontSize: 24), // 30에서 24로 줄임
               ),
-              
-              const SizedBox(width: AppTheme.spacingM),
-              
-              // 루틴 정보
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+          
+          const SizedBox(width: 12),
+          
+          // 루틴 정보 (컴팩트하게)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min, // 최소 크기로
+              children: [
+                // 제목과 활성화 토글을 한 줄에
+                Row(
                   children: [
-                    Text(
-                      _currentRoutine.title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        _currentRoutine.title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith( // titleLarge에서 titleMedium으로
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    
-                    const SizedBox(height: AppTheme.spacingXS),
-                    
-                    Text(
-                      _currentRoutine.concept.displayName,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                    // 활성화 스위치를 제목 옆으로 이동
+                    Transform.scale(
+                      scale: 0.8, // 스위치 크기 줄임
+                      child: Switch(
+                        key: ValueKey(_currentRoutine.isActive),
+                        value: _currentRoutine.isActive,
+                        onChanged: (value) {
+                          _toggleActiveStatus();
+                        },
+                        activeColor: Colors.white,
+                        activeTrackColor: Colors.white.withOpacity(0.3),
+                        inactiveThumbColor: Colors.white.withOpacity(0.5),
+                        inactiveTrackColor: Colors.white.withOpacity(0.2),
                       ),
-                    ),
-                    
-                    const SizedBox(height: AppTheme.spacingXS),
-                    
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          color: Colors.white.withOpacity(0.8),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${_currentRoutine.items.length}개 활동',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                        const SizedBox(width: AppTheme.spacingM),
-                        Icon(
-                          Icons.timer,
-                          color: Colors.white.withOpacity(0.8),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          _formatTotalDuration(),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: AppTheme.spacingS),
-                    
-                    // 활성화 상태 토글
-                    Row(
-                      children: [
-                        Icon(
-                          _currentRoutine.isActive ? Icons.notifications_active : Icons.notifications_off,
-                          key: ValueKey('icon_${_currentRoutine.isActive}'), // 강제 리빌드
-                          color: Colors.white.withOpacity(0.8),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          _currentRoutine.isActive ? '활성화됨' : '비활성화됨',
-                          key: ValueKey('text_${_currentRoutine.isActive}'), // 강제 리빌드
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                        const Spacer(),
-                        Switch(
-                          key: ValueKey(_currentRoutine.isActive), // 강제 리빌드용 키
-                          value: _currentRoutine.isActive,
-                          onChanged: (value) {
-                            print('🎛️ 스위치 클릭: $value (현재: ${_currentRoutine.isActive})');
-                            _toggleActiveStatus();
-                          },
-                          activeColor: Colors.white,
-                          activeTrackColor: Colors.white.withOpacity(0.3),
-                          inactiveThumbColor: Colors.white.withOpacity(0.5),
-                          inactiveTrackColor: Colors.white.withOpacity(0.2),
-                        ),
-                      ],
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          
-          if (_currentRoutine.description.isNotEmpty) ...[ 
-            const SizedBox(height: AppTheme.spacingM),
-            const Divider(color: Colors.white24),
-            const SizedBox(height: AppTheme.spacingS),
-            Text(
-              _currentRoutine.description,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withOpacity(0.9),
-              ),
+                
+                const SizedBox(height: 4),
+                
+                // 컨셉과 기본 정보를 한 줄에
+                Row(
+                  children: [
+                    Text(
+                      _currentRoutine.concept.displayName,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.schedule,
+                      color: Colors.white.withOpacity(0.7),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${_currentRoutine.items.length}개',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      _currentRoutine.isActive ? Icons.notifications_active : Icons.notifications_off,
+                      color: Colors.white.withOpacity(0.7),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _currentRoutine.isActive ? '활성' : '비활성',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -374,48 +345,45 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
     final progress = totalCount > 0 ? completedCount / totalCount : 0.0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingL),
-      padding: const EdgeInsets.all(AppTheme.spacingL),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8), // 상하 마진 줄임
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // 패딩 줄임
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor,
-        borderRadius: AppTheme.mediumRadius,
+        borderRadius: BorderRadius.circular(12), // 반지름 줄임
         boxShadow: [AppTheme.cardShadow],
       ),
-      child: Column(
+      child: Row( // Column에서 Row로 변경하여 한 줄로
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '진행률',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Text(
-                '$completedCount/$totalCount 완료',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: AppTheme.spacingM),
-          
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: AppTheme.dividerColor,
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          
-          const SizedBox(height: AppTheme.spacingS),
-          
+          // 진행률 텍스트
           Text(
-            '${(progress * 100).round()}% 완료',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            '$completedCount/$totalCount',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryColor,
+            ),
+          ),
+          
+          const SizedBox(width: 12),
+          
+          // 진행률 바
+          Expanded(
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: AppTheme.dividerColor,
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+              minHeight: 6, // 높이 줄임
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          
+          const SizedBox(width: 12),
+          
+          // 퍼센트
+          Text(
+            '${(progress * 100).round()}%',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppTheme.textSecondaryColor,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

@@ -162,13 +162,13 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
           _isGenerating = false;
         });
         
-        // 자동으로 루틴 저장
-        await _saveRoutineAutomatically(response.routine!);
+        // 자동으로 루틴 저장 (저장 성공 여부 반환)
+        final saveSuccessful = await _saveRoutineAutomatically(response.routine!);
         
         await Future.delayed(const Duration(seconds: 1));
         
-        // 결과 화면으로 이동
-        if (mounted) {
+        // 저장이 성공한 경우에만 결과 화면 표시
+        if (mounted && saveSuccessful) {
           _showRoutineResult();
         }
       } else {
@@ -257,7 +257,8 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
   }
 
   /// 루틴 자동 저장 (제한 검사 포함)
-  Future<void> _saveRoutineAutomatically(DailyRoutine routine) async {
+  /// 저장 성공 여부를 반환
+  Future<bool> _saveRoutineAutomatically(DailyRoutine routine) async {
     try {
       // 저장 제한 검사
       final saveResult = await RoutineLimitService.validateAndPrepareForSave();
@@ -275,7 +276,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
         if (mounted) {
           _showStorageLimitReached(saveResult);
         }
-        return;
+        return false; // 저장 실패
       }
       
       final routineRepository = getIt<RoutineRepository>();
@@ -292,9 +293,12 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
         _showStorageWarning(saveResult);
       }
       
+      return true; // 저장 성공
+      
     } catch (e) {
       print('❌ 루틴 저장 실패: $e');
       // 저장 실패해도 사용자에게는 알리지 않음 (UX 방해 방지)
+      return false; // 저장 실패
     }
   }
 
