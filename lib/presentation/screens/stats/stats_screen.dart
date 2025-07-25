@@ -5,6 +5,7 @@ import '../../../domain/repositories/usage_repository.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/user_usage.dart';
 import '../../../di/service_locator.dart';
+import 'package:flutter/foundation.dart';
 
 /// 통계 화면
 class StatsScreen extends ConsumerStatefulWidget {
@@ -39,7 +40,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('통계 데이터 로드 실패: $e');
+      debugPrint('통계 데이터 로드 실패: $e');
       setState(() {
         _isLoading = false;
       });
@@ -109,7 +110,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.3),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -123,7 +124,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
@@ -198,10 +199,10 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -226,7 +227,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -244,7 +245,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -268,7 +269,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF6366F1).withOpacity(0.05),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -349,7 +350,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -382,7 +383,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             const SizedBox(height: 12),
             ...conceptCount.entries.map((entry) => 
               _buildConceptBar(entry.key, entry.value, _routines.length)
-            ).toList(),
+            ),
           ] else ...[
             Center(
               child: Column(
@@ -479,7 +480,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -572,10 +573,10 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           width: 1,
         ),
       ),

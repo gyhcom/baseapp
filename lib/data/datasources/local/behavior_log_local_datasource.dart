@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
 import '../../../domain/entities/user_behavior_log.dart';
+import 'package:flutter/foundation.dart';
 
 /// 행동 로그 로컬 데이터소스
 class BehaviorLogLocalDataSource {
@@ -43,7 +44,7 @@ class BehaviorLogLocalDataSource {
         
         allLogs.add(log);
       } catch (e) {
-        print('행동 로그 파싱 오류: $e');
+        debugPrint('행동 로그 파싱 오류: $e');
         continue;
       }
     }
@@ -77,7 +78,7 @@ class BehaviorLogLocalDataSource {
         
         routineLogs.add(log);
       } catch (e) {
-        print('루틴 로그 파싱 오류: $e');
+        debugPrint('루틴 로그 파싱 오류: $e');
         continue;
       }
     }
@@ -111,7 +112,7 @@ class BehaviorLogLocalDataSource {
       try {
         return BehaviorPattern.fromJson(Map<String, dynamic>.from(patternData));
       } catch (e) {
-        print('패턴 데이터 파싱 오류: $e');
+        debugPrint('패턴 데이터 파싱 오류: $e');
         return null;
       }
     }
@@ -141,7 +142,7 @@ class BehaviorLogLocalDataSource {
       await box.delete(key);
     }
     
-    print('${keysToDelete.length}개의 오래된 로그를 정리했습니다.');
+    debugPrint('${keysToDelete.length}개의 오래된 로그를 정리했습니다.');
   }
 
   /// 전체 로그 삭제

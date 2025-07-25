@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../entities/daily_routine.dart';
 import '../entities/routine_item.dart';
+import 'package:flutter/foundation.dart';
 
 /// 알림 서비스 인터페이스
 abstract class NotificationService {
@@ -84,7 +85,7 @@ class LocalNotificationService implements NotificationService {
   void _onNotificationTapped(NotificationResponse response) {
     // 알림 탭 시 처리 로직
     // 향후 라우팅 처리 구현 예정
-    print('알림 탭됨: ${response.payload}');
+    debugPrint('알림 탭됨: ${response.payload}');
   }
 
   @override

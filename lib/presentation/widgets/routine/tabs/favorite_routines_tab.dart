@@ -14,8 +14,8 @@ class FavoriteRoutinesTab extends StatelessWidget {
   const FavoriteRoutinesTab({
     super.key,
     required this.onSwitchToAllTab,
-    required onRoutineDetail,
-  }) : onRoutineDetail = onRoutineDetail;
+    required this.onRoutineDetail,
+  });
 
   @override
   Widget build(BuildContext context) {

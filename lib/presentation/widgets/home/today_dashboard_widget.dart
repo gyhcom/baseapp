@@ -3,6 +3,7 @@ import '../../screens/routine/today_routines_screen.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/repositories/routine_repository.dart';
 import '../../../di/service_locator.dart';
+import 'package:flutter/foundation.dart';
 
 /// 오늘의 루틴 대시보드 위젯
 class TodayDashboardWidget extends StatefulWidget {
@@ -34,7 +35,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
       setState(() {
         _isLoading = false;
       });
-      print('활성화된 루틴 로드 실패: $e');
+      debugPrint('활성화된 루틴 로드 실패: $e');
     }
   }
 
@@ -48,23 +49,23 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
           end: Alignment.bottomRight,
           colors: [
             Colors.white,
-            Colors.white.withOpacity(0.95),
+            Colors.white.withValues(alpha: 0.95),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.08),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.08),
             blurRadius: 32,
             offset: const Offset(0, 12),
             spreadRadius: 0,
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -108,7 +109,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6366F1).withOpacity(0.3),
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -136,7 +137,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
                     letterSpacing: 0.3,
                     shadows: [
                       Shadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         offset: const Offset(0, 1),
                         blurRadius: 2,
                       ),
@@ -178,7 +179,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
         ),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF6366F1).withOpacity(0.1),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Builder(
@@ -267,7 +268,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
             gradient: const LinearGradient(
               colors: [Color(0xFF10B981), Color(0xFF059669)],
             ),
-            bgColor: const Color(0xFF10B981).withOpacity(0.08),
+            bgColor: const Color(0xFF10B981).withValues(alpha: 0.08),
           ),
         ),
         const SizedBox(width: 12),
@@ -279,7 +280,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
             gradient: const LinearGradient(
               colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
             ),
-            bgColor: const Color(0xFF8B5CF6).withOpacity(0.08),
+            bgColor: const Color(0xFF8B5CF6).withValues(alpha: 0.08),
           ),
         ),
         const SizedBox(width: 12),
@@ -291,7 +292,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
             gradient: const LinearGradient(
               colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
             ),
-            bgColor: const Color(0xFFEF4444).withOpacity(0.08),
+            bgColor: const Color(0xFFEF4444).withValues(alpha: 0.08),
           ),
         ),
       ],
@@ -322,7 +323,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
           end: Alignment.bottomRight,
           colors: [
             const Color(0xFFF8FAFC),
-            const Color(0xFFF1F5F9).withOpacity(0.8),
+            const Color(0xFFF1F5F9).withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -372,7 +373,7 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
                   borderRadius: BorderRadius.circular(4),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF6366F1).withOpacity(0.4),
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.4),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -391,10 +392,10 @@ class _TodayDashboardWidgetState extends State<TodayDashboardWidget> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9).withOpacity(0.5),
+        color: const Color(0xFFF1F5F9).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.5),
+          color: Colors.white.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -499,12 +500,12 @@ class MetricCard extends StatelessWidget {
         color: bgColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.5),
+          color: Colors.white.withValues(alpha: 0.5),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -519,7 +520,7 @@ class MetricCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),

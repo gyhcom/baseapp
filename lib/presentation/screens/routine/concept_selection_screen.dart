@@ -211,8 +211,8 @@ class _ConceptSelectionScreenState extends State<ConceptSelectionScreen>
                               height: 50,
                               decoration: BoxDecoration(
                                 color: isSelected 
-                                    ? Colors.white.withOpacity(0.2)
-                                    : AppTheme.primaryColor.withOpacity(0.1),
+                                    ? Colors.white.withValues(alpha: 0.2)
+                                    : AppTheme.primaryColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Center(
@@ -246,7 +246,7 @@ class _ConceptSelectionScreenState extends State<ConceptSelectionScreen>
                                     concept.description,
                                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                       color: isSelected 
-                                          ? Colors.white.withOpacity(0.9)
+                                          ? Colors.white.withValues(alpha: 0.9)
                                           : AppTheme.textSecondaryColor,
                                     ),
                                   ),
@@ -257,7 +257,7 @@ class _ConceptSelectionScreenState extends State<ConceptSelectionScreen>
                                     concept.category,
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: isSelected 
-                                          ? Colors.white.withOpacity(0.7)
+                                          ? Colors.white.withValues(alpha: 0.7)
                                           : AppTheme.primaryColor,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -291,7 +291,7 @@ class _ConceptSelectionScreenState extends State<ConceptSelectionScreen>
                     Container(
                       padding: const EdgeInsets.all(AppTheme.spacingM),
                       decoration: BoxDecoration(
-                        color: AppTheme.accentColor.withOpacity(0.1),
+                        color: AppTheme.accentColor.withValues(alpha: 0.1),
                         borderRadius: AppTheme.mediumRadius,
                       ),
                       child: Row(

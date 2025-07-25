@@ -28,7 +28,7 @@ class RoutineCardHeader extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: routine.concept.color.withOpacity(0.2),
+            color: routine.concept.color.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

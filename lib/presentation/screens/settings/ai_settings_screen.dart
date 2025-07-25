@@ -100,7 +100,7 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
           Text(
             config.description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
           
@@ -131,9 +131,9 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
@@ -196,7 +196,7 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
           ],
         ),
         tileColor: isCurrentService 
-            ? AppTheme.primaryColor.withOpacity(0.1) 
+            ? AppTheme.primaryColor.withValues(alpha: 0.1) 
             : null,
         shape: RoundedRectangleBorder(
           borderRadius: AppTheme.mediumRadius,

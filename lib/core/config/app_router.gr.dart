@@ -59,6 +59,16 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const RegisterPage(),
       );
     },
+    RoutineDetailRoute.name: (routeData) {
+      final args = routeData.argsAs<RoutineDetailRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: RoutineDetailScreen(
+          key: args.key,
+          routine: args.routine,
+        ),
+      );
+    },
     RoutineGenerationRoute.name: (routeData) {
       final args = routeData.argsAs<RoutineGenerationRouteArgs>();
       return AutoRoutePage<dynamic>(
@@ -250,6 +260,44 @@ class RegisterRoute extends PageRouteInfo<void> {
   static const String name = 'RegisterRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [RoutineDetailScreen]
+class RoutineDetailRoute extends PageRouteInfo<RoutineDetailRouteArgs> {
+  RoutineDetailRoute({
+    Key? key,
+    required DailyRoutine routine,
+    List<PageRouteInfo>? children,
+  }) : super(
+          RoutineDetailRoute.name,
+          args: RoutineDetailRouteArgs(
+            key: key,
+            routine: routine,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'RoutineDetailRoute';
+
+  static const PageInfo<RoutineDetailRouteArgs> page =
+      PageInfo<RoutineDetailRouteArgs>(name);
+}
+
+class RoutineDetailRouteArgs {
+  const RoutineDetailRouteArgs({
+    this.key,
+    required this.routine,
+  });
+
+  final Key? key;
+
+  final DailyRoutine routine;
+
+  @override
+  String toString() {
+    return 'RoutineDetailRouteArgs{key: $key, routine: $routine}';
+  }
 }
 
 /// generated route for

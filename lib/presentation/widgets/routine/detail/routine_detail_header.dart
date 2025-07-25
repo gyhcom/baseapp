@@ -19,104 +19,111 @@ class RoutineDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            routine.concept.color.withOpacity(0.1),
-            routine.concept.color.withOpacity(0.05),
+            routine.concept.color.withValues(alpha: 0.08),
+            routine.concept.color.withValues(alpha: 0.03),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 컨셉 아이콘과 활성화 토글
+          // 상단 행: 아이콘, 제목, 스위치
           Row(
             children: [
+              // 컨셉 아이콘 (축소)
               Container(
-                width: 50,
-                height: 50,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: routine.concept.color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: routine.concept.color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  routine.concept.displayName.split(' ')[0], // 이모지 부분만 추출
-                  style: const TextStyle(fontSize: 24),
-                ),
-              ),
-              const Spacer(),
-              Switch(
-                value: isActive,
-                onChanged: (_) => onToggleActive?.call(),
-                activeColor: Colors.white,
-                activeTrackColor: routine.concept.color,
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 제목
-          Text(
-            routine.title,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          
-          const SizedBox(height: 8),
-          
-          // 설명
-          if (routine.description.isNotEmpty)
-            Text(
-              routine.description,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                height: 1.5,
-              ),
-            ),
-          
-          const SizedBox(height: 16),
-          
-          // 컨셉과 즐겨찾기
-          Row(
-            children: [
-              // 컨셉 태그
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: routine.concept.color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  routine.concept.displayName,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: routine.concept.color,
+                child: Center(
+                  child: Text(
+                    routine.concept.displayName.split(' ')[0],
+                    style: const TextStyle(fontSize: 18),
                   ),
                 ),
               ),
+              const SizedBox(width: 12),
               
-              const Spacer(),
+              // 제목 (축소)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      routine.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (routine.description.isNotEmpty)
+                      Text(
+                        routine.description,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
+              ),
               
-              // 즐겨찾기 버튼
+              // 즐겨찾기와 활성화 스위치
               IconButton(
                 icon: Icon(
                   routine.isFavorite ? Icons.favorite : Icons.favorite_outline,
                   color: routine.isFavorite ? Colors.red : Colors.grey[400],
+                  size: 20,
                 ),
                 onPressed: onToggleFavorite,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(4),
+              ),
+              const SizedBox(width: 4),
+              Transform.scale(
+                scale: 0.8,
+                child: Switch(
+                  value: isActive,
+                  onChanged: (_) => onToggleActive?.call(),
+                  activeColor: Colors.white,
+                  activeTrackColor: routine.concept.color,
+                ),
               ),
             ],
+          ),
+          
+          const SizedBox(height: 8),
+          
+          // 하단 행: 컨셉 태그
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: routine.concept.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              routine.concept.displayName,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: routine.concept.color,
+              ),
+            ),
           ),
         ],
       ),

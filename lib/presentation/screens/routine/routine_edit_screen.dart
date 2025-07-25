@@ -144,10 +144,10 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
           Container(
             padding: const EdgeInsets.all(AppTheme.spacingM),
             decoration: BoxDecoration(
-              color: widget.routine.concept.color.withOpacity(0.1),
+              color: widget.routine.concept.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: widget.routine.concept.color.withOpacity(0.3),
+                color: widget.routine.concept.color.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -261,7 +261,7 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

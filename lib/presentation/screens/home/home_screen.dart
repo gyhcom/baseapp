@@ -7,6 +7,7 @@ import '../../widgets/home/recent_activity_widget.dart';
 import '../../../domain/repositories/routine_repository.dart';
 import '../../../di/service_locator.dart';
 import '../../../core/config/app_router.dart';
+import 'package:flutter/foundation.dart';
 
 /// Home screen - main dashboard
 class HomeScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _favoriteRoutines = favoriteRoutines.length;
       });
     } catch (e) {
-      print('홈 화면 통계 로드 실패: $e');
+      debugPrint('홈 화면 통계 로드 실패: $e');
     }
   }
 
@@ -112,9 +113,9 @@ class _HomeScreenState extends State<HomeScreen> {
       title: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.3)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -128,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'RoutineCraft',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.95),
+                color: Colors.white.withValues(alpha: 0.95),
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.2,
@@ -177,9 +178,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.15),
+                                      color: Colors.white.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                                     ),
                                     child: Icon(
                                       greetingIcon,
@@ -205,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Text(
                                           '새로운 하루, 새로운 루틴을 시작해보세요',
                                           style: TextStyle(
-                                            color: Colors.white.withOpacity(0.9),
+                                            color: Colors.white.withValues(alpha: 0.9),
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
                                           ),

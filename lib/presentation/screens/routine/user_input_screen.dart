@@ -6,6 +6,7 @@ import '../../widgets/routine/user_input_steps.dart';
 import '../../../domain/repositories/usage_repository.dart';
 import '../../../domain/entities/user_usage.dart';
 import '../../../di/service_locator.dart';
+import 'package:flutter/foundation.dart';
 
 /// 단계별 사용자 정보 입력 화면
 class UserInputScreen extends StatefulWidget {
@@ -100,9 +101,9 @@ class _UserInputScreenState extends State<UserInputScreen>
     }
 
     // 컨셉 선택 화면으로 이동
-    print('사용자 입력 완료:');
-    print('이름: $_name, 나이: $_age, 직업: $_job');
-    print('취미: $_hobbies, 추가정보: $_additionalInfo');
+    debugPrint('사용자 입력 완료:');
+    debugPrint('이름: $_name, 나이: $_age, 직업: $_job');
+    debugPrint('취미: $_hobbies, 추가정보: $_additionalInfo');
     
     // 컨셉 선택 화면으로 이동하면서 데이터 전달
     context.router.navigate(ConceptSelectionRoute(
@@ -135,22 +136,49 @@ class _UserInputScreenState extends State<UserInputScreen>
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text('$_currentStep단계', style: const TextStyle(fontSize: 16)),
+        backgroundColor: AppTheme.surfaceColor,
+        title: Text(
+          '${_currentStep + 1}단계 / $_totalSteps단계', 
+          style: TextStyle(
+            fontSize: 16, 
+            color: AppTheme.textPrimaryColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         leading: _currentStep > 0
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
+                icon: Icon(Icons.arrow_back_ios, color: AppTheme.textPrimaryColor),
                 onPressed: _previousStep,
               )
             : IconButton(
-                icon: const Icon(Icons.close),
+                icon: Icon(Icons.close, color: AppTheme.textPrimaryColor),
                 onPressed: () => context.router.maybePop(),
               ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.home_outlined),
+            icon: Icon(Icons.home_outlined, color: AppTheme.textPrimaryColor),
             tooltip: '홈으로',
-            onPressed: () {
-              context.router.navigate(const HomeWrapperRoute());
+            onPressed: () async {
+              // 여러 방법으로 시도
+              try {
+                // 방법 1: AutoRoute pushAndPopUntil
+                await context.router.pushAndPopUntil(
+                  const HomeWrapperRoute(),
+                  predicate: (route) => false,
+                );
+              } catch (e) {
+                try {
+                  // 방법 2: 네이티브 Navigator
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/home',
+                    (route) => false,
+                  );
+                } catch (e2) {
+                  // 방법 3: 마지막 수단
+                  context.router.popUntilRoot();
+                  context.router.push(const HomeWrapperRoute());
+                }
+              }
             },
           ),
         ],

@@ -6,6 +6,7 @@ import '../../domain/entities/ai_routine_request.dart';
 import '../../domain/entities/ai_routine_response.dart';
 import '../../domain/entities/daily_routine.dart';
 import '../../domain/entities/routine_item.dart';
+import 'package:flutter/foundation.dart';
 
 /// Claude API 서비스 구현
 class ClaudeAIServiceImpl implements AIServiceRepository {
@@ -76,13 +77,13 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
         );
       }
     } catch (e) {
-      print('Claude AI Error: $e');
+      debugPrint('Claude AI Error: $e');
       
       // DioException에서 더 자세한 정보 추출
       if (e is DioException) {
-        print('Response data: ${e.response?.data}');
-        print('Response headers: ${e.response?.headers}');
-        print('Request data: ${e.requestOptions.data}');
+        debugPrint('Response data: ${e.response?.data}');
+        debugPrint('Response headers: ${e.response?.headers}');
+        debugPrint('Request data: ${e.requestOptions.data}');
         
         final errorMessage = e.response?.data?['error']?['message'] ?? 
                            'API 요청 실패 (${e.response?.statusCode})';
@@ -180,7 +181,7 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
         createdAt: DateTime.now(),
       );
     } catch (e) {
-      print('AI Response Parsing Error: $e');
+      debugPrint('AI Response Parsing Error: $e');
       // 파싱 실패 시 기본 루틴 반환
       return _createFallbackRoutine(request);
     }
@@ -281,7 +282,7 @@ class ClaudeAIServiceImpl implements AIServiceRepository {
       );
       return response.statusCode == 200;
     } catch (e) {
-      print('Claude 서비스 헬스체크 실패: $e');
+      debugPrint('Claude 서비스 헬스체크 실패: $e');
       return false;
     }
   }

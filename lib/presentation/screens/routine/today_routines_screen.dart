@@ -5,6 +5,7 @@ import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
 import '../../../di/service_locator.dart';
 import 'today_routine_screen.dart';
+import 'package:flutter/foundation.dart';
 
 /// 오늘의 루틴 목록 화면
 class TodayRoutinesScreen extends ConsumerStatefulWidget {
@@ -34,7 +35,7 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('활성화된 루틴 로드 실패: $e');
+      debugPrint('활성화된 루틴 로드 실패: $e');
       setState(() {
         _isLoading = false;
       });
@@ -78,7 +79,7 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: const Color(0xFF6366F1).withOpacity(0.1),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(60),
             ),
             child: const Icon(
@@ -149,12 +150,12 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: routine.concept.color.withOpacity(0.2),
+          color: routine.concept.color.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -169,7 +170,7 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: routine.concept.color.withOpacity(0.1),
+                  color: routine.concept.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -198,9 +199,9 @@ class _TodayRoutinesScreenState extends ConsumerState<TodayRoutinesScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
+                            color: Colors.green.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.green.withOpacity(0.3)),
+                            border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,

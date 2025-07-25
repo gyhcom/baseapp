@@ -14,6 +14,7 @@ import '../../../di/service_locator.dart';
 import '../../widgets/usage/usage_indicator.dart';
 import '../../providers/auth_provider.dart';
 import '../../../core/config/app_router.dart';
+import 'package:flutter/foundation.dart';
 
 /// 프로필 화면 - 사용자 정보 표시 및 수정
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -168,12 +169,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
 
       if (shouldLogout == true) {
-        print('👋 로그아웃 시도 중...');
+        debugPrint('👋 로그아웃 시도 중...');
         final authController = ref.read(authControllerProvider.notifier);
         await authController.signOut();
         
         if (mounted) {
-          print('✅ 로그아웃 성공 - 로그인 화면으로 이동');
+          debugPrint('✅ 로그아웃 성공 - 로그인 화면으로 이동');
           context.router.navigate(const LoginRoute());
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -188,7 +189,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }
       }
     } catch (e) {
-      print('❌ 로그아웃 실패: $e');
+      debugPrint('❌ 로그아웃 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -297,7 +298,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(40),
             ),
             child: Icon(
@@ -325,7 +326,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Text(
               '${_userProfile!.age}세 • ${_userProfile!.job}',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
               ),
             ),
             
@@ -334,7 +335,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Text(
                 '관심사: ${_userProfile!.hobbies.join(', ')}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -353,7 +354,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.white, width: 1.5),
-                  backgroundColor: Colors.white.withOpacity(0.1),
+                  backgroundColor: Colors.white.withValues(alpha: 0.1),
                   padding: const EdgeInsets.symmetric(
                     vertical: AppTheme.spacingS,
                     horizontal: AppTheme.spacingM,
@@ -521,9 +522,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: AppTheme.mediumRadius,
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -881,14 +882,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: color.withOpacity(0.8),
+          color: color.withValues(alpha: 0.8),
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),

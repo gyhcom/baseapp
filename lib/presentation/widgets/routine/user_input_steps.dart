@@ -22,67 +22,110 @@ class StepLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.spacingL),
+    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final appBarHeight = AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
+    final availableHeight = screenHeight - appBarHeight - MediaQuery.of(context).viewInsets.bottom;
+    
+    return SafeArea(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppTheme.spacingXL),
+          // 스크롤 가능한 상단 영역
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingL),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 상단 여백 (키보드 올라갈 때 축소)
+                  SizedBox(height: isKeyboardVisible ? AppTheme.spacingS : AppTheme.spacingL),
+                  
+                  // 단계 아이콘 (키보드 올라갈 때 숨김)
+                  if (stepIcon != null && !isKeyboardVisible) ...[
+                    Center(
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: AppTheme.primaryGradientDecoration,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          stepIcon,
+                          size: 24,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppTheme.spacingM),
+                  ],
+                  
+                  // 제목
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: AppTheme.textPrimaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: isKeyboardVisible ? 18 : 22, // 키보드 올라갈 때 축소
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  const SizedBox(height: AppTheme.spacingS),
+                  
+                  // 부제목
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppTheme.textSecondaryColor,
+                      fontSize: isKeyboardVisible ? 13 : 15, // 키보드 올라갈 때 축소
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  SizedBox(height: isKeyboardVisible ? AppTheme.spacingM : AppTheme.spacingL),
+                  
+                  // 입력 영역
+                  child,
+                  
+                  // 하단 여백 (버튼을 위한 공간)
+                  SizedBox(height: onNext != null ? 80 : AppTheme.spacingL),
+                ],
+              ),
+            ),
+          ),
           
-          // 단계 아이콘
-          if (stepIcon != null) ...[
-            Center(
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: AppTheme.primaryGradientDecoration,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [AppTheme.cardShadow],
+          // 고정 하단 버튼 영역
+          if (onNext != null)
+            Container(
+              padding: const EdgeInsets.all(AppTheme.spacingL),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceColor,
+                border: Border(
+                  top: BorderSide(
+                    color: AppTheme.dividerColor,
+                    width: 1,
+                  ),
                 ),
-                child: Icon(
-                  stepIcon,
-                  size: 30,
-                  color: Colors.white,
+              ),
+              child: SafeArea(
+                top: false,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onNext,
+                    child: Text(nextButtonText),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: AppTheme.spacingL),
-          ],
-          
-          // 제목
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: AppTheme.spacingS),
-          
-          // 부제목
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppTheme.textSecondaryColor,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: AppTheme.spacingXXL),
-          
-          // 입력 영역
-          Expanded(child: child),
-          
-          // 다음 버튼
-          if (onNext != null) ...[
-            const SizedBox(height: AppTheme.spacingL),
-            ElevatedButton(
-              onPressed: onNext,
-              child: Text(nextButtonText),
-            ),
-          ],
-          
-          const SizedBox(height: AppTheme.spacingL),
         ],
       ),
     );
@@ -252,7 +295,7 @@ class _UserInputStep2State extends State<UserInputStep2>
           Container(
             padding: const EdgeInsets.all(AppTheme.spacingM),
             decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
               borderRadius: AppTheme.mediumRadius,
             ),
             child: Text(
@@ -362,7 +405,9 @@ class _UserInputStep3State extends State<UserInputStep3>
           
           const SizedBox(height: AppTheme.spacingM),
           
-          Expanded(
+          // 그리드 높이를 고정하여 표시
+          SizedBox(
+            height: 200, // 4줄 * 50px 높이
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -387,7 +432,7 @@ class _UserInputStep3State extends State<UserInputStep3>
                       border: Border.all(
                         color: isSelected 
                             ? AppTheme.primaryColor 
-                            : AppTheme.dividerColor,
+                            : AppTheme.borderColor,
                       ),
                     ),
                     child: Center(
@@ -499,7 +544,7 @@ class _UserInputStep4State extends State<UserInputStep4>
             Container(
               padding: const EdgeInsets.all(AppTheme.spacingM),
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: AppTheme.mediumRadius,
               ),
               child: Column(
@@ -542,7 +587,9 @@ class _UserInputStep4State extends State<UserInputStep4>
           
           const SizedBox(height: AppTheme.spacingM),
           
-          Expanded(
+          // 취미 그리드 높이를 고정하여 표시
+          SizedBox(
+            height: 240, // 7줄 정도의 높이
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -564,13 +611,13 @@ class _UserInputStep4State extends State<UserInputStep4>
                       color: isSelected 
                           ? AppTheme.primaryColor 
                           : isDisabled 
-                              ? AppTheme.dividerColor.withOpacity(0.3)
+                              ? AppTheme.dividerColor.withValues(alpha: 0.3)
                               : AppTheme.surfaceColor,
                       borderRadius: AppTheme.smallRadius,
                       border: Border.all(
                         color: isSelected 
                             ? AppTheme.primaryColor 
-                            : AppTheme.dividerColor,
+                            : AppTheme.borderColor,
                       ),
                     ),
                     child: Center(
@@ -580,7 +627,7 @@ class _UserInputStep4State extends State<UserInputStep4>
                           color: isSelected 
                               ? Colors.white 
                               : isDisabled
-                                  ? AppTheme.textSecondaryColor.withOpacity(0.5)
+                                  ? AppTheme.textSecondaryColor.withValues(alpha: 0.5)
                                   : AppTheme.textPrimaryColor,
                           fontSize: 12,
                           fontWeight: isSelected 
@@ -692,7 +739,7 @@ class _UserInputStep5State extends State<UserInputStep5>
           Container(
             padding: const EdgeInsets.all(AppTheme.spacingM),
             decoration: BoxDecoration(
-              color: AppTheme.accentColor.withOpacity(0.1),
+              color: AppTheme.accentColor.withValues(alpha: 0.1),
               borderRadius: AppTheme.mediumRadius,
             ),
             child: Column(

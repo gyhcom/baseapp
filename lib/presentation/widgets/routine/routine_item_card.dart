@@ -87,14 +87,14 @@ class _RoutineItemCardState extends State<RoutineItemCard>
               padding: const EdgeInsets.all(AppTheme.spacingL),
               decoration: BoxDecoration(
                 color: !widget.isEnabled
-                    ? Colors.grey.withOpacity(0.1) // 비활성화 시 회색
+                    ? Colors.grey.withValues(alpha: 0.1) // 비활성화 시 회색
                     : widget.item.isCompleted
-                    ? AppTheme.primaryColor.withOpacity(0.1)
+                    ? AppTheme.primaryColor.withValues(alpha: 0.1)
                     : AppTheme.surfaceColor,
                 borderRadius: AppTheme.mediumRadius,
                 border: Border.all(
                   color: !widget.isEnabled
-                      ? Colors.grey.withOpacity(0.3) // 비활성화 시 회색 테두리
+                      ? Colors.grey.withValues(alpha: 0.3) // 비활성화 시 회색 테두리
                       : widget.item.isCompleted
                       ? AppTheme.primaryColor
                       : AppTheme.dividerColor,
@@ -173,13 +173,13 @@ class _RoutineItemCardState extends State<RoutineItemCard>
       ),
       decoration: BoxDecoration(
         color: widget.item.isCompleted
-            ? AppTheme.primaryColor.withOpacity(0.2)
-            : AppTheme.accentColor.withOpacity(0.1),
+            ? AppTheme.primaryColor.withValues(alpha: 0.2)
+            : AppTheme.accentColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: widget.item.isCompleted
-              ? AppTheme.primaryColor.withOpacity(0.3)
-              : AppTheme.accentColor.withOpacity(0.3),
+              ? AppTheme.primaryColor.withValues(alpha: 0.3)
+              : AppTheme.accentColor.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -197,8 +197,8 @@ class _RoutineItemCardState extends State<RoutineItemCard>
             width: 20,
             height: 1,
             color: widget.item.isCompleted
-                ? AppTheme.primaryColor.withOpacity(0.5)
-                : AppTheme.accentColor.withOpacity(0.5),
+                ? AppTheme.primaryColor.withValues(alpha: 0.5)
+                : AppTheme.accentColor.withValues(alpha: 0.5),
             margin: const EdgeInsets.symmetric(vertical: 2),
           ),
           Text(
@@ -206,8 +206,8 @@ class _RoutineItemCardState extends State<RoutineItemCard>
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontSize: 10,
               color: widget.item.isCompleted
-                  ? AppTheme.primaryColor.withOpacity(0.7)
-                  : AppTheme.accentColor.withOpacity(0.7),
+                  ? AppTheme.primaryColor.withValues(alpha: 0.7)
+                  : AppTheme.accentColor.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -239,7 +239,7 @@ class _RoutineItemCardState extends State<RoutineItemCard>
             widget.item.description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: widget.item.isCompleted
-                  ? AppTheme.textSecondaryColor.withOpacity(0.7)
+                  ? AppTheme.textSecondaryColor.withValues(alpha: 0.7)
                   : AppTheme.textSecondaryColor,
             ),
             maxLines: 2,
@@ -281,9 +281,9 @@ class _RoutineItemCardState extends State<RoutineItemCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -318,7 +318,7 @@ class _RoutineItemCardState extends State<RoutineItemCard>
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppTheme.dividerColor.withOpacity(0.5),
+                color: AppTheme.dividerColor.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Icon(
@@ -340,9 +340,9 @@ class _RoutineItemCardState extends State<RoutineItemCard>
       width: 28,
       height: 28,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Icon(
         icon,

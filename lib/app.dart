@@ -16,8 +16,7 @@ class RoutineCraftApp extends ConsumerWidget {
       title: 'RoutineCraft',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light, // 라이트 테마만 사용
       routerConfig: appRouter.config(),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/app_router.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import 'package:flutter/foundation.dart';
 
 /// 루틴 생성 앱의 감성적인 스플래시 화면
 class SplashScreen extends ConsumerStatefulWidget {
@@ -77,39 +78,39 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _initializeApp() async {
-    print('🌟 루틴 앱 초기화 시작...');
+    debugPrint('🌟 루틴 앱 초기화 시작...');
 
     // 앱 초기화 시뮬레이션
     await Future.delayed(const Duration(seconds: 2));
-    print('✅ 루틴 앱 초기화 완료');
+    debugPrint('✅ 루틴 앱 초기화 완료');
 
     if (mounted) {
       try {
         // 인증 상태 확인
-        print('🔐 인증 상태 확인 중...');
+        debugPrint('🔐 인증 상태 확인 중...');
         final authController = ref.read(authControllerProvider.notifier);
         await authController.getCurrentUser();
         
         final authState = ref.read(authControllerProvider);
-        print('🔍 현재 인증 상태: ${authState.runtimeType}');
+        debugPrint('🔍 현재 인증 상태: ${authState.runtimeType}');
         
         if (authState is AuthAuthenticated) {
           // 로그인된 사용자 - 홈 화면으로 이동
-          print('✅ 로그인된 사용자 확인 - 홈 화면으로 이동');
-          print('👤 사용자 정보: ${authState.user.displayName} (${authState.user.email})');
+          debugPrint('✅ 로그인된 사용자 확인 - 홈 화면으로 이동');
+          debugPrint('👤 사용자 정보: ${authState.user.displayName} (${authState.user.email})');
           context.router.navigate(const HomeWrapperRoute());
         } else {
           // 로그인되지 않은 사용자 - 로그인 화면으로 이동
-          print('❌ 로그인되지 않은 사용자 - 로그인 화면으로 이동');
+          debugPrint('❌ 로그인되지 않은 사용자 - 로그인 화면으로 이동');
           context.router.navigate(const LoginRoute());
         }
         
-        print('✅ 화면 이동 성공');
+        debugPrint('✅ 화면 이동 성공');
       } catch (e) {
-        print('❌ 인증 확인 또는 화면 이동 실패: $e');
+        debugPrint('❌ 인증 확인 또는 화면 이동 실패: $e');
         // 에러 발생 시 로그인 화면으로 이동
         if (mounted) {
-          print('🔄 에러로 인해 로그인 화면으로 이동');
+          debugPrint('🔄 에러로 인해 로그인 화면으로 이동');
           context.router.navigate(const LoginRoute());
         }
       }
@@ -149,11 +150,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               blurRadius: 20,
                               spreadRadius: 5,
                             ),
@@ -186,7 +187,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         '당신만의 루틴을 시작해보세요',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontWeight: FontWeight.w500,
                         ),
                       ),

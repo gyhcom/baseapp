@@ -30,6 +30,7 @@ import '../domain/usecases/auth_usecase.dart';
 import '../domain/usecases/todo_usecases.dart';
 import '../domain/services/auth_service.dart';
 import '../data/services/firebase_auth_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Global service locator instance
 final GetIt getIt = GetIt.instance;
@@ -43,13 +44,13 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<SharedPreferences>(sharedPreferences);
 
   // Hive 초기화 및 데이터 호환성 문제 해결
-  print('🔧 Hive 초기화 중...');
+  debugPrint('🔧 Hive 초기화 중...');
   await Hive.initFlutter();
   
   try {
     // 기존 Hive 데이터베이스 삭제 (호환성 문제 해결)
     await Hive.deleteFromDisk();
-    print('🗑️ 기존 Hive 데이터 초기화 완료');
+    debugPrint('🗑️ 기존 Hive 데이터 초기화 완료');
     
     // Hive 재초기화
     await Hive.initFlutter();
@@ -57,16 +58,16 @@ Future<void> setupDependencies() async {
     // Hive Adapters 등록
     if (!Hive.isAdapterRegistered(8)) {
       Hive.registerAdapter(UserAuthAdapter());
-      print('✅ UserAuth Adapter 등록');
+      debugPrint('✅ UserAuth Adapter 등록');
     }
     if (!Hive.isAdapterRegistered(9)) {
       Hive.registerAdapter(UserAuthProviderAdapter());
-      print('✅ UserAuthProvider Adapter 등록');
+      debugPrint('✅ UserAuthProvider Adapter 등록');
     }
     
-    print('✅ Hive 초기화 성공');
+    debugPrint('✅ Hive 초기화 성공');
   } catch (e) {
-    print('❌ Hive 초기화 실패: $e');
+    debugPrint('❌ Hive 초기화 실패: $e');
     throw e;
   }
   
@@ -123,9 +124,9 @@ Future<void> setupDependencies() async {
   try {
     final userAuthBox = await Hive.openBox<UserAuth>('userAuth');
     getIt.registerSingleton<Box<UserAuth>>(userAuthBox, instanceName: 'userAuthBox');
-    print('✅ UserAuth Box 생성 성공');
+    debugPrint('✅ UserAuth Box 생성 성공');
   } catch (e) {
-    print('❌ UserAuth Box 생성 실패: $e');
+    debugPrint('❌ UserAuth Box 생성 실패: $e');
     throw e;
   }
 

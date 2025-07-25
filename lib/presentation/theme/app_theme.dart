@@ -5,26 +5,51 @@ class AppTheme {
   // Private constructor to prevent instantiation
   AppTheme._();
 
-  // 🎨 App Color Palette for Routine App
-  static const Color primaryColor = Color(0xFF4F86F7); // 갓생 블루
-  static const Color accentColor = Color(0xFFFBAF5D); // 햇살 오렌지
-  static const Color backgroundColor = Color(0xFFF9FAFB);
-  static const Color surfaceColor = Color(0xFFFFFFFF);
-  static const Color textPrimaryColor = Color(0xFF2E2E2E);
-  static const Color textSecondaryColor = Color(0xFF8A8A8A);
-  static const Color cardColor = Color(0xFFFFFFFF);
-  static const Color dividerColor = Color(0xFFE5E7EB);
-  static const Color errorColor = Color(0xFFEF4444);
+  // 🎨 클린하고 사용자 친화적인 색상 시스템
+  // 메인 컬러 - 편안하고 신뢰감 있는 블루
+  static const Color primaryColor = Color(0xFF2563EB); // 깔끔한 블루
+  static const Color primaryLightColor = Color(0xFF3B82F6); // 라이트 블루
+  static const Color primaryDarkColor = Color(0xFF1D4ED8); // 다크 블루
+  
+  // 액센트 컬러 - 활기찬 그린
+  static const Color accentColor = Color(0xFF10B981); // 상쾌한 그린
+  static const Color accentLightColor = Color(0xFF34D399); // 라이트 그린
+  
+  // 배경 색상 시스템
+  static const Color backgroundColor = Color(0xFFFAFAFA); // 아주 밝은 회색 배경
+  static const Color surfaceColor = Color(0xFFFFFFFF); // 순백색 표면
+  static const Color cardColor = Color(0xFFFFFFFF); // 카드 배경
+  
+  // 텍스트 색상 시스템
+  static const Color textPrimaryColor = Color(0xFF111827); // 진한 검정
+  static const Color textSecondaryColor = Color(0xFF6B7280); // 중간 회색
+  static const Color textTertiaryColor = Color(0xFF9CA3AF); // 연한 회색
+  
+  // 보더 및 구분선
+  static const Color borderColor = Color(0xFFE5E7EB); // 연한 회색 보더
+  static const Color dividerColor = Color(0xFFF3F4F6); // 아주 연한 구분선
+  
+  // 상태 색상
+  static const Color successColor = Color(0xFF10B981); // 성공 (그린)
+  static const Color warningColor = Color(0xFFF59E0B); // 경고 (앰버)
+  static const Color errorColor = Color(0xFFEF4444); // 에러 (레드)
+  static const Color infoColor = Color(0xFF3B82F6); // 정보 (블루)
   
   // 그라데이션 컬러
   static const List<Color> primaryGradient = [
-    Color(0xFF4F86F7),
-    Color(0xFF6B94F8),
+    Color(0xFF2563EB),
+    Color(0xFF3B82F6),
   ];
   
   static const List<Color> accentGradient = [
-    Color(0xFFFBAF5D),
-    Color(0xFFFFC478),
+    Color(0xFF10B981),
+    Color(0xFF34D399),
+  ];
+  
+  // 서브틸한 그라데이션
+  static const List<Color> subtleGradient = [
+    Color(0xFFF8FAFC),
+    Color(0xFFE2E8F0),
   ];
 
   // ========== LIGHT THEME ==========
@@ -44,6 +69,8 @@ class AppTheme {
         onSurface: textPrimaryColor,
         onBackground: textPrimaryColor,
         error: errorColor,
+        outline: borderColor,
+        outlineVariant: dividerColor,
       ),
       
       // 배경색
@@ -53,12 +80,16 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
-        backgroundColor: backgroundColor,
+        backgroundColor: surfaceColor,
+        surfaceTintColor: Colors.transparent,
         foregroundColor: textPrimaryColor,
         titleTextStyle: TextStyle(
           color: textPrimaryColor,
           fontSize: 18,
           fontWeight: FontWeight.w600,
+        ),
+        iconTheme: IconThemeData(
+          color: textPrimaryColor,
         ),
       ),
       
@@ -67,8 +98,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
-          elevation: 2,
-          shadowColor: primaryColor.withOpacity(0.3),
+          elevation: 1,
+          shadowColor: primaryColor.withValues(alpha: 0.2),
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -80,11 +111,11 @@ class AppTheme {
         ),
       ),
       
-      // 아웃라인 버튼 테마 (소셜 로그인용)
+      // 아웃라인 버튼 테마
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: textPrimaryColor,
-          side: const BorderSide(color: dividerColor, width: 1.5),
+          side: const BorderSide(color: borderColor, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -113,11 +144,11 @@ class AppTheme {
         fillColor: surfaceColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: dividerColor, width: 1),
+          borderSide: const BorderSide(color: borderColor, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: dividerColor, width: 1),
+          borderSide: const BorderSide(color: borderColor, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -133,7 +164,7 @@ class AppTheme {
           fontSize: 14,
         ),
         hintStyle: const TextStyle(
-          color: textSecondaryColor,
+          color: textTertiaryColor,
           fontSize: 14,
         ),
       ),
@@ -141,10 +172,11 @@ class AppTheme {
       // 카드 테마
       cardTheme: CardThemeData(
         color: cardColor,
-        elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.1),
+        elevation: 1,
+        shadowColor: Colors.black.withValues(alpha: 0.06),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: dividerColor, width: 1),
         ),
       ),
       
@@ -196,56 +228,8 @@ class AppTheme {
     );
   }
 
-  // ========== DARK THEME ==========
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      fontFamily: 'Pretendard',
-      
-      colorScheme: const ColorScheme.dark(
-        primary: primaryColor,
-        secondary: accentColor,
-        surface: Color(0xFF1E1E1E),
-        background: Color(0xFF121212),
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: Colors.white,
-        onBackground: Colors.white,
-        error: errorColor,
-      ),
-      
-      scaffoldBackgroundColor: const Color(0xFF121212),
-      
-      appBarTheme: const AppBarTheme(
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Color(0xFF121212),
-        foregroundColor: Colors.white,
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          elevation: 2,
-          shadowColor: primaryColor.withOpacity(0.3),
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
+  // ========== 단일 라이트 테마만 사용 ==========
+  // 다크 테마는 제거하고 깔끔한 라이트 테마만 유지
   
   // ========== UTILITY METHODS ==========
   
@@ -262,20 +246,46 @@ class AppTheme {
     colors: accentGradient,
   );
   
-  // 그림자 유틸리티
+  // 그림자 유틸리티 - 더 서브틸하고 깔끔하게
   static BoxShadow get cardShadow => BoxShadow(
-    color: Colors.black.withOpacity(0.08),
+    color: Colors.black.withValues(alpha: 0.04),
+    offset: const Offset(0, 1),
+    blurRadius: 8,
+    spreadRadius: 0,
+  );
+  
+  static BoxShadow get elevatedShadow => BoxShadow(
+    color: Colors.black.withValues(alpha: 0.08),
     offset: const Offset(0, 2),
     blurRadius: 12,
     spreadRadius: 0,
   );
   
   static BoxShadow get buttonShadow => BoxShadow(
-    color: primaryColor.withOpacity(0.3),
-    offset: const Offset(0, 4),
-    blurRadius: 12,
+    color: primaryColor.withValues(alpha: 0.15),
+    offset: const Offset(0, 2),
+    blurRadius: 8,
     spreadRadius: 0,
   );
+  
+  // 추가 그림자 옵션
+  static List<BoxShadow> get subtleShadow => [
+    BoxShadow(
+      color: Colors.black.withValues(alpha: 0.02),
+      offset: const Offset(0, 1),
+      blurRadius: 4,
+      spreadRadius: 0,
+    ),
+  ];
+  
+  static List<BoxShadow> get mediumShadow => [
+    BoxShadow(
+      color: Colors.black.withValues(alpha: 0.06),
+      offset: const Offset(0, 2),
+      blurRadius: 8,
+      spreadRadius: 0,
+    ),
+  ];
   
   // 둥근 모서리 유틸리티
   static BorderRadius get smallRadius => BorderRadius.circular(8);

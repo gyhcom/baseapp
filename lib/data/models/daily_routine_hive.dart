@@ -37,6 +37,9 @@ class DailyRoutineHive extends HiveObject {
   @HiveField(8)
   final int usageCount;
 
+  @HiveField(9, defaultValue: false)
+  final bool isActive;
+
   DailyRoutineHive({
     required this.id,
     required this.title,
@@ -47,6 +50,7 @@ class DailyRoutineHive extends HiveObject {
     this.createdAt,
     required this.isFavorite,
     required this.usageCount,
+    this.isActive = false,
   });
 
   /// DailyRoutine 엔티티로 변환
@@ -61,6 +65,7 @@ class DailyRoutineHive extends HiveObject {
       createdAt: createdAt,
       isFavorite: isFavorite,
       usageCount: usageCount,
+      isActive: isActive,
     );
   }
 
@@ -70,11 +75,14 @@ class DailyRoutineHive extends HiveObject {
       id: routine.id,
       title: routine.title,
       conceptName: routine.concept.name,
-      items: routine.items.map((item) => RoutineItemHive.fromRoutineItem(item)).toList(),
+      items: routine.items
+          .map((item) => RoutineItemHive.fromRoutineItem(item))
+          .toList(),
       generatedFor: UserProfileHive.fromUserProfile(routine.generatedFor),
       description: routine.description,
       createdAt: routine.createdAt,
       isFavorite: routine.isFavorite,
+      isActive: routine.isActive,
       usageCount: routine.usageCount,
     );
   }
@@ -239,4 +247,3 @@ class UserProfileHive {
     );
   }
 }
-

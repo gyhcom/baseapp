@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/services/behavior_analytics_service.dart';
 import '../../domain/entities/user_behavior_log.dart';
 import '../../di/service_locator.dart';
+import 'package:flutter/foundation.dart';
 
 /// 행동 분석 서비스 Provider
 final behaviorAnalyticsServiceProvider = Provider<BehaviorAnalyticsService>((ref) {
@@ -27,7 +28,7 @@ class BehaviorLogger {
     required String routineItemId,
     DateTime? notificationSentAt,
   }) async {
-    print('📊 루틴 시작 로그: $routineId');
+    debugPrint('📊 루틴 시작 로그: $routineId');
     
     await _analyticsService.logBehavior(
       userId: userId,
@@ -49,7 +50,7 @@ class BehaviorLogger {
     required String routineItemId,
     Duration? duration,
   }) async {
-    print('📊 루틴 완료 로그: $routineId');
+    debugPrint('📊 루틴 완료 로그: $routineId');
     
     await _analyticsService.logBehavior(
       userId: userId,
@@ -70,7 +71,7 @@ class BehaviorLogger {
     required String routineItemId,
     String? reason,
   }) async {
-    print('📊 루틴 건너뛰기 로그: $routineId');
+    debugPrint('📊 루틴 건너뛰기 로그: $routineId');
     
     await _analyticsService.logBehavior(
       userId: userId,
@@ -91,7 +92,7 @@ class BehaviorLogger {
     required String routineItemId,
     required DateTime notificationSentAt,
   }) async {
-    print('📊 알림 응답 로그: $routineId');
+    debugPrint('📊 알림 응답 로그: $routineId');
     
     await _analyticsService.logBehavior(
       userId: userId,
@@ -111,7 +112,7 @@ class BehaviorLogger {
     required String userId,
     String? source,
   }) async {
-    print('📊 앱 열기 로그');
+    debugPrint('📊 앱 열기 로그');
     
     await _analyticsService.logBehavior(
       userId: userId,

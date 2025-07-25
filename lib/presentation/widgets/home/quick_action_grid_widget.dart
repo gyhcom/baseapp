@@ -194,10 +194,10 @@ class QuickActionIcon extends StatelessWidget {
                   height: 56,
                   margin: const EdgeInsets.only(bottom: 2),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: color.withOpacity(0.2),
+                      color: color.withValues(alpha: 0.2),
                       width: 1,
                     ),
                   ),
@@ -268,8 +268,8 @@ class AnimatedMoreHint extends StatelessWidget {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              const Color(0xFFF8FAFC).withOpacity(0.0),
-              const Color(0xFFF8FAFC).withOpacity(0.8),
+              const Color(0xFFF8FAFC).withValues(alpha: 0.0),
+              const Color(0xFFF8FAFC).withValues(alpha: 0.8),
               const Color(0xFFF8FAFC),
             ],
           ),

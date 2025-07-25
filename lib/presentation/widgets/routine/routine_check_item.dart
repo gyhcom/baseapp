@@ -103,14 +103,14 @@ class _RoutineCheckItemState extends State<RoutineCheckItem>
     return Card(
       elevation: isCompleted ? 2 : 4,
       color: isCompleted 
-          ? AppTheme.surfaceColor.withOpacity(0.8)
+          ? AppTheme.surfaceColor.withValues(alpha: 0.8)
           : AppTheme.surfaceColor,
       shape: RoundedRectangleBorder(
         borderRadius: AppTheme.mediumRadius,
         side: BorderSide(
           color: isCompleted 
-              ? Colors.green.withOpacity(0.5)
-              : _priorityColor.withOpacity(0.3),
+              ? Colors.green.withValues(alpha: 0.5)
+              : _priorityColor.withValues(alpha: 0.3),
           width: isCompleted ? 2 : 1,
         ),
       ),
@@ -179,10 +179,10 @@ class _RoutineCheckItemState extends State<RoutineCheckItem>
         vertical: AppTheme.spacingXS,
       ),
       decoration: BoxDecoration(
-        color: _priorityColor.withOpacity(0.1),
+        color: _priorityColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _priorityColor.withOpacity(0.3),
+          color: _priorityColor.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -200,7 +200,7 @@ class _RoutineCheckItemState extends State<RoutineCheckItem>
             widget.item.durationDisplay,
             style: TextStyle(
               fontSize: 10,
-              color: _priorityColor.withOpacity(0.8),
+              color: _priorityColor.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -231,7 +231,7 @@ class _RoutineCheckItemState extends State<RoutineCheckItem>
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               decoration: isCompleted ? TextDecoration.lineThrough : null,
               color: isCompleted 
-                  ? AppTheme.textSecondaryColor.withOpacity(0.7)
+                  ? AppTheme.textSecondaryColor.withValues(alpha: 0.7)
                   : AppTheme.textSecondaryColor,
             ),
             maxLines: 2,
@@ -253,7 +253,7 @@ class _RoutineCheckItemState extends State<RoutineCheckItem>
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -272,7 +272,7 @@ class _RoutineCheckItemState extends State<RoutineCheckItem>
                   vertical: 2,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentColor.withOpacity(0.1),
+                  color: AppTheme.accentColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 
 /// API 관련 상수들
 class ApiConstants {
@@ -43,9 +44,9 @@ class EnvironmentConfig {
     }
     
     // API 키가 없으면 안내 메시지와 함께 빈 문자열 반환
-    print('⚠️  Claude API 키가 필요합니다!');
-    print('1. .env 파일에 CLAUDE_API_KEY 설정');
-    print('2. 또는 환경변수 설정: export CLAUDE_API_KEY="your-key"');
+    debugPrint('⚠️  Claude API 키가 필요합니다!');
+    debugPrint('1. .env 파일에 CLAUDE_API_KEY 설정');
+    debugPrint('2. 또는 환경변수 설정: export CLAUDE_API_KEY="your-key"');
     return '';
   }
   

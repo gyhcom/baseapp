@@ -13,6 +13,7 @@ class DailyRoutineHiveAdapter extends TypeAdapter<DailyRoutineHive> {
   @override
   DailyRoutineHive read(BinaryReader reader) {
     final numOfFields = reader.readByte();
+
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
@@ -26,13 +27,14 @@ class DailyRoutineHiveAdapter extends TypeAdapter<DailyRoutineHive> {
       createdAt: fields[6] as DateTime?,
       isFavorite: fields[7] as bool,
       usageCount: fields[8] as int,
+      isActive: fields[9] == null ? false : fields[9] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, DailyRoutineHive obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +52,9 @@ class DailyRoutineHiveAdapter extends TypeAdapter<DailyRoutineHive> {
       ..writeByte(7)
       ..write(obj.isFavorite)
       ..writeByte(8)
-      ..write(obj.usageCount);
+      ..write(obj.usageCount)
+      ..writeByte(9)
+      ..write(obj.isActive);
   }
 
   @override

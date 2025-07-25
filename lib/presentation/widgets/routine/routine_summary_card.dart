@@ -9,6 +9,7 @@ import '../../../domain/repositories/routine_repository.dart';
 import '../../../domain/services/routine_limit_service.dart';
 import '../../../core/constants/routine_limits.dart';
 import '../../../di/service_locator.dart';
+import 'package:flutter/foundation.dart';
 
 /// 루틴 요약 카드 위젯
 class RoutineSummaryCard extends StatefulWidget {
@@ -111,7 +112,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
               boxShadow: [AppTheme.cardShadow],
               border: Border.all(
                 color: widget.routine.isFavorite 
-                    ? AppTheme.primaryColor.withOpacity(0.3)
+                    ? AppTheme.primaryColor.withValues(alpha: 0.3)
                     : AppTheme.dividerColor,
                 width: widget.routine.isFavorite ? 2 : 1,
               ),
@@ -162,7 +163,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primaryColor.withOpacity(0.3),
+                color: AppTheme.primaryColor.withValues(alpha: 0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -223,8 +224,8 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: widget.routine.isFavorite 
-                    ? Colors.red.withOpacity(0.1)
-                    : AppTheme.dividerColor.withOpacity(0.3),
+                    ? Colors.red.withValues(alpha: 0.1)
+                    : AppTheme.dividerColor.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -248,7 +249,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppTheme.dividerColor.withOpacity(0.3),
+              color: AppTheme.dividerColor.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -294,7 +295,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
             key: ValueKey(_isActive), // 강제 리빌드
             value: _isActive,
             onChanged: (value) {
-              print('🎛️ 루틴 카드 스위치 클릭: $value (현재: $_isActive)');
+              debugPrint('🎛️ 루틴 카드 스위치 클릭: $value (현재: $_isActive)');
               _toggleActiveStatus();
             },
             activeColor: AppTheme.primaryColor,
@@ -311,12 +312,12 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: _isActive 
-            ? Colors.green.withOpacity(0.1)
-            : AppTheme.dividerColor.withOpacity(0.3),
+            ? Colors.green.withValues(alpha: 0.1)
+            : AppTheme.dividerColor.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _isActive 
-              ? Colors.green.withOpacity(0.3)
+              ? Colors.green.withValues(alpha: 0.3)
               : AppTheme.dividerColor,
         ),
       ),
@@ -446,9 +447,9 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -740,7 +741,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                       icon: const Icon(Icons.share),
                       iconSize: 32,
                       style: IconButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366F1).withOpacity(0.1),
+                        backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.1),
                         foregroundColor: const Color(0xFF6366F1),
                       ),
                     ),
@@ -763,7 +764,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                       icon: const Icon(Icons.content_copy),
                       iconSize: 32,
                       style: IconButton.styleFrom(
-                        backgroundColor: const Color(0xFF059669).withOpacity(0.1),
+                        backgroundColor: const Color(0xFF059669).withValues(alpha: 0.1),
                         foregroundColor: const Color(0xFF059669),
                       ),
                     ),
@@ -780,7 +781,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                       icon: const Icon(Icons.image),
                       iconSize: 32,
                       style: IconButton.styleFrom(
-                        backgroundColor: const Color(0xFFDC2626).withOpacity(0.1),
+                        backgroundColor: const Color(0xFFDC2626).withValues(alpha: 0.1),
                         foregroundColor: const Color(0xFFDC2626),
                       ),
                     ),
@@ -814,19 +815,19 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
 
   /// 루틴 활성화 상태 토글
   Future<void> _toggleActiveStatus() async {
-    print('🔄 루틴 카드 활성화 토글 시작: ${widget.routine.title} (현재: $_isActive)');
+    debugPrint('🔄 루틴 카드 활성화 토글 시작: ${widget.routine.title} (현재: $_isActive)');
     
     try {
       final routineRepository = getIt<RoutineRepository>();
       
       // 활성화하려는 경우 제한 검사
       if (!_isActive) {
-        print('📊 활성화 제한 검사 중...');
+        debugPrint('📊 활성화 제한 검사 중...');
         final canActivate = await RoutineLimitService.canActivateRoutine();
-        print('📊 활성화 가능 여부: $canActivate');
+        debugPrint('📊 활성화 가능 여부: $canActivate');
         
         if (!canActivate) {
-          print('❌ 활성화 제한으로 인해 실패');
+          debugPrint('❌ 활성화 제한으로 인해 실패');
           // 제한 초과 시 업그레이드 안내
           _showActivationLimitDialog();
           return;
@@ -834,24 +835,24 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
         
         // 무료 사용자는 기존 활성화된 루틴을 자동 비활성화 (현재 루틴 제외)
         final userTier = await RoutineLimitService.getUserTier();
-        print('👤 사용자 등급: $userTier');
+        debugPrint('👤 사용자 등급: $userTier');
         if (userTier == UserTier.free) {
-          print('🔧 기존 활성화된 루틴들 비활성화 중 (현재 루틴 제외: ${widget.routine.id})...');
+          debugPrint('🔧 기존 활성화된 루틴들 비활성화 중 (현재 루틴 제외: ${widget.routine.id})...');
           await routineRepository.deactivateAllRoutines(exceptRoutineId: widget.routine.id);
         }
       }
       
       // UI 상태를 먼저 낙관적으로 업데이트
       final expectedNewState = !_isActive;
-      print('🎨 UI 상태 낙관적 업데이트: $expectedNewState');
+      debugPrint('🎨 UI 상태 낙관적 업데이트: $expectedNewState');
       setState(() {
         _isActive = expectedNewState;
       });
       
       // 상태 토글
-      print('🔧 데이터베이스에서 루틴 상태 토글 실행...');
+      debugPrint('🔧 데이터베이스에서 루틴 상태 토글 실행...');
       await routineRepository.toggleRoutineActive(widget.routine.id);
-      print('✅ 데이터베이스 토글 완료');
+      debugPrint('✅ 데이터베이스 토글 완료');
       
       // 부모 위젯에 변경 알림
       widget.onActiveToggle?.call();
@@ -871,10 +872,10 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
         );
       }
       
-      print('🏁 루틴 카드 활성화 토글 완료: $_isActive');
+      debugPrint('🏁 루틴 카드 활성화 토글 완료: $_isActive');
       
     } catch (e) {
-      print('❌ 루틴 카드 활성화 토글 실패: $e');
+      debugPrint('❌ 루틴 카드 활성화 토글 실패: $e');
       
       // 실패 시 UI 상태를 원래대로 되돌림
       setState(() {

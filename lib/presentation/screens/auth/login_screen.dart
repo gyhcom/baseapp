@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/app_router.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import 'package:flutter/foundation.dart';
 
 /// 루틴 앱의 사용자 친화적인 로그인 화면
 class LoginScreen extends ConsumerStatefulWidget {
@@ -60,7 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     setState(() => _isLoading = true);
 
     try {
-      print('📧 이메일 로그인 시도 중...');
+      debugPrint('📧 이메일 로그인 시도 중...');
       // 개발용: 이메일/비밀번호 로그인은 익명 로그인으로 처리
       final authController = ref.read(authControllerProvider.notifier);
       await authController.signInAnonymously();
@@ -68,7 +69,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       final authState = ref.read(authControllerProvider);
       
       if (authState is AuthAuthenticated) {
-        print('✅ 로그인 성공');
+        debugPrint('✅ 로그인 성공');
         if (mounted) {
           context.router.navigate(const UserInputRoute());
           ScaffoldMessenger.of(context).showSnackBar(
@@ -88,7 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         throw Exception('로그인에 실패했습니다');
       }
     } catch (e) {
-      print('❌ 로그인 실패: $e');
+      debugPrint('❌ 로그인 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -111,14 +112,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Future<void> _handleGoogleLogin() async {
     setState(() => _isLoading = true);
     try {
-      print('🔐 Google 로그인 시도 중...');
+      debugPrint('🔐 Google 로그인 시도 중...');
       final authController = ref.read(authControllerProvider.notifier);
       await authController.signInWithGoogle();
       
       final authState = ref.read(authControllerProvider);
       
       if (authState is AuthAuthenticated) {
-        print('✅ Google 로그인 성공');
+        debugPrint('✅ Google 로그인 성공');
         if (mounted) {
           context.router.navigate(const HomeWrapperRoute());
           ScaffoldMessenger.of(context).showSnackBar(
@@ -138,7 +139,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         throw Exception('로그인에 실패했습니다');
       }
     } catch (e) {
-      print('❌ Google 로그인 실패: $e');
+      debugPrint('❌ Google 로그인 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -159,14 +160,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Future<void> _handleAppleLogin() async {
     setState(() => _isLoading = true);
     try {
-      print('🍎 Apple 로그인 시도 중...');
+      debugPrint('🍎 Apple 로그인 시도 중...');
       final authController = ref.read(authControllerProvider.notifier);
       await authController.signInWithApple();
       
       final authState = ref.read(authControllerProvider);
       
       if (authState is AuthAuthenticated) {
-        print('✅ Apple 로그인 성공');
+        debugPrint('✅ Apple 로그인 성공');
         if (mounted) {
           context.router.navigate(const HomeWrapperRoute());
           ScaffoldMessenger.of(context).showSnackBar(
@@ -186,7 +187,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         throw Exception('로그인에 실패했습니다');
       }
     } catch (e) {
-      print('❌ Apple 로그인 실패: $e');
+      debugPrint('❌ Apple 로그인 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -207,14 +208,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Future<void> _handleSkip() async {
     setState(() => _isLoading = true);
     try {
-      print('👤 익명 로그인 시도 중...');
+      debugPrint('👤 익명 로그인 시도 중...');
       final authController = ref.read(authControllerProvider.notifier);
       await authController.signInAnonymously();
       
       final authState = ref.read(authControllerProvider);
       
       if (authState is AuthAuthenticated) {
-        print('✅ 익명 로그인 성공');
+        debugPrint('✅ 익명 로그인 성공');
         if (mounted) {
           context.router.navigate(const UserInputRoute());
           ScaffoldMessenger.of(context).showSnackBar(
@@ -234,13 +235,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         throw Exception('익명 로그인에 실패했습니다');
       }
     } catch (e) {
-      print('❌ 익명 로그인 실패: $e');
+      debugPrint('❌ 익명 로그인 실패: $e');
       
       // 익명 로그인 실패 시 테스트를 위한 임시 건너뛰기
       if (e.toString().contains('operation-not-allowed') || 
           e.toString().contains('익명 로그인이 비활성화') ||
           e.toString().contains('administrators only')) {
-        print('🔄 Firebase 익명 인증이 비활성화됨 - 테스트 모드로 진행');
+        debugPrint('🔄 Firebase 익명 인증이 비활성화됨 - 테스트 모드로 진행');
         if (mounted) {
           context.router.navigate(const UserInputRoute());
           ScaffoldMessenger.of(context).showSnackBar(

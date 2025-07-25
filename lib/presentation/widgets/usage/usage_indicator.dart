@@ -132,7 +132,7 @@ class UsageIndicator extends ConsumerWidget {
             Text(
               _getDetailText(usage),
               style: TextStyle(
-                color: _getTextColor(available, isPremium).withOpacity(0.8),
+                color: _getTextColor(available, isPremium).withValues(alpha: 0.8),
                 fontSize: 11,
               ),
               textAlign: TextAlign.center,
@@ -144,15 +144,15 @@ class UsageIndicator extends ConsumerWidget {
   }
 
   Color _getBackgroundColor(int available, bool isPremium) {
-    if (isPremium) return AppTheme.primaryColor.withOpacity(0.1);
-    if (available > 0) return Colors.green.withOpacity(0.1);
-    return Colors.red.withOpacity(0.1);
+    if (isPremium) return AppTheme.primaryColor.withValues(alpha: 0.1);
+    if (available > 0) return Colors.green.withValues(alpha: 0.1);
+    return Colors.red.withValues(alpha: 0.1);
   }
 
   Color _getBorderColor(int available, bool isPremium) {
-    if (isPremium) return AppTheme.primaryColor.withOpacity(0.3);
-    if (available > 0) return Colors.green.withOpacity(0.3);
-    return Colors.red.withOpacity(0.3);
+    if (isPremium) return AppTheme.primaryColor.withValues(alpha: 0.3);
+    if (available > 0) return Colors.green.withValues(alpha: 0.3);
+    return Colors.red.withValues(alpha: 0.3);
   }
 
   IconData _getIcon(int available, bool isPremium) {

@@ -6,6 +6,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../domain/services/auth_service.dart';
 import '../datasources/local/local_storage.dart';
 import '../datasources/remote/api_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Implementation of AuthRepository
 class AuthRepositoryImpl implements AuthRepository {
@@ -158,7 +159,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserAuth?> signInWithGoogle() async {
     if (_authService == null) throw Exception('Auth service not configured');
-    final userAuth = await _authService!.signInWithGoogle();
+    final userAuth = await _authService.signInWithGoogle();
     if (userAuth != null) {
       await saveUserAuth(userAuth);
     }
@@ -168,7 +169,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserAuth?> signInWithApple() async {
     if (_authService == null) throw Exception('Auth service not configured');
-    final userAuth = await _authService!.signInWithApple();
+    final userAuth = await _authService.signInWithApple();
     if (userAuth != null) {
       await saveUserAuth(userAuth);
     }
@@ -178,7 +179,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserAuth?> signInAnonymously() async {
     if (_authService == null) throw Exception('Auth service not configured');
-    final userAuth = await _authService!.signInAnonymously();
+    final userAuth = await _authService.signInAnonymously();
     if (userAuth != null) {
       await saveUserAuth(userAuth);
     }
@@ -188,7 +189,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signOut() async {
     if (_authService != null) {
-      await _authService!.signOut();
+      await _authService.signOut();
     }
     await _userAuthBox?.clear();
   }
@@ -202,17 +203,17 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserAuth?> getCurrentUserAuth() async {
     // Firebase 실시간 상태를 우선적으로 확인
     if (_authService != null) {
-      final firebaseUser = _authService!.getCurrentUser();
+      final firebaseUser = _authService.getCurrentUser();
       
       if (firebaseUser != null) {
         // Firebase에서 사용자 정보를 가져온 경우, 로컬 저장소 업데이트
         await saveUserAuth(firebaseUser);
-        print('🔄 Firebase에서 사용자 정보 동기화: ${firebaseUser.displayName} (${firebaseUser.email})');
+        debugPrint('🔄 Firebase에서 사용자 정보 동기화: ${firebaseUser.displayName} (${firebaseUser.email})');
         return firebaseUser;
       } else {
         // Firebase에 사용자가 없으면 로컬 저장소도 클리어
         await _userAuthBox?.clear();
-        print('🗑️ Firebase 로그아웃 상태로 로컬 데이터 클리어');
+        debugPrint('🗑️ Firebase 로그아웃 상태로 로컬 데이터 클리어');
         return null;
       }
     }
@@ -220,7 +221,7 @@ class AuthRepositoryImpl implements AuthRepository {
     // AuthService가 없는 경우에만 로컬 저장소에서 가져오기
     final localUser = _userAuthBox?.get('current_user');
     if (localUser != null) {
-      print('📦 로컬 저장소에서 사용자 정보 로드: ${localUser.displayName} (${localUser.email})');
+      debugPrint('📦 로컬 저장소에서 사용자 정보 로드: ${localUser.displayName} (${localUser.email})');
     }
     return localUser;
   }
@@ -228,13 +229,13 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<UserAuth?> get authStateChanges {
     if (_authService == null) return Stream.value(null);
-    return _authService!.authStateChanges;
+    return _authService.authStateChanges;
   }
 
   @override
   bool get isSignedIn {
     if (_authService == null) return false;
-    return _authService!.isSignedIn;
+    return _authService.isSignedIn;
   }
 
   /// Map API response to User entity

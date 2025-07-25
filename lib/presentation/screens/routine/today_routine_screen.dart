@@ -9,6 +9,7 @@ import '../../../domain/repositories/routine_repository.dart';
 import '../../../di/service_locator.dart';
 import '../../widgets/routine/routine_check_item.dart';
 import '../../widgets/routine/progress_circle.dart';
+import 'package:flutter/foundation.dart';
 
 /// 오늘의 루틴 실행 화면
 /// 하루 일정을 체크리스트 형태로 보여주고 완료/미완료 체크 가능
@@ -94,7 +95,7 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
       }
       
     } catch (e) {
-      print('루틴 아이템 체크 실패: $e');
+      debugPrint('루틴 아이템 체크 실패: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('체크 상태 변경에 실패했습니다: $e'),
@@ -136,7 +137,7 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
                     end: Alignment.bottomRight,
                     colors: [
                       _routine.concept.color,
-                      _routine.concept.color.withOpacity(0.8),
+                      _routine.concept.color.withValues(alpha: 0.8),
                     ],
                   ),
                 ),
@@ -173,7 +174,7 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
                                     Text(
                                       _routine.concept.displayName,
                                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        color: Colors.white.withOpacity(0.9),
+                                        color: Colors.white.withValues(alpha: 0.9),
                                       ),
                                     ),
                                   ],
@@ -191,7 +192,7 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
                                             progress: _progressAnimation.value,
                                             size: 70,
                                             strokeWidth: 6,
-                                            backgroundColor: Colors.white.withOpacity(0.3),
+                                            backgroundColor: Colors.white.withValues(alpha: 0.3),
                                             progressColor: Colors.white,
                                             child: Column(
                                               mainAxisAlignment: MainAxisAlignment.center,
@@ -207,7 +208,7 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
                                                 Text(
                                                   '$_completedCount/${_routine.items.length}',
                                                   style: TextStyle(
-                                                    color: Colors.white.withOpacity(0.8),
+                                                    color: Colors.white.withValues(alpha: 0.8),
                                                     fontSize: 10,
                                                   ),
                                                 ),
@@ -238,7 +239,7 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
                                                   ? '🎉 오늘 루틴을 모두 완료했어요!'
                                                   : '${_routine.items.length - _completedCount}개 남았어요',
                                               style: TextStyle(
-                                                color: Colors.white.withOpacity(0.9),
+                                                color: Colors.white.withValues(alpha: 0.9),
                                                 fontSize: 14,
                                               ),
                                             ),
@@ -383,7 +384,7 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
         ),
       );
     } catch (e) {
-      print('루틴 아이템 삭제 실패: $e');
+      debugPrint('루틴 아이템 삭제 실패: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('삭제에 실패했습니다: $e'),

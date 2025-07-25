@@ -2,6 +2,7 @@ import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/entities/notification_settings.dart';
 import '../../domain/repositories/notification_repository.dart';
+import 'package:flutter/foundation.dart';
 
 @LazySingleton(as: NotificationRepository)
 class NotificationRepositoryImpl implements NotificationRepository {
@@ -24,7 +25,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
       final box = await _settingsBox;
       return box.get(_settingsKey) ?? const NotificationSettings();
     } catch (e) {
-      print('알림 설정 로드 실패: $e');
+      debugPrint('알림 설정 로드 실패: $e');
       return const NotificationSettings();
     }
   }
@@ -35,7 +36,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
       final box = await _settingsBox;
       await box.put(_settingsKey, settings);
     } catch (e) {
-      print('알림 설정 저장 실패: $e');
+      debugPrint('알림 설정 저장 실패: $e');
       rethrow;
     }
   }

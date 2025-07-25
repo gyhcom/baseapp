@@ -13,6 +13,7 @@ import '../../presentation/screens/routine/user_input_screen.dart';
 import '../../presentation/screens/routine/concept_selection_screen.dart';
 import '../../presentation/screens/routine/routine_generation_screen.dart';
 import '../../presentation/screens/routine/today_routine_screen.dart';
+import '../../presentation/screens/routine/routine_detail_screen.dart';
 import '../../domain/entities/routine_concept.dart';
 import '../../domain/entities/daily_routine.dart';
 
@@ -54,6 +55,7 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: ConceptSelectionRoute.page, path: '/routine/concept'),
     AutoRoute(page: RoutineGenerationRoute.page, path: '/routine/generation'),
     AutoRoute(page: TodayRoutineRoute.page, path: '/routine/today'),
+    AutoRoute(page: RoutineDetailRoute.page, path: '/routine/detail'),
 
     // ========== FALLBACK ==========
     /// Redirect to splash if route is not found
@@ -252,6 +254,19 @@ class TodayRoutinePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TodayRoutineScreen(routine: routine);
+}
+
+@RoutePage()
+class RoutineDetailPage extends StatelessWidget {
+  final DailyRoutine routine;
+  
+  const RoutineDetailPage({
+    super.key,
+    required this.routine,
+  });
+
+  @override
+  Widget build(BuildContext context) => RoutineDetailScreen(routine: routine);
 }
 
 /// Navigation helper methods for AppRouter

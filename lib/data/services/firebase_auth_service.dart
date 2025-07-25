@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../domain/entities/user_auth.dart';
 import '../../domain/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
 
 class FirebaseAuthService implements AuthService {
   final firebase_auth.FirebaseAuth _firebaseAuth;
@@ -37,30 +38,30 @@ class FirebaseAuthService implements AuthService {
   Future<UserAuth?> signInWithGoogle() async {
     try {
       // iOS에서 Google Sign-In 설정 확인
-      print('🔧 Google Sign-In 설정 확인 중...');
+      debugPrint('🔧 Google Sign-In 설정 확인 중...');
       
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        print('❌ Google 로그인 취소됨');
+        debugPrint('❌ Google 로그인 취소됨');
         return null;
       }
 
-      print('✅ Google 계정 선택 완료: ${googleUser.email}');
+      debugPrint('✅ Google 계정 선택 완료: ${googleUser.email}');
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       
       if (googleAuth.accessToken == null || googleAuth.idToken == null) {
         throw Exception('Google 인증 토큰을 가져올 수 없습니다');
       }
       
-      print('✅ Google 인증 토큰 획득 완료');
+      debugPrint('✅ Google 인증 토큰 획득 완료');
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      print('🔥 Firebase 인증 시도 중...');
+      debugPrint('🔥 Firebase 인증 시도 중...');
       final firebase_auth.UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
-      print('✅ Firebase 인증 성공');
+      debugPrint('✅ Firebase 인증 성공');
       
       return _userFromFirebase(userCredential.user);
     } on firebase_auth.FirebaseAuthException catch (e) {

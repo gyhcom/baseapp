@@ -3,6 +3,7 @@ import '../../domain/entities/daily_routine.dart';
 import '../../domain/entities/user_profile.dart';
 import '../datasources/local/routine_local_datasource.dart';
 import '../../presentation/screens/routine/routine_notification_helper.dart';
+import 'package:flutter/foundation.dart';
 
 /// 루틴 저장소 구현
 class RoutineRepositoryImpl implements RoutineRepository {
@@ -51,22 +52,22 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   @override
   Future<void> updateRoutine(DailyRoutine routine) async {
-    print('💾 updateRoutine 시작: ${routine.title} (활성화: ${routine.isActive})');
+    debugPrint('💾 updateRoutine 시작: ${routine.title} (활성화: ${routine.isActive})');
     
     // 수정된 시간으로 업데이트
     final updatedRoutine = routine.copyWith(
       createdAt: routine.createdAt ?? DateTime.now(),
     );
     
-    print('💾 DB에 저장할 루틴 상태: ${updatedRoutine.isActive}');
+    debugPrint('💾 DB에 저장할 루틴 상태: ${updatedRoutine.isActive}');
     await _localDataSource.saveRoutine(updatedRoutine);
-    print('✅ DB 저장 완료');
+    debugPrint('✅ DB 저장 완료');
     
-    print('✅ updateRoutine 완료');
+    debugPrint('✅ updateRoutine 완료');
     
     // 저장 후 실제 상태 확인
     final savedRoutine = await getRoutineById(updatedRoutine.id);
-    print('🔍 저장 후 실제 DB 상태: ${savedRoutine?.isActive}');
+    debugPrint('🔍 저장 후 실제 DB 상태: ${savedRoutine?.isActive}');
   }
 
   @override
@@ -92,33 +93,33 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   @override
   Future<void> toggleRoutineActive(String id) async {
-    print('🔄 toggleRoutineActive 시작: $id');
+    debugPrint('🔄 toggleRoutineActive 시작: $id');
     final routine = await getRoutineById(id);
     if (routine != null) {
-      print('📊 DB에서 읽은 현재 상태: ${routine.isActive} (${routine.title})');
-      print('📊 변경 예정 상태: ${!routine.isActive}');
+      debugPrint('📊 DB에서 읽은 현재 상태: ${routine.isActive} (${routine.title})');
+      debugPrint('📊 변경 예정 상태: ${!routine.isActive}');
       final updatedRoutine = routine.copyWith(
         isActive: !routine.isActive,
       );
-      print('📊 업데이트할 루틴 상태: ${updatedRoutine.isActive}');
+      debugPrint('📊 업데이트할 루틴 상태: ${updatedRoutine.isActive}');
       
       // 먼저 루틴 상태 업데이트
-      print('💾 루틴 상태 업데이트 중: ${updatedRoutine.isActive}');
+      debugPrint('💾 루틴 상태 업데이트 중: ${updatedRoutine.isActive}');
       await updateRoutine(updatedRoutine);
-      print('✅ 루틴 상태 업데이트 완료');
+      debugPrint('✅ 루틴 상태 업데이트 완료');
       
       // 그 다음 알림 관리 (updateRoutine에서 이미 처리하지만 확실히 하기 위해)
       if (updatedRoutine.isActive) {
         // 활성화 시 추가 알림 예약 확인
-        print('🔔 활성화 완료 - 알림 상태 확인');
+        debugPrint('🔔 활성화 완료 - 알림 상태 확인');
       } else {
         // 비활성화 시 추가 알림 취소 확인  
-        print('🔕 비활성화 완료 - 알림 취소 확인');
+        debugPrint('🔕 비활성화 완료 - 알림 취소 확인');
       }
       
-      print('✅ toggleRoutineActive 완료');
+      debugPrint('✅ toggleRoutineActive 완료');
     } else {
-      print('❌ 루틴을 찾을 수 없음: $id');
+      debugPrint('❌ 루틴을 찾을 수 없음: $id');
     }
   }
 
@@ -130,24 +131,24 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   @override
   Future<void> deactivateAllRoutines({String? exceptRoutineId}) async {
-    print('🔧 deactivateAllRoutines 시작 (제외할 루틴: $exceptRoutineId)');
+    debugPrint('🔧 deactivateAllRoutines 시작 (제외할 루틴: $exceptRoutineId)');
     final allRoutines = await getSavedRoutines();
     
     for (final routine in allRoutines) {
-      print('📊 루틴 체크: ${routine.title} (ID: ${routine.id}, 활성화: ${routine.isActive})');
+      debugPrint('📊 루틴 체크: ${routine.title} (ID: ${routine.id}, 활성화: ${routine.isActive})');
       
       if (routine.isActive && routine.id != exceptRoutineId) {
-        print('🔧 루틴 비활성화: ${routine.title} (ID: ${routine.id})');
+        debugPrint('🔧 루틴 비활성화: ${routine.title} (ID: ${routine.id})');
         final deactivatedRoutine = routine.copyWith(isActive: false);
         await updateRoutine(deactivatedRoutine);
       } else if (routine.id == exceptRoutineId) {
-        print('⚠️ 제외된 루틴 건너뛰기: ${routine.title}');
+        debugPrint('⚠️ 제외된 루틴 건너뛰기: ${routine.title}');
       } else if (!routine.isActive) {
-        print('ℹ️ 이미 비활성화된 루틴: ${routine.title}');
+        debugPrint('ℹ️ 이미 비활성화된 루틴: ${routine.title}');
       }
     }
     
-    print('✅ deactivateAllRoutines 완료');
+    debugPrint('✅ deactivateAllRoutines 완료');
   }
 
   @override

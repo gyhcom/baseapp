@@ -7,6 +7,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'app.dart';
 import 'di/service_locator.dart';
 import 'presentation/screens/routine/routine_notification_helper.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,12 +31,12 @@ void main() async {
     } else {
       await Firebase.initializeApp();
     }
-    print('✅ Firebase 초기화 성공');
+    debugPrint('✅ Firebase 초기화 성공');
   } catch (e) {
-    print('❌ Firebase 초기화 실패: $e');
-    print('📋 Firebase 설정 파일을 확인해주세요:');
-    print('   - android/app/google-services.json');
-    print('   - ios/Runner/GoogleService-Info.plist');
+    debugPrint('❌ Firebase 초기화 실패: $e');
+    debugPrint('📋 Firebase 설정 파일을 확인해주세요:');
+    debugPrint('   - android/app/google-services.json');
+    debugPrint('   - ios/Runner/GoogleService-Info.plist');
   }
 
   // Initialize timezone database

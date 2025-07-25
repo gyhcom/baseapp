@@ -3,6 +3,7 @@ import '../../../domain/entities/user_behavior_log.dart';
 import '../../../domain/usecases/notification_usecase.dart';
 import '../../../domain/services/behavior_analytics_service.dart';
 import '../../../di/service_locator.dart';
+import 'package:flutter/foundation.dart';
 
 /// 루틴 알림 도우미 클래스
 class RoutineNotificationHelper {
@@ -24,9 +25,9 @@ class RoutineNotificationHelper {
       // 알림 예약 로그 (향후 분석용)
       await _logNotificationScheduled(routine);
       
-      print('✅ 알림이 예약되었습니다: ${routine.title}');
+      debugPrint('✅ 알림이 예약되었습니다: ${routine.title}');
     } catch (e) {
-      print('❌ 알림 예약 실패: $e');
+      debugPrint('❌ 알림 예약 실패: $e');
       // 에러가 발생해도 루틴 저장에는 영향을 주지 않음
     }
   }
@@ -45,7 +46,7 @@ class RoutineNotificationHelper {
         },
       );
     } catch (e) {
-      print('알림 예약 로그 실패: $e');
+      debugPrint('알림 예약 로그 실패: $e');
     }
   }
 
@@ -53,9 +54,9 @@ class RoutineNotificationHelper {
   static Future<void> cancelNotificationsForRoutine(String routineId) async {
     try {
       await _notificationUseCase.cancelRoutineNotifications(routineId);
-      print('알림이 취소되었습니다: $routineId');
+      debugPrint('알림이 취소되었습니다: $routineId');
     } catch (e) {
-      print('알림 취소 실패: $e');
+      debugPrint('알림 취소 실패: $e');
     }
   }
 
@@ -64,7 +65,7 @@ class RoutineNotificationHelper {
     try {
       return await _notificationUseCase.requestNotificationPermissions();
     } catch (e) {
-      print('알림 권한 요청 실패: $e');
+      debugPrint('알림 권한 요청 실패: $e');
       return false;
     }
   }
@@ -77,9 +78,9 @@ class RoutineNotificationHelper {
       // 일일 완료 리마인더 예약
       await _notificationUseCase.scheduleDailyCompletionReminder();
       
-      print('알림 서비스가 초기화되었습니다');
+      debugPrint('알림 서비스가 초기화되었습니다');
     } catch (e) {
-      print('알림 초기화 실패: $e');
+      debugPrint('알림 초기화 실패: $e');
     }
   }
 }

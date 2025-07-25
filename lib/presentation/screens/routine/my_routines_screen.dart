@@ -282,7 +282,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Icon(
@@ -550,7 +550,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
         borderRadius: AppTheme.mediumRadius,
         boxShadow: [AppTheme.cardShadow],
         border: Border.all(
-          color: _getStorageStatusColor().withOpacity(0.2),
+          color: _getStorageStatusColor().withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -600,8 +600,8 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
       ),
       decoration: BoxDecoration(
         color: _userTier == UserTier.premium 
-            ? Colors.amber.withOpacity(0.1)
-            : Colors.grey.withOpacity(0.1),
+            ? Colors.amber.withValues(alpha: 0.1)
+            : Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _userTier == UserTier.premium 
@@ -920,7 +920,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
                     label: Text(concept.displayName),
                     selected: isSelected,
                     onSelected: (selected) => _toggleConceptFilter(concept),
-                    selectedColor: concept.color.withOpacity(0.2),
+                    selectedColor: concept.color.withValues(alpha: 0.2),
                     checkmarkColor: concept.color,
                     side: BorderSide(
                       color: isSelected ? concept.color : AppTheme.dividerColor,

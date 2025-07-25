@@ -16,6 +16,7 @@ import '../../../core/constants/routine_limits.dart';
 import '../../../di/service_locator.dart';
 import 'routine_detail_screen.dart';
 import 'my_routines_screen.dart';
+import 'package:flutter/foundation.dart';
 
 /// AI 루틴 생성 화면
 class RoutineGenerationScreen extends ConsumerStatefulWidget {
@@ -175,7 +176,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
         throw Exception(response.error ?? '루틴 생성에 실패했어요');
       }
     } catch (e) {
-      print('루틴 생성 오류: $e');
+      debugPrint('루틴 생성 오류: $e');
       setState(() {
         _error = e.toString();
         _isGenerating = false;
@@ -207,13 +208,30 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               // 다이얼로그 닫기
               Navigator.of(context).pop();
-              // 홈 화면이 있는 곳까지 pop하기
-              Navigator.of(context).popUntil((route) {
-                return route.settings.name?.contains('Home') == true || route.isFirst;
-              });
+              
+              // 여러 방법으로 시도
+              try {
+                // 방법 1: AutoRoute pushAndPopUntil
+                await context.router.pushAndPopUntil(
+                  const HomeWrapperRoute(),
+                  predicate: (route) => false,
+                );
+              } catch (e) {
+                try {
+                  // 방법 2: 네이티브 Navigator
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/home',
+                    (route) => false,
+                  );
+                } catch (e2) {
+                  // 방법 3: 마지막 수단
+                  context.router.popUntilRoot();
+                  context.router.push(const HomeWrapperRoute());
+                }
+              }
             },
             child: const Text('홈으로'),
           ),
@@ -263,15 +281,15 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
       // 저장 제한 검사
       final saveResult = await RoutineLimitService.validateAndPrepareForSave();
       
-      print('🔍 저장 제한 검사 결과:');
-      print('  - canSave: ${saveResult.canSave}');
-      print('  - status: ${saveResult.status}');
-      print('  - currentCount: ${saveResult.currentCount}');
-      print('  - remainingSlots: ${saveResult.remainingSlots}');
-      print('  - maxCount: ${saveResult.maxCount}');
+      debugPrint('🔍 저장 제한 검사 결과:');
+      debugPrint('  - canSave: ${saveResult.canSave}');
+      debugPrint('  - status: ${saveResult.status}');
+      debugPrint('  - currentCount: ${saveResult.currentCount}');
+      debugPrint('  - remainingSlots: ${saveResult.remainingSlots}');
+      debugPrint('  - maxCount: ${saveResult.maxCount}');
       
       if (!saveResult.canSave) {
-        print('❌ 저장 제한으로 인해 저장 불가');
+        debugPrint('❌ 저장 제한으로 인해 저장 불가');
         // 저장 불가능한 경우 사용자에게 알림
         if (mounted) {
           _showStorageLimitReached(saveResult);
@@ -282,8 +300,8 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
       final routineRepository = getIt<RoutineRepository>();
       await routineRepository.saveRoutine(routine);
       
-      print('✅ 루틴이 자동으로 저장되었습니다: ${routine.id}');
-      print('📊 루틴 항목 개수: ${routine.items.length}');
+      debugPrint('✅ 루틴이 자동으로 저장되었습니다: ${routine.id}');
+      debugPrint('📊 루틴 항목 개수: ${routine.items.length}');
       
       // 사용자 프로필도 저장 (최신 정보 유지)
       await routineRepository.saveUserProfile(routine.generatedFor);
@@ -296,7 +314,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
       return true; // 저장 성공
       
     } catch (e) {
-      print('❌ 루틴 저장 실패: $e');
+      debugPrint('❌ 루틴 저장 실패: $e');
       // 저장 실패해도 사용자에게는 알리지 않음 (UX 방해 방지)
       return false; // 저장 실패
     }
@@ -325,9 +343,9 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -452,7 +470,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
         items.add(Text('설명: ${_generatedRoutine!.description}'));
       }
     } catch (e) {
-      print('루틴 아이템 빌드 오류: $e');
+      debugPrint('루틴 아이템 빌드 오류: $e');
       items.add(const Text('루틴 정보를 표시할 수 없습니다.'));
     }
     
@@ -480,8 +498,27 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                     IconButton(
                       icon: const Icon(Icons.home_outlined),
                       tooltip: '홈으로',
-                      onPressed: () {
-                        context.router.navigate(const HomeWrapperRoute());
+                      onPressed: () async {
+                        // 여러 방법으로 시도
+                        try {
+                          // 방법 1: AutoRoute pushAndPopUntil
+                          await context.router.pushAndPopUntil(
+                            const HomeWrapperRoute(),
+                            predicate: (route) => false,
+                          );
+                        } catch (e) {
+                          try {
+                            // 방법 2: 네이티브 Navigator
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/home',
+                              (route) => false,
+                            );
+                          } catch (e2) {
+                            // 방법 3: 마지막 수단
+                            context.router.popUntilRoot();
+                            context.router.push(const HomeWrapperRoute());
+                          }
+                        }
                       },
                     ),
                     IconButton(
@@ -541,7 +578,8 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                   decoration: BoxDecoration(
                     color: AppTheme.surfaceColor,
                     borderRadius: AppTheme.mediumRadius,
-                    boxShadow: [AppTheme.cardShadow],
+                    border: Border.all(color: AppTheme.dividerColor, width: 1),
+                    boxShadow: AppTheme.mediumShadow,
                   ),
                   child: Column(
                     children: [
@@ -551,8 +589,12 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withOpacity(0.1),
+                              color: widget.concept.color.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: widget.concept.color.withValues(alpha: 0.3), 
+                                width: 1,
+                              ),
                             ),
                             child: Center(
                               child: Text(
@@ -570,6 +612,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                                   '${widget.name}님의 ${widget.concept.displayName}',
                                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
+                                    color: AppTheme.textPrimaryColor,
                                   ),
                                 ),
                                 Text(
@@ -586,7 +629,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                       
                       if (widget.hobbies.isNotEmpty) ...[ 
                         const SizedBox(height: AppTheme.spacingM),
-                        const Divider(),
+                        Divider(color: AppTheme.dividerColor),
                         const SizedBox(height: AppTheme.spacingS),
                         Align(
                           alignment: Alignment.centerLeft,
@@ -607,7 +650,10 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                 // 상태 메시지
                 Text(
                   _currentStatus,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.textPrimaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 
@@ -615,9 +661,10 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                 
                 // 진행률 표시
                 if (_isGenerating) ...[ 
-                  const LinearProgressIndicator(
+                  LinearProgressIndicator(
                     backgroundColor: AppTheme.dividerColor,
                     valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                    minHeight: 3,
                   ),
                   const SizedBox(height: AppTheme.spacingS),
                   Text(
@@ -676,7 +723,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                   Container(
                     padding: const EdgeInsets.all(AppTheme.spacingM),
                     decoration: BoxDecoration(
-                      color: AppTheme.accentColor.withOpacity(0.1),
+                      color: AppTheme.accentColor.withValues(alpha: 0.1),
                       borderRadius: AppTheme.mediumRadius,
                     ),
                     child: Row(
