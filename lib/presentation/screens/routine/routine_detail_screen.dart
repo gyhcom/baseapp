@@ -277,7 +277,8 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
                         key: ValueKey(_currentRoutine.isActive),
                         value: _currentRoutine.isActive,
                         onChanged: (value) {
-                          _toggleActiveStatus();
+                          print('🎛️ 스위치 onChanged 호출: 현재=${_currentRoutine.isActive}, 목표=$value');
+                          _setActiveStatus(value);
                         },
                         activeColor: Colors.white,
                         activeTrackColor: Colors.white.withOpacity(0.3),
@@ -769,13 +770,18 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
     );
   }
 
-  /// 루틴 활성화 상태 토글
-  Future<void> _toggleActiveStatus() async {
-    print('🔄 루틴 활성화 토글 시작: ${_currentRoutine.title} (현재: ${_currentRoutine.isActive})');
+  /// 루틴 활성화 상태를 특정 값으로 설정
+  Future<void> _setActiveStatus(bool targetState) async {
+    print('🎯 루틴 활성화 상태 설정: ${_currentRoutine.title} (현재: ${_currentRoutine.isActive} → 목표: $targetState)');
+
+    // 현재 상태와 동일하면 아무것도 하지 않음
+    if (_currentRoutine.isActive == targetState) {
+      print('⏭️ 현재 상태와 동일하므로 변경하지 않음');
+      return;
+    }
 
     try {
       final routineRepository = getIt<RoutineRepository>();
-      final targetState = !_currentRoutine.isActive;
 
       // 활성화하려는 경우 제한 검사
       if (targetState) {
@@ -798,7 +804,7 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
         }
       }
 
-      // 데이터베이스 상태 업데이트 (토글 대신 명시적 설정)
+      // 데이터베이스 상태 업데이트
       print('🔧 데이터베이스에서 루틴 상태 변경: ${_currentRoutine.isActive} → $targetState');
       final routineToUpdate = _currentRoutine.copyWith(isActive: targetState);
       await routineRepository.updateRoutine(routineToUpdate);
@@ -847,7 +853,12 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
         throw Exception('업데이트된 루틴 정보를 가져올 수 없습니다');
       }
     } catch (e) {
-      print('❌ 루틴 활성화 토글 실패: $e');
+      print('❌ 루틴 활성화 상태 설정 실패: $e');
+      
+      // 에러 발생 시 UI 상태를 원래대로 되돌림
+      setState(() {
+        // 변경사항 없음 - 원래 상태 유지
+      });
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -859,6 +870,11 @@ class _RoutineDetailScreenState extends ConsumerState<RoutineDetailScreen>
         );
       }
     }
+  }
+
+  /// 루틴 활성화 상태 토글 (기존 호환성을 위해 유지)
+  Future<void> _toggleActiveStatus() async {
+    await _setActiveStatus(!_currentRoutine.isActive);
   }
 
   /// 활성화 제한 다이얼로그 표시
