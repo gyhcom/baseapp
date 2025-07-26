@@ -37,8 +37,8 @@ class StepLayout extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 상단 여백 (키보드 올라갈 때 축소)
-                  SizedBox(height: isKeyboardVisible ? AppTheme.spacingS : AppTheme.spacingL),
+                  // 상단 여백 (키보드 상태에 따라 조정)
+                  SizedBox(height: isKeyboardVisible ? AppTheme.spacingM : AppTheme.spacingL),
                   
                   // 단계 아이콘 (키보드 올라갈 때 숨김)
                   if (stepIcon != null && !isKeyboardVisible) ...[
@@ -405,54 +405,60 @@ class _UserInputStep3State extends State<UserInputStep3>
           
           const SizedBox(height: AppTheme.spacingM),
           
-          // 그리드 높이를 고정하여 표시
-          SizedBox(
-            height: 200, // 4줄 * 50px 높이
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 2.5,
-                crossAxisSpacing: AppTheme.spacingS,
-                mainAxisSpacing: AppTheme.spacingS,
-              ),
-              itemCount: _commonJobs.length,
-              itemBuilder: (context, index) {
-                final job = _commonJobs[index];
-                final isSelected = _controller.text == job;
-                
-                return InkWell(
-                  onTap: () => _selectJob(job),
-                  borderRadius: AppTheme.smallRadius,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected 
-                          ? AppTheme.primaryColor 
-                          : AppTheme.surfaceColor,
+          // 그리드 높이를 화면 크기에 맞게 조정
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final screenHeight = MediaQuery.of(context).size.height;
+              final gridHeight = screenHeight * 0.25; // 화면 높이의 25%
+              return SizedBox(
+                height: gridHeight.clamp(180.0, 250.0), // 최소 180, 최대 250
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 2.5,
+                    crossAxisSpacing: AppTheme.spacingS,
+                    mainAxisSpacing: AppTheme.spacingS,
+                  ),
+                  itemCount: _commonJobs.length,
+                  itemBuilder: (context, index) {
+                    final job = _commonJobs[index];
+                    final isSelected = _controller.text == job;
+                    
+                    return InkWell(
+                      onTap: () => _selectJob(job),
                       borderRadius: AppTheme.smallRadius,
-                      border: Border.all(
-                        color: isSelected 
-                            ? AppTheme.primaryColor 
-                            : AppTheme.borderColor,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        job,
-                        style: TextStyle(
+                      child: Container(
+                        decoration: BoxDecoration(
                           color: isSelected 
-                              ? Colors.white 
-                              : AppTheme.textPrimaryColor,
-                          fontSize: 12,
-                          fontWeight: isSelected 
-                              ? FontWeight.w600 
-                              : FontWeight.normal,
+                              ? AppTheme.primaryColor 
+                              : AppTheme.surfaceColor,
+                          borderRadius: AppTheme.smallRadius,
+                          border: Border.all(
+                            color: isSelected 
+                                ? AppTheme.primaryColor 
+                                : AppTheme.borderColor,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            job,
+                            style: TextStyle(
+                              color: isSelected 
+                                  ? Colors.white 
+                                  : AppTheme.textPrimaryColor,
+                              fontSize: 12,
+                              fontWeight: isSelected 
+                                  ? FontWeight.w600 
+                                  : FontWeight.normal,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -587,59 +593,65 @@ class _UserInputStep4State extends State<UserInputStep4>
           
           const SizedBox(height: AppTheme.spacingM),
           
-          // 취미 그리드 높이를 고정하여 표시
-          SizedBox(
-            height: 240, // 7줄 정도의 높이
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 2.2,
-                crossAxisSpacing: AppTheme.spacingS,
-                mainAxisSpacing: AppTheme.spacingS,
-              ),
-              itemCount: _commonHobbies.length,
-              itemBuilder: (context, index) {
-                final hobby = _commonHobbies[index];
-                final isSelected = _selectedHobbies.contains(hobby);
-                final isDisabled = !isSelected && _selectedHobbies.length >= 5;
-                
-                return InkWell(
-                  onTap: isDisabled ? null : () => _toggleHobby(hobby),
-                  borderRadius: AppTheme.smallRadius,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected 
-                          ? AppTheme.primaryColor 
-                          : isDisabled 
-                              ? AppTheme.dividerColor.withValues(alpha: 0.3)
-                              : AppTheme.surfaceColor,
+          // 취미 그리드 높이를 화면 크기에 맞게 조정
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final screenHeight = MediaQuery.of(context).size.height;
+              final gridHeight = screenHeight * 0.28; // 화면 높이의 28%
+              return SizedBox(
+                height: gridHeight.clamp(220.0, 280.0), // 최소 220, 최대 280
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 2.2,
+                    crossAxisSpacing: AppTheme.spacingS,
+                    mainAxisSpacing: AppTheme.spacingS,
+                  ),
+                  itemCount: _commonHobbies.length,
+                  itemBuilder: (context, index) {
+                    final hobby = _commonHobbies[index];
+                    final isSelected = _selectedHobbies.contains(hobby);
+                    final isDisabled = !isSelected && _selectedHobbies.length >= 5;
+                    
+                    return InkWell(
+                      onTap: isDisabled ? null : () => _toggleHobby(hobby),
                       borderRadius: AppTheme.smallRadius,
-                      border: Border.all(
-                        color: isSelected 
-                            ? AppTheme.primaryColor 
-                            : AppTheme.borderColor,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        hobby,
-                        style: TextStyle(
+                      child: Container(
+                        decoration: BoxDecoration(
                           color: isSelected 
-                              ? Colors.white 
-                              : isDisabled
-                                  ? AppTheme.textSecondaryColor.withValues(alpha: 0.5)
-                                  : AppTheme.textPrimaryColor,
-                          fontSize: 12,
-                          fontWeight: isSelected 
-                              ? FontWeight.w600 
-                              : FontWeight.normal,
+                              ? AppTheme.primaryColor 
+                              : isDisabled 
+                                  ? AppTheme.dividerColor.withValues(alpha: 0.3)
+                                  : AppTheme.surfaceColor,
+                          borderRadius: AppTheme.smallRadius,
+                          border: Border.all(
+                            color: isSelected 
+                                ? AppTheme.primaryColor 
+                                : AppTheme.borderColor,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            hobby,
+                            style: TextStyle(
+                              color: isSelected 
+                                  ? Colors.white 
+                                  : isDisabled
+                                      ? AppTheme.textSecondaryColor.withValues(alpha: 0.5)
+                                      : AppTheme.textPrimaryColor,
+                              fontSize: 12,
+                              fontWeight: isSelected 
+                                  ? FontWeight.w600 
+                                  : FontWeight.normal,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
           
           // 직접 추가

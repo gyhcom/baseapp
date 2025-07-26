@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../../core/config/app_router.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_concept.dart';
@@ -85,11 +86,11 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('루틴 목록을 불러오는데 실패했어요: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastUtils.showWithIcon(
+          message: '루틴 목록을 불러오는데 실패했어요',
+          icon: Icons.error_outline,
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
         );
       }
     }
@@ -341,18 +342,19 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
       await _routineRepository.toggleFavorite(routineId);
       await _loadRoutines(); // 목록 새로고침
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('즐겨찾기가 변경되었습니다'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      // 즐겨찾기는 하트 아이콘 변화만으로도 충분한 피드백
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('즐겨찾기가 변경되었습니다'),
+      //     duration: Duration(seconds: 1),
+      //   ),
+      // );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('즐겨찾기 변경에 실패했어요: $e'),
-          backgroundColor: Colors.red,
-        ),
+      ToastUtils.showWithIcon(
+        message: '즐겨찾기 변경에 실패했어요',
+        icon: Icons.error_outline,
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
       );
     }
   }

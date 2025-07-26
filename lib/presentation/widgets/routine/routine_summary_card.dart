@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
 import '../../screens/routine/routine_edit_screen.dart';
@@ -288,19 +289,35 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
         
         const Spacer(),
         
-        // 활성화 토글 스위치
-        Transform.scale(
-          scale: 0.8,
-          child: Switch(
-            key: ValueKey(_isActive), // 강제 리빌드
-            value: _isActive,
-            onChanged: (value) {
-              debugPrint('🎛️ 루틴 카드 스위치 클릭: $value (현재: $_isActive)');
-              _toggleActiveStatus();
-            },
-            activeColor: AppTheme.primaryColor,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
+        // 활성화 토글 스위치 (향상된 피드백)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 상태 아이콘 (즉각적 피드백)
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                _isActive ? Icons.notifications_active : Icons.notifications_off,
+                key: ValueKey(_isActive),
+                size: 16,
+                color: _isActive ? Colors.green : Colors.grey,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Transform.scale(
+              scale: 0.8,
+              child: Switch(
+                key: ValueKey(_isActive), // 강제 리빌드
+                value: _isActive,
+                onChanged: (value) {
+                  debugPrint('🎛️ 루틴 카드 스위치 클릭: $value (현재: $_isActive)');
+                  _toggleActiveStatus();
+                },
+                activeColor: AppTheme.primaryColor,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -569,41 +586,19 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
   }
 
   Future<void> _copyRoutine() async {
+    // 로딩 토스트 표시
+    final loadingCancel = ToastUtils.showLoading(message: '루틴 복사 중...');
+    
     try {
-      // 로딩 스낵바 표시
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                ),
-                SizedBox(width: 12),
-                Text('루틴 복사 중...'),
-              ],
-            ),
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }
-
       final routineRepository = getIt<RoutineRepository>();
       
       // 저장 제한 체크
       final currentCount = await routineRepository.getSavedRoutines();
       if (currentCount.length >= 5) { // 무료 사용자 제한
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('저장 공간이 가득 찼습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요'),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
+        // 로딩 숨기기
+        loadingCancel();
+        
+        ToastUtils.showWarning('저장 공간이 가득 찼습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요');
         return;
       }
       
@@ -626,28 +621,29 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
       // 복사본 저장
       await routineRepository.saveRoutine(copiedRoutine);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ 루틴이 성공적으로 복사되었습니다'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        
-        // 부모 화면에 복사 완료 알림
-        widget.onCopy?.call();
-      }
+      // 로딩 숨기기
+      loadingCancel();
+      
+      // 성공 토스트
+      ToastUtils.showWithIcon(
+        message: '루틴이 성공적으로 복사되었습니다',
+        icon: Icons.check_circle,
+        backgroundColor: Colors.green,
+      );
+      
+      // 부모 화면에 복사 완료 알림
+      widget.onCopy?.call();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ 루틴 복사에 실패했어요: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      // 로딩 숨기기
+      loadingCancel();
+      
+      // 에러 토스트
+      ToastUtils.showWithIcon(
+        message: '루틴 복사에 실패했어요',
+        icon: Icons.error_outline,
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      );
     }
   }
 
@@ -754,11 +750,10 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                       onPressed: () {
                         Navigator.of(context).pop();
                         Clipboard.setData(ClipboardData(text: shareText.toString()));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('텍스트가 클립보드에 복사되었습니다'),
-                            backgroundColor: Colors.green,
-                          ),
+                        ToastUtils.showWithIcon(
+                          message: '텍스트가 클립보드에 복사되었습니다',
+                          icon: Icons.check_circle,
+                          backgroundColor: Colors.green,
                         );
                       },
                       icon: const Icon(Icons.content_copy),
@@ -804,12 +799,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
 
   void _shareAsImage() {
     // TODO: 이미지로 공유하는 기능 구현 (추후 구현)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('이미지 공유 기능은 준비 중입니다'),
-        backgroundColor: Colors.orange,
-      ),
-    );
+    ToastUtils.showInfo('이미지 공유 기능은 준비 중입니다');
   }
 
 
@@ -857,20 +847,8 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
       // 부모 위젯에 변경 알림
       widget.onActiveToggle?.call();
       
-      // 성공 메시지
-      final message = _isActive 
-          ? '루틴이 활성화되었습니다. 알림과 추천을 받을 수 있습니다.' 
-          : '루틴이 비활성화되었습니다.';
-          
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: _isActive ? Colors.green : Colors.grey,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      // 성공 시 간단한 시각적 피드백만 제공
+      // SnackBar 대신 상태 변경 자체가 충분한 피드백이 됨
       
       debugPrint('🏁 루틴 카드 활성화 토글 완료: $_isActive');
       
@@ -882,15 +860,13 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
         _isActive = !_isActive;
       });
       
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('상태 변경에 실패했습니다: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      // 실패 시에만 간단한 에러 표시
+      ToastUtils.showWithIcon(
+        message: '상태 변경에 실패했습니다',
+        icon: Icons.error_outline,
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
+      );
     }
   }
 
@@ -944,15 +920,12 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
 
   /// 프리미엄 업그레이드 정보 표시
   void _showPremiumUpgradeInfo() {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('🚧 프리미엄 기능은 준비 중입니다. 곧 출시될 예정입니다!'),
-          backgroundColor: AppTheme.primaryColor,
-          duration: Duration(seconds: 3),
-        ),
-      );
-    }
+    ToastUtils.showWithIcon(
+      message: '프리미엄 기능은 준비 중입니다. 곧 출시될 예정입니다!',
+      icon: Icons.construction,
+      backgroundColor: AppTheme.primaryColor,
+      duration: const Duration(seconds: 3),
+    );
   }
 
   void _showMoreOptions() {

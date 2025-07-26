@@ -69,17 +69,33 @@ class RoutineCardHeader extends StatelessWidget {
           ),
         ),
         
-        // 활성화 토글
-        Transform.scale(
-          scale: 0.9,
-          child: Switch(
-            value: isActive,
-            onChanged: (_) => onActiveToggle?.call(),
-            activeColor: Colors.white,
-            activeTrackColor: routine.concept.color,
-            inactiveThumbColor: Colors.grey[400],
-            inactiveTrackColor: Colors.grey[300],
-          ),
+        // 활성화 토글 (향상된 피드백)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 상태 아이콘
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                isActive ? Icons.notifications_active : Icons.notifications_off,
+                key: ValueKey(isActive),
+                size: 16,
+                color: isActive ? routine.concept.color : Colors.grey[400],
+              ),
+            ),
+            const SizedBox(width: 6),
+            Transform.scale(
+              scale: 0.9,
+              child: Switch(
+                value: isActive,
+                onChanged: (_) => onActiveToggle?.call(),
+                activeColor: Colors.white,
+                activeTrackColor: routine.concept.color,
+                inactiveThumbColor: Colors.grey[400],
+                inactiveTrackColor: Colors.grey[300],
+              ),
+            ),
+          ],
         ),
         
         // 즐겨찾기 버튼

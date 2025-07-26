@@ -104,8 +104,11 @@ class _HomeScreenState extends State<HomeScreen> {
       greetingIcon = Icons.nightlight_round;
     }
 
+    final screenHeight = MediaQuery.of(context).size.height;
+    final expandedHeight = (screenHeight * 0.2).clamp(140.0, 180.0); // 화면 높이의 20%, 최소 140, 최대 180
+    
     return SliverAppBar(
-      expandedHeight: 160,
+      expandedHeight: expandedHeight,
       floating: false,
       pinned: true,
       backgroundColor: Colors.transparent,

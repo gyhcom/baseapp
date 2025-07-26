@@ -528,7 +528,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                   ],
                 ),
                 
-                const Spacer(),
+                const Spacer(flex: 2),
                 
                 // AI 생성 아이콘
                 AnimatedBuilder(
@@ -716,7 +716,7 @@ class _RoutineGenerationScreenState extends ConsumerState<RoutineGenerationScree
                   ),
                 ],
                 
-                const Spacer(),
+                const Spacer(flex: 1),
                 
                 // 안내 문구
                 if (_isGenerating)

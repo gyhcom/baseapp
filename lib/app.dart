@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bot_toast/bot_toast.dart';
 
 import 'presentation/theme/app_theme.dart';
 import 'core/config/app_router.dart';
@@ -18,6 +19,8 @@ class RoutineCraftApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light, // 라이트 테마만 사용
       routerConfig: appRouter.config(),
+      // BotToast 설정
+      builder: BotToastInit(),
     );
   }
 }

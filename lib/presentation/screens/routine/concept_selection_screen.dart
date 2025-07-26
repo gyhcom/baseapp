@@ -204,6 +204,7 @@ class _ConceptSelectionScreenState extends State<ConceptSelectionScreen>
                               : [AppTheme.cardShadow],
                         ),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             // 컨셉 아이콘 (이모지 추출)
                             Container(

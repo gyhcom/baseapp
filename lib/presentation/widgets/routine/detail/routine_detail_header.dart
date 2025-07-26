@@ -95,14 +95,30 @@ class RoutineDetailHeader extends StatelessWidget {
                 padding: const EdgeInsets.all(4),
               ),
               const SizedBox(width: 4),
-              Transform.scale(
-                scale: 0.8,
-                child: Switch(
-                  value: isActive,
-                  onChanged: (_) => onToggleActive?.call(),
-                  activeColor: Colors.white,
-                  activeTrackColor: routine.concept.color,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 상태 아이콘
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      isActive ? Icons.notifications_active : Icons.notifications_off,
+                      key: ValueKey(isActive),
+                      size: 14,
+                      color: isActive ? routine.concept.color : Colors.grey[400],
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Transform.scale(
+                    scale: 0.8,
+                    child: Switch(
+                      value: isActive,
+                      onChanged: (_) => onToggleActive?.call(),
+                      activeColor: Colors.white,
+                      activeTrackColor: routine.concept.color,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

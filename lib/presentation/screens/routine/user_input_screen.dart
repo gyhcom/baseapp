@@ -183,7 +183,7 @@ class _UserInputScreenState extends State<UserInputScreen>
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(8),
+          preferredSize: const Size.fromHeight(12),
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingL),
             child: AnimatedBuilder(
