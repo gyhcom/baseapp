@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
 import '../../providers/routine_detail_provider.dart';
@@ -183,23 +184,14 @@ class RoutineDetailScreen extends StatelessWidget {
     try {
       await provider.toggleActive();
       
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              provider.isActive ? '루틴이 활성화되었습니다' : '루틴이 비활성화되었습니다',
-            ),
-            backgroundColor: provider.isActive ? Colors.green : Colors.orange,
-          ),
-        );
-      }
+      // 활성화 상태는 이미 시각적으로 표시되므로 토스트 불필요
+      // (스위치와 아이콘이 충분한 피드백 제공)
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('활성화 상태 변경에 실패했습니다: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastUtils.showWithIcon(
+          message: '활성화 상태 변경에 실패했습니다',
+          icon: Icons.error_outline,
+          backgroundColor: Colors.red,
         );
       }
     }
@@ -210,25 +202,13 @@ class RoutineDetailScreen extends StatelessWidget {
     try {
       await provider.toggleFavorite();
       
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              provider.routine.isFavorite
-                  ? '즐겨찾기에 추가되었습니다'
-                  : '즐겨찾기에서 제거되었습니다',
-            ),
-            backgroundColor: provider.routine.isFavorite ? Colors.red : Colors.grey,
-          ),
-        );
-      }
+      // 즐겨찾기는 하트 아이콘 변화만으로도 충분한 피드백
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('즐겨찾기 상태 변경에 실패했습니다: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastUtils.showWithIcon(
+          message: '즐겨찾기 상태 변경에 실패했습니다',
+          icon: Icons.error_outline,
+          backgroundColor: Colors.red,
         );
       }
     }
@@ -240,11 +220,10 @@ class RoutineDetailScreen extends StatelessWidget {
       await provider.toggleItemCompletion(itemId);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('항목 상태 변경에 실패했습니다: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastUtils.showWithIcon(
+          message: '항목 상태 변경에 실패했습니다: $e',
+          icon: Icons.error_outline,
+          backgroundColor: Colors.red,
         );
       }
     }
@@ -283,9 +262,7 @@ RoutineCraft에서 만든 루틴입니다.
   /// 루틴 복사
   void _copyRoutine(BuildContext context, DailyRoutine routine) {
     // TODO: 루틴 복사 로직 구현
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('루틴이 복사되었습니다')),
-    );
+    ToastUtils.showSuccess('루틴이 복사되었습니다');
   }
 
   /// 삭제 확인
@@ -309,20 +286,14 @@ RoutineCraft에서 만든 루틴입니다.
                 
                 if (context.mounted) {
                   context.router.pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('루틴이 삭제되었습니다'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                  ToastUtils.showSuccess('루틴이 삭제되었습니다');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('루틴 삭제에 실패했습니다: $e'),
-                      backgroundColor: Colors.red,
-                    ),
+                  ToastUtils.showWithIcon(
+                    message: '루틴 삭제에 실패했습니다: $e',
+                    icon: Icons.error_outline,
+                    backgroundColor: Colors.red,
                   );
                 }
               }
@@ -437,9 +408,7 @@ class _ItemEditDialogState extends State<_ItemEditDialog> {
   /// 저장
   void _save() {
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('제목을 입력해주세요')),
-      );
+      ToastUtils.showWarning('제목을 입력해주세요');
       return;
     }
 

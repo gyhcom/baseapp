@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'notification_settings_screen.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../../domain/repositories/usage_repository.dart';
 import '../../../di/service_locator.dart';
 
@@ -631,9 +632,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () {
               Navigator.pop(context);
               // TODO: 계정 삭제 로직
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('계정 삭제 기능 준비 중입니다')),
-              );
+              ToastUtils.showInfo('계정 삭제 기능 준비 중입니다');
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('삭제'),

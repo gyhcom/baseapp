@@ -586,18 +586,12 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
   }
 
   Future<void> _copyRoutine() async {
-    // 로딩 토스트 표시
-    final loadingCancel = ToastUtils.showLoading(message: '루틴 복사 중...');
-    
     try {
       final routineRepository = getIt<RoutineRepository>();
       
       // 저장 제한 체크
       final currentCount = await routineRepository.getSavedRoutines();
       if (currentCount.length >= 5) { // 무료 사용자 제한
-        // 로딩 숨기기
-        loadingCancel();
-        
         ToastUtils.showWarning('저장 공간이 가득 찼습니다. 기존 루틴을 삭제하거나 프리미엄으로 업그레이드하세요');
         return;
       }
@@ -620,9 +614,6 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
 
       // 복사본 저장
       await routineRepository.saveRoutine(copiedRoutine);
-
-      // 로딩 숨기기
-      loadingCancel();
       
       // 성공 토스트
       ToastUtils.showWithIcon(
@@ -634,9 +625,6 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
       // 부모 화면에 복사 완료 알림
       widget.onCopy?.call();
     } catch (e) {
-      // 로딩 숨기기
-      loadingCancel();
-      
       // 에러 토스트
       ToastUtils.showWithIcon(
         message: '루틴 복사에 실패했어요',
@@ -750,11 +738,7 @@ class _RoutineSummaryCardState extends State<RoutineSummaryCard>
                       onPressed: () {
                         Navigator.of(context).pop();
                         Clipboard.setData(ClipboardData(text: shareText.toString()));
-                        ToastUtils.showWithIcon(
-                          message: '텍스트가 클립보드에 복사되었습니다',
-                          icon: Icons.check_circle,
-                          backgroundColor: Colors.green,
-                        );
+                        // 클립보드 복사는 즉시 확인 가능하므로 토스트 불필요
                       },
                       icon: const Icon(Icons.content_copy),
                       iconSize: 32,

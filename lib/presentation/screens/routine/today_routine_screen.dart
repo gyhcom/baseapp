@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:auto_route/auto_route.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../../core/config/app_router.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
@@ -96,11 +97,10 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
       
     } catch (e) {
       debugPrint('루틴 아이템 체크 실패: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('체크 상태 변경에 실패했습니다: $e'),
-          backgroundColor: Colors.red,
-        ),
+      ToastUtils.showWithIcon(
+        message: '체크 상태 변경에 실패했습니다: $e',
+        icon: Icons.error_outline,
+        backgroundColor: Colors.red,
       );
     }
   }
@@ -377,19 +377,17 @@ class _TodayRoutineScreenState extends ConsumerState<TodayRoutineScreen>
       final repository = getIt<RoutineRepository>();
       await repository.saveRoutine(updatedRoutine);
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${item.title}이(가) 삭제되었습니다'),
-          backgroundColor: Colors.green,
-        ),
+      ToastUtils.showWithIcon(
+        message: '${item.title}이(가) 삭제되었습니다',
+        icon: Icons.delete_outline,
+        backgroundColor: Colors.green,
       );
     } catch (e) {
       debugPrint('루틴 아이템 삭제 실패: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('삭제에 실패했습니다: $e'),
-          backgroundColor: Colors.red,
-        ),
+      ToastUtils.showWithIcon(
+        message: '삭제에 실패했습니다: $e',
+        icon: Icons.error_outline,
+        backgroundColor: Colors.red,
       );
     }
   }

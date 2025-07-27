@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../../domain/entities/daily_routine.dart';
 import '../../../domain/entities/routine_item.dart';
 import '../../../domain/repositories/routine_repository.dart';
@@ -452,12 +453,7 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
     if (!_formKey.currentState!.validate()) return;
     
     if (_items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('최소 1개의 루틴 항목이 필요합니다'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      ToastUtils.showWarning('최소 1개의 루틴 항목이 필요합니다');
       return;
     }
 
@@ -476,21 +472,15 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
       await _routineRepository.updateRoutine(updatedRoutine);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('루틴이 성공적으로 수정되었습니다'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        ToastUtils.showSuccess('루틴이 성공적으로 수정되었습니다');
         Navigator.of(context).pop(true); // 변경사항이 있음을 알림
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('루틴 수정에 실패했어요: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastUtils.showWithIcon(
+          message: '루틴 수정에 실패했어요: $e',
+          icon: Icons.error_outline,
+          backgroundColor: Colors.red,
         );
       }
     } finally {

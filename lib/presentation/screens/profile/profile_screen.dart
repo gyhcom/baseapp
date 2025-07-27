@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:auto_route/auto_route.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../../domain/entities/user_profile.dart';
 import '../../../domain/entities/user_usage.dart';
 import '../../../domain/entities/routine_concept.dart';
@@ -86,8 +87,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('프로필 로드 실패: $e')),
+        ToastUtils.showWithIcon(
+          message: '프로필 로드 실패',
+          icon: Icons.error_outline,
+          backgroundColor: Colors.red,
         );
       }
     }
@@ -101,17 +104,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final hobbiesText = _hobbiesController.text.trim();
 
       if (name.isEmpty || ageText.isEmpty || job.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('이름, 나이, 직업은 필수 입력 항목입니다')),
-        );
+        ToastUtils.showWarning('이름, 나이, 직업은 필수 입력 항목입니다');
         return;
       }
 
       final age = int.tryParse(ageText);
       if (age == null || age < 1 || age > 120) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('올바른 나이를 입력해주세요 (1-120)')),
-        );
+        ToastUtils.showWarning('올바른 나이를 입력해주세요 (1-120)');
         return;
       }
 
@@ -137,12 +136,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _isEditing = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('프로필이 저장되었습니다')),
-      );
+      ToastUtils.showSuccess('프로필이 저장되었습니다');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('프로필 저장 실패: $e')),
+      ToastUtils.showWithIcon(
+        message: '프로필 저장 실패: $e',
+        icon: Icons.error_outline,
+        backgroundColor: Colors.red,
       );
     }
   }
@@ -176,30 +175,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         if (mounted) {
           debugPrint('✅ 로그아웃 성공 - 로그인 화면으로 이동');
           context.router.navigate(const LoginRoute());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('로그아웃되었습니다'),
-              backgroundColor: AppTheme.primaryColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppTheme.mediumRadius,
-              ),
-            ),
-          );
+          // 화면 전환 자체가 충분한 피드백이므로 토스트 불필요
         }
       }
     } catch (e) {
       debugPrint('❌ 로그아웃 실패: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('로그아웃 실패: $e'),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppTheme.mediumRadius,
-            ),
-          ),
+        ToastUtils.showWithIcon(
+          message: '로그아웃 실패: $e',
+          icon: Icons.error_outline,
+          backgroundColor: AppTheme.errorColor,
         );
       }
     }
@@ -972,11 +957,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🚧 프리미엄 기능은 곧 출시될 예정입니다!'),
-                  backgroundColor: AppTheme.primaryColor,
-                ),
+              ToastUtils.showWithIcon(
+                message: '🚧 프리미엄 기능은 곧 출시될 예정입니다!',
+                icon: Icons.construction,
+                backgroundColor: AppTheme.primaryColor,
               );
             },
             style: ElevatedButton.styleFrom(

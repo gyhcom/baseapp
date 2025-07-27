@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/app_router.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import 'package:flutter/foundation.dart';
@@ -72,15 +73,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         debugPrint('✅ 로그인 성공');
         if (mounted) {
           context.router.navigate(const UserInputRoute());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('로그인 성공! 루틴 생성을 시작합니다! ✨'),
-              backgroundColor: AppTheme.primaryColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppTheme.mediumRadius,
-              ),
-            ),
+          ToastUtils.showWithIcon(
+            message: '로그인 성공! 루틴 생성을 시작합니다! ✨',
+            icon: Icons.check_circle,
+            backgroundColor: AppTheme.primaryColor,
           );
         }
       } else if (authState is AuthError) {
@@ -91,15 +87,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     } catch (e) {
       debugPrint('❌ 로그인 실패: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('로그인 실패: $e'),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppTheme.mediumRadius,
-            ),
-          ),
+        ToastUtils.showWithIcon(
+          message: '로그인 실패: $e',
+          icon: Icons.error_outline,
+          backgroundColor: AppTheme.errorColor,
         );
       }
     } finally {
@@ -122,15 +113,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         debugPrint('✅ Google 로그인 성공');
         if (mounted) {
           context.router.navigate(const HomeWrapperRoute());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Google 로그인 성공! 🎉'),
-              backgroundColor: AppTheme.primaryColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppTheme.mediumRadius,
-              ),
-            ),
+          ToastUtils.showWithIcon(
+            message: 'Google 로그인 성공! 🎉',
+            icon: Icons.check_circle,
+            backgroundColor: AppTheme.primaryColor,
           );
         }
       } else if (authState is AuthError) {
@@ -141,15 +127,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     } catch (e) {
       debugPrint('❌ Google 로그인 실패: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Google 로그인 실패: $e'),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppTheme.mediumRadius,
-            ),
-          ),
+        ToastUtils.showWithIcon(
+          message: 'Google 로그인 실패: $e',
+          icon: Icons.error_outline,
+          backgroundColor: AppTheme.errorColor,
         );
       }
     } finally {
@@ -170,15 +151,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         debugPrint('✅ Apple 로그인 성공');
         if (mounted) {
           context.router.navigate(const HomeWrapperRoute());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Apple 로그인 성공! 🎉'),
-              backgroundColor: AppTheme.primaryColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppTheme.mediumRadius,
-              ),
-            ),
+          ToastUtils.showWithIcon(
+            message: 'Apple 로그인 성공! 🎉',
+            icon: Icons.check_circle,
+            backgroundColor: AppTheme.primaryColor,
           );
         }
       } else if (authState is AuthError) {
@@ -189,15 +165,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     } catch (e) {
       debugPrint('❌ Apple 로그인 실패: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Apple 로그인 실패: $e'),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppTheme.mediumRadius,
-            ),
-          ),
+        ToastUtils.showWithIcon(
+          message: 'Apple 로그인 실패: $e',
+          icon: Icons.error_outline,
+          backgroundColor: AppTheme.errorColor,
         );
       }
     } finally {
@@ -218,15 +189,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         debugPrint('✅ 익명 로그인 성공');
         if (mounted) {
           context.router.navigate(const UserInputRoute());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('익명으로 시작합니다! ✨'),
-              backgroundColor: AppTheme.primaryColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppTheme.mediumRadius,
-              ),
-            ),
+          ToastUtils.showWithIcon(
+            message: '익명으로 시작합니다! ✨',
+            icon: Icons.person_outline,
+            backgroundColor: AppTheme.primaryColor,
           );
         }
       } else if (authState is AuthError) {
@@ -244,30 +210,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         debugPrint('🔄 Firebase 익명 인증이 비활성화됨 - 테스트 모드로 진행');
         if (mounted) {
           context.router.navigate(const UserInputRoute());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('테스트 모드로 시작합니다 (익명 인증 비활성화됨)'),
-              backgroundColor: Colors.orange,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppTheme.mediumRadius,
-              ),
-            ),
+          ToastUtils.showWithIcon(
+            message: '테스트 모드로 시작합니다 (익명 인증 비활성화됨)',
+            icon: Icons.warning,
+            backgroundColor: Colors.orange,
           );
           return;
         }
       }
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('익명 로그인 실패: $e'),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppTheme.mediumRadius,
-            ),
-          ),
+        ToastUtils.showWithIcon(
+          message: '익명 로그인 실패: $e',
+          icon: Icons.error_outline,
+          backgroundColor: AppTheme.errorColor,
         );
       }
     } finally {

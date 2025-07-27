@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
+import '../../../core/utils/toast_utils.dart';
 import '../../../domain/entities/notification_settings.dart';
 import '../../../domain/usecases/notification_usecase.dart';
 import '../../../di/service_locator.dart';
@@ -57,20 +58,14 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('알림 설정이 저장되었습니다'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        ToastUtils.showSuccess('알림 설정이 저장되었습니다');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('설정 저장에 실패했습니다: $e'),
-            backgroundColor: Colors.red,
-          ),
+        ToastUtils.showWithIcon(
+          message: '설정 저장에 실패했습니다: $e',
+          icon: Icons.error_outline,
+          backgroundColor: Colors.red,
         );
       }
     }

@@ -384,20 +384,18 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
         await _loadRoutines(); // 목록 새로고침
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('루틴이 삭제되었습니다'),
-              backgroundColor: Colors.red,
-            ),
+          ToastUtils.showWithIcon(
+            message: '루틴이 삭제되었습니다',
+            icon: Icons.delete_outline,
+            backgroundColor: Colors.red,
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('루틴 삭제에 실패했어요: $e'),
-              backgroundColor: Colors.red,
-            ),
+          ToastUtils.showWithIcon(
+            message: '루틴 삭제에 실패했어요',
+            icon: Icons.error_outline,
+            backgroundColor: Colors.red,
           );
         }
       }
@@ -522,20 +520,18 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
         await _loadRoutines();
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('모든 루틴이 삭제되었습니다'),
-              backgroundColor: Colors.red,
-            ),
+          ToastUtils.showWithIcon(
+            message: '모든 루틴이 삭제되었습니다',
+            icon: Icons.delete_sweep,
+            backgroundColor: Colors.red,
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('삭제에 실패했어요: $e'),
-              backgroundColor: Colors.red,
-            ),
+          ToastUtils.showWithIcon(
+            message: '삭제에 실패했어요',
+            icon: Icons.error_outline,
+            backgroundColor: Colors.red,
           );
         }
       }
@@ -839,9 +835,7 @@ class _MyRoutinesScreenState extends State<MyRoutinesScreen>
             onPressed: () {
               Navigator.of(context).pop();
               // TODO: 프리미엄 구독 페이지로 이동
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('프리미엄 구독 기능 준비 중입니다')),
-              );
+              ToastUtils.showInfo('프리미엄 구독 기능 준비 중입니다');
             },
             child: const Text('구독하기'),
           ),
